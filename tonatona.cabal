@@ -1,0 +1,58 @@
+name:                tonatona
+version:             0.1.0.0
+synopsis:            meta web application framework
+description:
+  `Tonatona` is **meta** web application framework, which handles lots of annoying and boring tasks on real world web development such as environment variables, logging, etc...
+homepage:            http://github.com/arow-oss/tonatona/#readme
+license:             MIT
+license-file:        LICENSE
+author:              ARoW Co., Ltd.
+maintainer:          arow.okamoto+github@gmail.com
+copyright:           2018 ARoW Co., Ltd.
+category:            Web
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Tonatona
+  build-depends:       base >= 4.7 && < 5
+                     , envy
+                     , monad-logger
+                     , wai
+                     , wai-extra
+                     , warp
+  default-language:    Haskell2010
+  ghc-options:         -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
+  default-extensions:  DefaultSignatures
+                     , DeriveDataTypeable
+                     , DeriveFunctor
+                     , DeriveGeneric
+                     , OverloadedStrings
+                     , RecordWildCards
+                     , ScopedTypeVariables
+                     , ViewPatterns
+
+test-suite tonatona-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , tonatona
+  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
+  default-language:    Haskell2010
+
+test-suite tonatona-doctest
+  type:                exitcode-stdio-1.0
+  main-is:             DocTest.hs
+  hs-source-dirs:      test
+  build-depends:       base
+                     , doctest
+                     , Glob
+  default-language:    Haskell2010
+  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+source-repository head
+  type:     git
+  location: https://github.com/arow-oss/tonatona
