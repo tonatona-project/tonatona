@@ -15,39 +15,44 @@ import System.Envy (FromEnv, decodeEnv)
  -}
 run :: TonaConfig config => (config -> Application) -> IO ()
 run app = do
-  (cfg, requestLoggerMiddleware) <- setup
+  cfg <- setup
+  let reqLogMiddleware = getReqLogMiddleware cfg
   onStartup cfg
   let port = getPort cfg
-  putStrLn $ "goatass running on port " <> show port <> "..."
-  Warp.run port . requestLoggerMiddleware $ app cfg
+  putStrLn $ "app running on port " <> show port <> "..."
+  Warp.run port . reqLogMiddleware $ app cfg
 
 {-| A type class for configuration.
  - The 'config' is supposed to be an instance of 'FromEnv'.
  -}
-class (FromEnv config) =>
-      TonaConfig config
-  where
+class (FromEnv config) => TonaConfig config where
   getPort :: config -> Int
-  getEnv :: config -> Environment
-  onStartup :: config -> IO ()
+  getPort _ = 8000
 
-{-| TODO: Support 'Staging' environment and other custom values.
- -}
+  getEnv :: config -> Environment
+  getEnv _ = Development
+
+  onStartup :: config -> IO ()
+  onStartup _ = pure ()
+
+  getReqLogMiddleware :: config -> Middleware
+  getReqLogMiddleware conf =
+    case getEnv conf of
+      Production -> logStdout
+      Test -> id
+      _ -> logStdoutDev
+
 data Environment
   = Development
-  | Test
   | Production
+  | Staging
+  | Test
   deriving (Eq, Show, Read)
 
-setup :: TonaConfig config => IO (config, Middleware)
+setup :: TonaConfig config => IO config
 setup = do
   eitherConfg <- decodeEnv
   case eitherConfg of
     Left err ->
       error . unlines $ ["Error: Environment variables are not expected", err]
-    Right cfg -> pure (cfg, getRequestLoggerMiddleware $ getEnv cfg)
-
-getRequestLoggerMiddleware :: Environment -> Middleware
-getRequestLoggerMiddleware Test = id
-getRequestLoggerMiddleware Development = logStdoutDev
-getRequestLoggerMiddleware Production = logStdout
+    Right cfg -> pure cfg
