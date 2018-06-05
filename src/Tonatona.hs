@@ -56,3 +56,22 @@ setup = do
     Left err ->
       error . unlines $ ["Error: Environment variables are not expected", err]
     Right cfg -> pure cfg
+
+newtype DbConnStr = DbConnStr { unDbConnStr :: ByteString }
+  deriving newtype (IsString, Read, Show)
+  deriving stock (Eq)
+
+newtype DbConnNum = DbConnNum { unDbConnNum :: Int }
+  deriving newtype (Num, Read, Show)
+  deriving stock (Eq)
+
+class FromEnv conf => TonaDbEnv conf env | env -> conf, conf -> env where
+  mkDbEnv :: MonadIO m => conf -> m env
+
+  poolLens :: Lens' env ConnectionPool
+
+class FromEnv conf => TonaDbConf conf where
+  connStrLens :: Lens' conf DbConnStr
+
+  connNumLens :: Lens' conf DbConnStr
+  
