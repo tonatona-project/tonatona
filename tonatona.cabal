@@ -14,6 +14,10 @@ build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
+flag buildexample
+  description: Build an example webapp making use of tonatona
+  default: False
+
 library
   hs-source-dirs:      src
   exposed-modules:     Tonatona
@@ -33,6 +37,28 @@ library
                      , RecordWildCards
                      , ScopedTypeVariables
                      , ViewPatterns
+
+executable tonatona-example-server
+  main-is:             Server.hs
+  hs-source-dirs:      example
+  build-depends:       base
+                     , aeson
+                     , http-api-data
+                     , http-types
+                     , natural-transformation
+                     , servant
+                     , servant-server
+                     , text
+                     , tonatona
+                     , wai
+                     , warp
+  default-language:    Haskell2010
+  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+
+  if flag(buildexample)
+    buildable:         True
+  else
+    buildable:         False
 
 test-suite tonatona-test
   type:                exitcode-stdio-1.0
