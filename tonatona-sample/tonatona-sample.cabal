@@ -27,6 +27,8 @@ library
                      , DeriveDataTypeable
                      , DeriveFunctor
                      , DeriveGeneric
+                     , DuplicateRecordFields
+                     , MultiParamTypeClasses
                      , OverloadedStrings
                      , RankNTypes
                      , RecordWildCards

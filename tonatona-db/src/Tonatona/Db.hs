@@ -1,8 +1,11 @@
 module Tonatona.Db
   ( run
   , Config(..)
+  , Shared(..)
+  , Tonatona.Db.init
   , TonaDbM
   , TonaDbConfig(..)
+  , TonaDbShared(..)
   , migrate
   ) where
 
@@ -10,24 +13,52 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.Semigroup ((<>))
 import System.Envy (FromEnv(..), env)
-import Tonatona (TonaConfig, TonaM)
+import Tonatona (TonaM)
 
 {-| Main type
  - TODO make this an opaque type, and appropreate Monad instead of `IO`
  -}
-type TonaDbM conf a
-   = (TonaDbConfig conf) =>
-       ReaderT conf IO a
+type TonaDbM conf shared a
+   = (TonaDbConfig conf, TonaDbShared shared) =>
+       ReaderT (conf, shared) IO a
 
 {-| Main function.
  -}
-run :: TonaDbConfig conf => TonaDbM conf a -> TonaM conf a
+run :: (TonaDbConfig conf, TonaDbShared shared) => TonaDbM conf shared a -> TonaM conf shared a
 run = id
 
-migrate :: TonaDbConfig conf => TonaDbM conf ()
+migrate :: TonaDbConfig conf => TonaDbM conf shared ()
 migrate = do
-  conf <- ask
-  liftIO $ putStrLn $ "Migrating: " <> (dbString . getConfig $ conf)
+  (conf, shared') <- ask
+  liftIO $ putStrLn $ "This function can use shared connection pool: " <> (dbPool . shared $ shared')
+  liftIO $ putStrLn $ "Migrating: " <> (dbString . config $ conf)
+
+
+-- Shared
+
+-- Dummy type for demonstration
+type ConnectionPool = String
+
+class TonaDbShared shared where
+  shared :: shared -> Shared
+
+data Shared = Shared
+  { dbPool :: ConnectionPool
+  }
+  deriving (Show)
+
+init :: (TonaDbConfig config) => config -> IO Shared
+init conf = Shared
+  <$> genConnectionPool (config conf)
+
+genConnectionPool :: Config -> IO ConnectionPool
+genConnectionPool Config {dbString} = do
+  putStrLn "Generationg dummy Connection Pool..."
+  print dbString
+  pure "Dummy Connection Pool"
+
+
+-- Config
 
 data Config = Config
   { dbString :: String
@@ -39,5 +70,5 @@ instance FromEnv Config where
   fromEnv = Config
     <$> env "TONA_DB_DB_STRING"
 
-class (TonaConfig config) => TonaDbConfig config where
-  getConfig :: config -> Config
+class TonaDbConfig config where
+  config :: config -> Config
