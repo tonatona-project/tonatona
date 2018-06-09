@@ -22,6 +22,7 @@ library
                      , monad-logger
                      , mtl
                      , tonatona
+                     , tonatona-environment
                      , wai
                      , wai-extra
                      , warp

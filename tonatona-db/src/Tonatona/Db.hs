@@ -14,23 +14,32 @@ import Control.Monad.Reader (ReaderT, ask)
 import Data.Semigroup ((<>))
 import System.Envy (FromEnv(..), env)
 import Tonatona (TonaM)
+import Tonatona.Environment (TonaEnvConfig)
+import qualified Tonatona.Environment as TonaEnv
 
 {-| Main type
  - TODO make this an opaque type, and appropreate Monad instead of `IO`
  -}
 type TonaDbM conf shared a
-   = (TonaDbConfig conf, TonaDbShared shared) =>
+   = (TonaDbConfig conf, TonaEnvConfig conf, TonaDbShared shared) =>
        ReaderT (conf, shared) IO a
 
 {-| Main function.
  -}
-run :: (TonaDbConfig conf, TonaDbShared shared) => TonaDbM conf shared a -> TonaM conf shared a
+run :: (TonaDbConfig conf, TonaEnvConfig conf, TonaDbShared shared) => TonaDbM conf shared a -> TonaM conf shared a
 run = id
 
-migrate :: TonaDbConfig conf => TonaDbM conf shared ()
+migrate :: (TonaDbConfig conf, TonaEnvConfig conf) => TonaDbM conf shared ()
 migrate = do
   (conf, shared') <- ask
-  liftIO $ putStrLn $ "This function can use shared connection pool: " <> (dbPool . shared $ shared')
+  let env' = TonaEnv.environment $ TonaEnv.config conf
+  liftIO $
+    putStrLn $
+    "This function can use shared connection pool: " <>
+    (dbPool . shared $ shared')
+  liftIO $
+    putStrLn $
+    "This function can use ENV environment variable to decide behaviour: " <> show env'
   liftIO $ putStrLn $ "Migrating: " <> (dbString . config $ conf)
 
 

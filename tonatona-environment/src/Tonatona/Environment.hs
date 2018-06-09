@@ -1,11 +1,12 @@
 module Tonatona.Environment
   ( Config(..)
+  , TonaEnvConfig(..)
   , Environment(..)
   ) where
 
 import GHC.Generics (Generic)
 import Text.Read (readMaybe)
-import System.Envy (FromEnv(..), env)
+import System.Envy (FromEnv(..), (.!=), envMaybe)
 import qualified System.Envy as Envy
 
 data Config = Config
@@ -16,7 +17,10 @@ data Config = Config
 
 instance FromEnv Config where
   fromEnv = Config
-    <$> env "ENV"
+    <$> envMaybe "ENV" .!= Development
+
+class TonaEnvConfig config where
+  config :: config -> Config
 
 data Environment
   = Development

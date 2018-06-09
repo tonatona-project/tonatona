@@ -6,6 +6,8 @@ import Tonatona (Plug(..))
 import qualified Tonatona as Tona
 import Tonatona.Db (TonaDbConfig(..), TonaDbShared(..))
 import qualified Tonatona.Db as TonaDb
+import Tonatona.Environment (TonaEnvConfig(..))
+import qualified Tonatona.Environment as TonaEnv
 import System.Envy (FromEnv(..))
 
 app :: IO ()
@@ -21,15 +23,20 @@ app = Tona.run @Config @Shared $ do
 
 data Config = Config
   { tonaDb :: TonaDb.Config
+  , tonaEnv :: TonaEnv.Config
   }
   deriving (Show)
 
 instance FromEnv Config where
   fromEnv = Config
     <$> fromEnv
+    <*> fromEnv
 
 instance TonaDbConfig Config where
   config = tonaDb
+
+instance TonaEnvConfig Config where
+  config = tonaEnv
 
 
 -- Shared
