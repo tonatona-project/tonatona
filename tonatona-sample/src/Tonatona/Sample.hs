@@ -2,8 +2,10 @@ module Tonatona.Sample
   ( app
   ) where
 
+import Data.Semigroup ((<>))
 import Tonatona (Plug(..))
 import qualified Tonatona as Tona
+import qualified Tonatona.IO as TonaIO
 import Tonatona.Db (TonaDbConfig(..), TonaDbShared(..))
 import qualified Tonatona.Db as TonaDb
 import Tonatona.Environment (TonaEnvConfig(..))
@@ -14,7 +16,8 @@ app :: IO ()
 app = Tona.run @Config @Shared $ do
   TonaDb.run $
     TonaDb.migrate
-  -- dbPool is shared
+  TonaIO.run $ \_conf shared' ->
+    putStrLn $ "dbPool (" <> TonaDb.dbPool (TonaDb.shared shared') <> ") is shared"
   TonaDb.run $
     TonaDb.migrate
 
