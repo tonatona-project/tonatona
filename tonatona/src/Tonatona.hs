@@ -1,43 +1,58 @@
 module Tonatona
   ( run
+  , Config(..)
+  , TonaM
   , TonaConfig(..)
   , Environment(..)
   ) where
 
+import Control.Monad.Reader (ReaderT, runReaderT)
 import Data.Semigroup ((<>))
-import Network.Wai (Application, Middleware)
-import qualified Network.Wai.Handler.Warp as Warp
+import GHC.Generics (Generic)
+import Network.Wai (Middleware)
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
-import System.Envy (FromEnv, decodeEnv)
+import System.Envy (FromEnv(..), (.!=), envMaybe)
+import qualified System.Envy as Envy
+import Text.Read (readMaybe)
+
+{-| Main type
+ - TODO make this an opaque type, and appropreate Monad instead of `IO`
+ -}
+type TonaM conf a
+   = (TonaConfig conf) =>
+       ReaderT conf IO a
 
 {-| Main function.
- - By providing your 'Application', this function adds several features for handling annoying real word tasks.
  -}
-run :: TonaConfig config => (config -> Application) -> IO ()
-run app = do
-  cfg <- setup
-  let reqLogMiddleware = getReqLogMiddleware cfg
-  onStartup cfg
-  let port = getPort cfg
-  putStrLn $ "app running on port " <> show port <> "..."
-  Warp.run port . reqLogMiddleware $ app cfg
+run :: TonaConfig conf => TonaM conf a -> IO a
+run ma = do
+  mconf <- Envy.decode
+  case mconf of
+    Nothing -> error "Fail to decode env"
+    Just conf -> do
+      putStrLn $ "Running as " <> show (environment . getConfig $ conf)
+      runReaderT ma conf
+
+data Config = Config
+  { environment :: Environment
+  }
+  deriving (Show)
+
+
+instance FromEnv Config where
+  fromEnv = Config
+    <$> envMaybe "ENV" .!= Development
 
 {-| A type class for configuration.
  - The 'config' is supposed to be an instance of 'FromEnv'.
  -}
-class (FromEnv config) => TonaConfig config where
-  getPort :: config -> Int
-  getPort _ = 8000
-
-  getEnv :: config -> Environment
-  getEnv _ = Development
-
-  onStartup :: config -> IO ()
-  onStartup _ = pure ()
-
+class (FromEnv config) =>
+      TonaConfig config
+  where
+  getConfig :: config -> Config
   getReqLogMiddleware :: config -> Middleware
   getReqLogMiddleware conf =
-    case getEnv conf of
+    case environment (getConfig conf) of
       Production -> logStdout
       Test -> id
       _ -> logStdoutDev
@@ -47,12 +62,8 @@ data Environment
   | Production
   | Staging
   | Test
-  deriving (Eq, Show, Read)
+  deriving (Eq, Generic, Show, Read)
 
-setup :: TonaConfig config => IO config
-setup = do
-  eitherConfg <- decodeEnv
-  case eitherConfg of
-    Left err ->
-      error . unlines $ ["Error: Environment variables are not expected", err]
-    Right cfg -> pure cfg
+instance Envy.Var Environment where
+  toVar = show
+  fromVar = readMaybe

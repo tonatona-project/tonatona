@@ -1,9 +1,9 @@
-name:                tonatona
+name:                tonatona-sample
 version:             0.1.0.0
 synopsis:            meta web application framework
 description:
   `Tonatona` is **meta** web application framework, which handles lots of annoying and boring tasks on real world web development such as environment variables, logging, etc...
-homepage:            http://github.com/arow-oss/tonatona/#readme
+homepage:            http://github.com/arow-oss/tonatona-sample/#readme
 license:             MIT
 license-file:        LICENSE
 author:              ARoW Co., Ltd.
@@ -16,14 +16,11 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Tonatona
+  exposed-modules:     Tonatona.Sample
   build-depends:       base >= 4.7 && < 5
                      , envy
-                     , monad-logger
-                     , mtl
-                     , wai
-                     , wai-extra
-                     , warp
+                     , tonatona
+                     , tonatona-db
   default-language:    Haskell2010
   ghc-options:         -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
   default-extensions:  DefaultSignatures
@@ -34,18 +31,36 @@ library
                      , RankNTypes
                      , RecordWildCards
                      , ScopedTypeVariables
+                     , TypeApplications
                      , ViewPatterns
 
-test-suite tonatona-test
+executable tonatona-sample-app
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  build-depends:       base >= 4.7 && < 5
+                     , tonatona-sample
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates
+  default-language:    Haskell2010
+  default-extensions:  DefaultSignatures
+                     , DeriveDataTypeable
+                     , DeriveFunctor
+                     , DeriveGeneric
+                     , OverloadedStrings
+                     , RankNTypes
+                     , RecordWildCards
+                     , ScopedTypeVariables
+                     , ViewPatterns
+
+test-suite tonatona-sample-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
-                     , tonatona
+                     , tonatona-sample
   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
   default-language:    Haskell2010
 
-test-suite tonatona-doctest
+test-suite tonatona-sample-doctest
   type:                exitcode-stdio-1.0
   main-is:             DocTest.hs
   hs-source-dirs:      test
@@ -57,4 +72,4 @@ test-suite tonatona-doctest
 
 source-repository head
   type:     git
-  location: https://github.com/arow-oss/tonatona
+  location: https://github.com/arow-oss/tonatona-sample
