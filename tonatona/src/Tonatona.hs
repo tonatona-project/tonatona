@@ -1,3 +1,5 @@
+{-# LANGUAGE FunctionalDependencies #-}
+
 module Tonatona
   ( run
   , TonaM
@@ -11,9 +13,8 @@ import qualified System.Envy as Envy
 {-| Main type
  - TODO make this an opaque type, and appropreate Monad instead of `IO`
  -}
-type TonaM conf shared a
-   = (Plug conf shared) =>
-       ReaderT (conf, shared) IO a
+type TonaM conf shared
+   = ReaderT (conf, shared) IO
 
 {-| Main function.
  -}
@@ -29,5 +30,5 @@ run ma = do
 {-| A type class for configuration.
  - The 'config' is supposed to be an instance of 'FromEnv'.
  -}
-class (FromEnv config) => Plug config shared where
-  init :: config -> IO shared
+class (FromEnv conf) => Plug conf share | conf -> share, share -> conf where
+  init :: conf -> IO share
