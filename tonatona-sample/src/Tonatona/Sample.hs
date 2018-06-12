@@ -41,7 +41,6 @@ instance ToJSON Void where toJSON = absurd
 
 app :: IO ()
 app = TonaServant.run @Config @Shared @API server
-  -- undefined
   -- TonaDb.run $
   --   TonaDb.migrate
   -- TonaIO.run $ \_conf shared' ->
