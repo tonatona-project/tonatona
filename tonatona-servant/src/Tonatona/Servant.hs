@@ -12,12 +12,12 @@ module Tonatona.Servant
   ) where
 
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Reader (ReaderT, ask)
+import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Data.Semigroup ((<>))
 import Data.String
 import Data.Text
 import Servant
-import System.Envy (FromEnv(..), Var(..), decode, env)
+import System.Envy (FromEnv(..), Var(..), (.!=), decodeEnv, env, envMaybe)
 import Tonatona
 import Network.Wai.Handler.Warp (Port)
 import qualified Network.Wai.Handler.Warp as Warp
@@ -26,10 +26,10 @@ import qualified Network.Wai.Handler.Warp as Warp
  -}
 run :: forall conf shared api. (HasServer api '[], Plug conf shared, TonaServantConfig conf) => ServerT api (TonaM conf shared) -> IO ()
 run servantServer = do
-  mconf <- decode
+  mconf <- decodeEnv
   case mconf of
-    Nothing -> error "Fail to decode env"
-    Just conf -> do
+    Left err -> error $ "Fail to decode env: " <> err
+    Right conf -> do
       shared <- Tonatona.init conf
       Warp.run (port (config conf)) $ runServant @conf @shared @api conf shared servantServer
       -- runReaderT ma (conf, shared)
@@ -40,7 +40,7 @@ runServant conf shared servantServer =
   where
     transformation
       :: forall a. TonaM conf shared a -> Handler a
-    transformation = undefined
+    transformation action = liftIO $ runReaderT action (conf, shared)
     -- transformation exceptTRIO = do
     --   let rioEither = runExceptT exceptTRIO
     --   eitherRes <- runRIO config rioEither
@@ -100,10 +100,10 @@ defaultConfig =
 
 instance FromEnv Config where
   fromEnv = Config
-    <$> env "TONA_SERVANT_HOST"
-    <*> env "TONA_SERVANT_PROTOCOL"
-    <*> env "TONA_SERVANT_PORT"
-    <*> env "TONA_SERVANT_REQLOG"
+    <$> envMaybe "TONA_SERVANT_HOST" .!= "localhost"
+    <*> envMaybe "TONA_SERVANT_PROTOCOL" .!= "http"
+    <*> envMaybe "TONA_SERVANT_PORT" .!= 8000
+    <*> envMaybe "TONA_SERVANT_REQLOG" .!= ReqLogVerbose
 
 class TonaServantConfig config where
   config :: config -> Config
