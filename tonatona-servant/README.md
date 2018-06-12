@@ -1,3 +1,3 @@
-# tonatona-db
+# tonatona-servant
 
-A plugin for `tonatona` that adds features to access db.
+A plugin for `tonatona` that adds the ability to run a Servant application.

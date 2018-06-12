@@ -2,7 +2,7 @@
 all: build
 
 build:
-	stack build tonatona-db
+	stack build tonatona-servant
 
 clean:
 	stack clean
@@ -45,13 +45,13 @@ test:
 
 # Watch for changes.
 watch:
-	stack build --file-watch --fast tonatona-db
+	stack build --file-watch --fast tonatona-servant
 
 # Watch for changes while trying to build haddocks
 watch-haddock:
-	stack build --haddock --file-watch --fast tonatona-db
+	stack build --haddock --file-watch --fast tonatona-servant
 
 # Watch for changes.
 watch-test: watch-tests
 watch-tests:
-	stack test --file-watch --fast tonatona-db
+	stack test --file-watch --fast tonatona-servant
