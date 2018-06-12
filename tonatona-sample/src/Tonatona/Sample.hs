@@ -5,7 +5,9 @@ module Tonatona.Sample
   ( app
   ) where
 
+import Data.Aeson
 import Data.Semigroup ((<>))
+import Data.Void
 import System.Envy (FromEnv(..))
 import Servant
 import Tonatona (Plug(..), TonaM)
@@ -18,20 +20,24 @@ import qualified Tonatona.Environment as TonaEnv
 import qualified Tonatona.Servant as TonaServant
 import Tonatona.Servant (TonaServantConfig(..))
 
-
-
 type API =
   "foo" :> Get '[JSON] Int :<|>
-  "bar" :> Get '[JSON] String
+  "bar" :> Get '[JSON] String :<|>
+  "redirect-example" :> Get '[JSON] Void
 
 server :: ServerT API (TonaM Config Shared)
-server = getFoo :<|> getBar
+server = getFoo :<|> getBar :<|> redirectExample
 
 getFoo :: TonaM Config Shared Int
 getFoo = pure 1
 
 getBar :: TonaM Config Shared String
 getBar = pure "bar"
+
+redirectExample :: TonaM Config Shared Void
+redirectExample = TonaServant.redirect "https://google.com"
+
+instance ToJSON Void where toJSON = absurd
 
 app :: IO ()
 app = TonaServant.run @Config @Shared @API server

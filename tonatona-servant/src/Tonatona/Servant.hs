@@ -7,15 +7,20 @@
 
 module Tonatona.Servant
   ( Tonatona.Servant.run
+  , redirect
   , Config(..)
   , TonaServantConfig(..)
   ) where
 
+import Control.Exception (catch)
+import Control.Monad.Catch (throwM)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
+import Data.ByteString (ByteString)
 import Data.Semigroup ((<>))
 import Data.String
 import Data.Text
+import Network.HTTP.Types.Header
 import Servant
 import System.Envy (FromEnv(..), Var(..), (.!=), decodeEnv, env, envMaybe)
 import Tonatona
@@ -34,17 +39,25 @@ run servantServer = do
       Warp.run (port (config conf)) $ runServant @conf @shared @api conf shared servantServer
       -- runReaderT ma (conf, shared)
 
+redirect :: ByteString -> TonaM conf shared a
+redirect redirectLocation =
+  throwM $
+    err302
+      { errHeaders = [(hLocation, redirectLocation)]
+      }
+
 runServant :: forall conf shared api. HasServer api '[] => conf -> shared -> ServerT api (TonaM conf shared) -> Application
 runServant conf shared servantServer =
   serve (Proxy @api) $ hoistServer (Proxy @api) transformation servantServer
   where
     transformation
       :: forall a. TonaM conf shared a -> Handler a
-    transformation action = liftIO $ runReaderT action (conf, shared)
-    -- transformation exceptTRIO = do
-    --   let rioEither = runExceptT exceptTRIO
-    --   eitherRes <- runRIO config rioEither
-    --   either throwError pure eitherRes
+    transformation action = do
+      let ioAction = Right <$> runReaderT action (conf, shared)
+      eitherRes <- liftIO $ ioAction `catch` \(e :: ServantErr) -> pure $ Left e
+      case eitherRes of
+        Right res -> pure res
+        Left servantErr -> throwError servantErr
 
 -- Config
 
