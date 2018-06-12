@@ -7,7 +7,8 @@ module Tonatona
   ) where
 
 import Control.Monad.Reader (ReaderT, runReaderT)
-import System.Envy (FromEnv)
+import Data.Semigroup ((<>))
+import System.Envy (FromEnv, decodeEnv)
 import qualified System.Envy as Envy
 
 {-| Main type
@@ -19,13 +20,13 @@ type TonaM conf shared
 {-| Main function.
  -}
 run :: Plug conf shared => TonaM conf shared a -> IO a
-run ma = do
-  mconf <- Envy.decode
+run action = do
+  mconf <- decodeEnv
   case mconf of
-    Nothing -> error "Fail to decode env"
-    Just conf -> do
+    Left err -> error $ "Fail to decode env: " <> err
+    Right conf -> do
       shared <- Tonatona.init conf
-      runReaderT ma (conf, shared)
+      runReaderT action (conf, shared)
 
 {-| A type class for configuration.
  - The 'config' is supposed to be an instance of 'FromEnv'.

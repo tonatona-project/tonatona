@@ -29,24 +29,21 @@ import qualified Network.Wai.Handler.Warp as Warp
 
 {-| Main function.
  -}
-run :: forall conf shared api. (HasServer api '[], Plug conf shared, TonaServantConfig conf) => ServerT api (TonaM conf shared) -> IO ()
+run ::
+     forall conf shared api.
+     (HasServer api '[], Plug conf shared, TonaServantConfig conf)
+  => ServerT api (TonaM conf shared)
+  -> TonaM conf shared ()
 run servantServer = do
-  mconf <- decodeEnv
-  case mconf of
-    Left err -> error $ "Fail to decode env: " <> err
-    Right conf -> do
-      shared <- Tonatona.init conf
-      Warp.run (port (config conf)) $ runServant @conf @shared @api conf shared servantServer
-      -- runReaderT ma (conf, shared)
+  (conf, shared) <- ask
+  liftIO $ Warp.run (port (config conf)) $ runServant @conf @shared @api conf shared servantServer
 
-redirect :: ByteString -> TonaM conf shared a
-redirect redirectLocation =
-  throwM $
-    err302
-      { errHeaders = [(hLocation, redirectLocation)]
-      }
-
-runServant :: forall conf shared api. HasServer api '[] => conf -> shared -> ServerT api (TonaM conf shared) -> Application
+runServant ::
+     forall conf shared api. HasServer api '[]
+  => conf
+  -> shared
+  -> ServerT api (TonaM conf shared)
+  -> Application
 runServant conf shared servantServer =
   serve (Proxy @api) $ hoistServer (Proxy @api) transformation servantServer
   where
@@ -58,6 +55,13 @@ runServant conf shared servantServer =
       case eitherRes of
         Right res -> pure res
         Left servantErr -> throwError servantErr
+
+redirect :: ByteString -> TonaM conf shared a
+redirect redirectLocation =
+  throwM $
+    err302
+      { errHeaders = [(hLocation, redirectLocation)]
+      }
 
 -- Config
 

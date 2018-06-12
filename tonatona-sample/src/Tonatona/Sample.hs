@@ -5,6 +5,7 @@ module Tonatona.Sample
   ( app
   ) where
 
+import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Semigroup ((<>))
 import Data.Void
@@ -40,7 +41,10 @@ redirectExample = TonaServant.redirect "https://google.com"
 instance ToJSON Void where toJSON = absurd
 
 app :: IO ()
-app = TonaServant.run @Config @Shared @API server
+app =
+  Tona.run $ do
+    liftIO $ putStrLn "About to run web server..."
+    TonaServant.run @Config @Shared @API server
   -- TonaDb.run $
   --   TonaDb.migrate
   -- TonaIO.run $ \_conf shared' ->
