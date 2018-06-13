@@ -39,6 +39,7 @@ packages:
     - 'tonatona'
     - 'tonatona-db'
     - 'tonatona-environment'
+    - 'tonatona-logger'
     - 'tonatona-sample'
     - 'tonatona-servant'
 

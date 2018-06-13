@@ -18,13 +18,15 @@ import Database.Persist.Postgresql
 import Database.Persist.TH
 import System.Envy (FromEnv(..))
 import Servant
-import Tonatona (Plug(..), TonaM)
+import Tonatona (Plug(..), TonaM, lift)
 import qualified Tonatona as Tona
 import qualified Tonatona.IO as TonaIO
 import Tonatona.Db (TonaDbConfig(..), TonaDbShared(..))
 import qualified Tonatona.Db as TonaDb
 import Tonatona.Environment (TonaEnvConfig(..))
 import qualified Tonatona.Environment as TonaEnv
+import Tonatona.Logger (TonaLoggerShared(..), logDebug, logInfo, stdoutLogger)
+import qualified Tonatona.Logger as TonaLogger
 import qualified Tonatona.Servant as TonaServant
 import Tonatona.Servant (TonaServantConfig(..))
 
@@ -57,14 +59,19 @@ server :: ServerT API (TonaM Config Shared)
 server = getFoo :<|> tagServer :<|> redirectExample
 
 getFoo :: TonaM Config Shared Int
-getFoo = pure 1
+getFoo = do
+  $(logInfo) "in getFoo, returning 1"
+  pure 1
 
 tagServer :: ServerT TagAPI (TonaM Config Shared)
 tagServer = postTag :<|> getTag
 
 postTag :: Text -> Text -> TonaM Config Shared ()
 postTag name val = do
-  TonaDb.run $
+  TonaDb.run $ do
+    $(logInfo) $
+      "in postTag, in TonaDb.run, inserting a tag with name = " <>
+      name <> ", val = " <> val
     insert_ (Tag name val)
 
 getTag :: Text -> TonaM Config Shared [Text]
@@ -81,9 +88,9 @@ instance ToJSON Void where toJSON = absurd
 app :: IO ()
 app =
   Tona.run $ do
-    liftIO $ putStrLn "About to run migration..."
+    $(logDebug) "About to run migration..."
     TonaDb.runMigrate migrateAll
-    liftIO $ putStrLn "About to run web server..."
+    $(logDebug) "About to run web server..."
     TonaServant.run @API server
 
 -- Config
@@ -113,15 +120,18 @@ instance TonaServantConfig Config where
 
 -- Shared
 
-
 data Shared = Shared
   { tonaDb :: TonaDb.Shared
+  , tonaLogger :: TonaLogger.Shared
   }
-  deriving (Show)
 
 instance Plug Config Shared where
   init conf = Shared
-    <$> TonaDb.init conf
+    <$> TonaDb.init conf stdoutLogger
+    <*> TonaLogger.init stdoutLogger
 
 instance TonaDbShared Shared where
   shared = tonaDb
+
+instance TonaLoggerShared Shared where
+  shared = tonaLogger

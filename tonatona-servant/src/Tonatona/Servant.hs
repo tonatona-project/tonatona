@@ -15,17 +15,27 @@ module Tonatona.Servant
 import Control.Exception (catch)
 import Control.Monad.Catch (throwM)
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Reader (ReaderT, ask, runReaderT)
+import Control.Monad.Reader (ReaderT, ask, reader, runReaderT)
 import Data.ByteString (ByteString)
 import Data.Semigroup ((<>))
 import Data.String
 import Data.Text
 import Network.HTTP.Types.Header
+import Network.Wai (Middleware)
+import Network.Wai.Handler.Warp (Port)
+import qualified Network.Wai.Handler.Warp as Warp
+import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Servant
 import System.Envy (FromEnv(..), Var(..), (.!=), decodeEnv, env, envMaybe)
 import Tonatona
-import Network.Wai.Handler.Warp (Port)
-import qualified Network.Wai.Handler.Warp as Warp
+
+reqLogMiddleware :: TonaServantConfig conf => TonaM conf shared Middleware
+reqLogMiddleware = do
+  logger <- reader (reqLog . config . fst)
+  case logger of
+    ReqLogVerbose -> pure logStdoutDev
+    ReqLogNormal -> pure logStdout
+    ReqLogQuiet -> pure id
 
 {-| Main function.
  -}
@@ -36,8 +46,9 @@ run ::
   -> TonaM conf shared ()
 run servantServer = do
   (conf, shared) <- ask
-  -- TODO: Add middleware to log requests.  Try to use Tonatona.Logging
-  liftIO $ Warp.run (port (config conf)) $ runServant @api conf shared servantServer
+  loggingMiddleware <- reqLogMiddleware
+  let app = runServant @api conf shared servantServer
+  liftIO $ Warp.run (port (config conf)) $ loggingMiddleware app
 
 runServant ::
      forall api conf shared. HasServer api '[]

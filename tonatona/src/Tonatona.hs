@@ -4,9 +4,11 @@ module Tonatona
   ( run
   , TonaM
   , Plug(..)
+  , lift
   ) where
 
 import Control.Monad.Reader (ReaderT, runReaderT)
+import Control.Monad.Trans (lift)
 import Data.Semigroup ((<>))
 import System.Envy (FromEnv, decodeEnv)
 import qualified System.Envy as Envy

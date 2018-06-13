@@ -13,7 +13,7 @@ module Tonatona.Db
   ) where
 
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Logger (runStdoutLoggingT)
+import Control.Monad.Logger
 import Control.Monad.Reader (ReaderT, reader)
 import Data.ByteString (ByteString)
 import Data.Semigroup ((<>))
@@ -52,13 +52,21 @@ data Shared = Shared
   }
   deriving (Show)
 
-init :: (TonaDbConfig config) => config -> IO Shared
-init conf = Shared <$> genConnectionPool (config conf)
+init ::
+     (TonaDbConfig config)
+  => config
+  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
+  -> IO Shared
+init conf logger = Shared <$> genConnectionPool (config conf) logger
 
-genConnectionPool :: Config -> IO ConnectionPool
-genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) =
-  -- TODO: Replace this logging call to the one from Tonatona.Logging
-  runStdoutLoggingT $ createPostgresqlPool connStr connNum
+genConnectionPool ::
+     Config
+  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
+  -> IO ConnectionPool
+genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
+  let LoggingT runConnPool = createPostgresqlPool connStr connNum
+  runConnPool logger
+
 
 -- Config
 
