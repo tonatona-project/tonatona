@@ -9,7 +9,7 @@ module Tonatona.Db
   , TonaDbM
   , TonaDbConfig(..)
   , TonaDbShared(..)
-  , migrate
+  , runMigrate
   ) where
 
 import Control.Monad.IO.Class (liftIO)
@@ -19,7 +19,7 @@ import Data.ByteString (ByteString)
 import Data.Semigroup ((<>))
 import Data.String (IsString)
 import Database.Persist.Postgresql (createPostgresqlPool)
-import Database.Persist.Sql (ConnectionPool, SqlBackend, runSqlPool)
+import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool)
 import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
 import Tonatona (TonaM)
 import Tonatona.Environment (TonaEnvConfig)
@@ -38,20 +38,8 @@ run query = do
   pool <- reader (dbPool . shared . snd)
   runSqlPool query pool
 
-migrate :: (TonaDbConfig conf, TonaEnvConfig conf) => TonaDbM conf shared ()
-migrate = do
-  undefined
-  -- (conf, shared') <- ask
-  -- let env' = TonaEnv.environment $ TonaEnv.config conf
-  -- liftIO $
-  --   putStrLn $
-  --   "This function can use shared connection pool: " <>
-  --   (dbPool . shared $ shared')
-  -- liftIO $
-  --   putStrLn $
-  --   "This function can use ENV environment variable to decide behaviour: " <> show env'
-  -- liftIO $ putStrLn $ "Migrating: " <> (dbString . config $ conf)
-
+runMigrate :: (TonaDbShared shared) => Migration -> TonaM conf shared ()
+runMigrate migration = run $ runMigration migration
 
 -- Shared
 

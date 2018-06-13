@@ -7,8 +7,7 @@
 {-# LANGUAGE TypeOperators #-}
 
 module Tonatona.Sample
-  ( app
-  ) where
+  where
 
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
@@ -82,6 +81,8 @@ instance ToJSON Void where toJSON = absurd
 app :: IO ()
 app =
   Tona.run $ do
+    liftIO $ putStrLn "About to run migration..."
+    TonaDb.runMigrate migrateAll
     liftIO $ putStrLn "About to run web server..."
     TonaServant.run @Config @Shared @API server
   -- TonaDb.run $
