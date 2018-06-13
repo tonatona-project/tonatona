@@ -54,3 +54,37 @@ $ sudo systemctl restart postgresql
 $ psql -U tonatonasample -d tonatonasample -h 127.0.0.1
 ```
 
+## Try sending requests to the server
+
+A normal route that doesn't do anything special:
+
+```ssh
+$ curl localhost:8000/foo
+1
+```
+
+A route that sends a redirect:
+
+```sh
+$ curl -v localhost:8000/redirect-example
+...
+< HTTP/1.1 302 Found
+< Transfer-Encoding: chunked
+< Date: Wed, 13 Jun 2018 06:45:09 GMT
+< Server: Warp/3.2.22
+< Location: https://google.com
+```
+
+A route that adds a tag to the database.  This adds the tag `hello` with the value `foobar`.
+
+```sh
+$ $ curl -v -X POST localhost:8000/tag/hello/foobar
+[]
+```
+
+A route that gets all of a specific tag from the database.  This gets all the values for tags called `hello`:
+
+```sh
+$ curl localhost:8000/tag/hello
+["foobar"]
+```
