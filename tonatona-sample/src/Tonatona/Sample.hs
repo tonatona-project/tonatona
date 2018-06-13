@@ -84,14 +84,7 @@ app =
     liftIO $ putStrLn "About to run migration..."
     TonaDb.runMigrate migrateAll
     liftIO $ putStrLn "About to run web server..."
-    TonaServant.run @Config @Shared @API server
-  -- TonaDb.run $
-  --   TonaDb.migrate
-  -- TonaIO.run $ \_conf shared' ->
-  --   putStrLn $ "dbPool (" <> TonaDb.dbPool (TonaDb.shared shared') <> ") is shared"
-  -- TonaDb.run $
-  --   TonaDb.migrate
-
+    TonaServant.run @API server
 
 -- Config
 
