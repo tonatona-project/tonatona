@@ -30,16 +30,17 @@ import qualified Network.Wai.Handler.Warp as Warp
 {-| Main function.
  -}
 run ::
-     forall conf shared api.
+     forall api conf shared.
      (HasServer api '[], Plug conf shared, TonaServantConfig conf)
   => ServerT api (TonaM conf shared)
   -> TonaM conf shared ()
 run servantServer = do
   (conf, shared) <- ask
-  liftIO $ Warp.run (port (config conf)) $ runServant @conf @shared @api conf shared servantServer
+  -- TODO: Add middleware to log requests.  Try to use Tonatona.Logging
+  liftIO $ Warp.run (port (config conf)) $ runServant @api conf shared servantServer
 
 runServant ::
-     forall conf shared api. HasServer api '[]
+     forall api conf shared. HasServer api '[]
   => conf
   -> shared
   -> ServerT api (TonaM conf shared)
