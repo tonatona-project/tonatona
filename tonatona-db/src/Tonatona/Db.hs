@@ -12,7 +12,7 @@ module Tonatona.Db
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.Semigroup ((<>))
-import System.Envy (FromEnv(..), env)
+import System.Envy (FromEnv(..), (.!=), env, envMaybe)
 import Tonatona (TonaM)
 import Tonatona.Environment (TonaEnvConfig)
 import qualified Tonatona.Environment as TonaEnv
@@ -77,7 +77,7 @@ data Config = Config
 
 instance FromEnv Config where
   fromEnv = Config
-    <$> env "TONA_DB_DB_STRING"
+    <$> envMaybe "TONA_DB_DB_STRING" .!= "postgresql://myuser:mypass@localhost:5432/mydb"
 
 class TonaDbConfig config where
   config :: config -> Config
