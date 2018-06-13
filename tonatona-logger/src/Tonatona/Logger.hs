@@ -53,3 +53,6 @@ stderrLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
 stderrLogger loc source level msg = do
   func <- runStderrLoggingT $ LoggingT pure
   func loc source level msg
+
+noLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
+noLogger _ _ _ _ = pure ()

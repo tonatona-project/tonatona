@@ -128,7 +128,7 @@ data Shared = Shared
 
 instance Plug Config Shared where
   init conf = Shared
-    <$> TonaDb.init conf
+    <$> TonaDb.init conf stdoutLogger
     <*> TonaLogger.init stdoutLogger
 
 instance TonaDbShared Shared where
