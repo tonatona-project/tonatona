@@ -28,6 +28,7 @@ library
                      , tonatona
                      , tonatona-db
                      , tonatona-environment
+                     , tonatona-logger
                      , tonatona-servant
   default-language:    Haskell2010
   ghc-options:         -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction

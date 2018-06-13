@@ -1,17 +1,20 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 module Tonatona.Logger
-  -- ( run
-  -- , Config(..)
-  -- , Shared(..)
-  -- , Tonatona.Db.init
-  -- , TonaDbM
-  -- , TonaDbConfig(..)
-  -- , TonaDbShared(..)
-  -- , runMigrate
-  -- )
-    where
+  ( TonaLoggerShared(..)
+  , Shared(..)
+  , Tonatona.Logger.init
+  , stdoutLogger
+  , stderrLogger
+  , logDebug
+  , logInfo
+  , logError
+  , logWarn
+  ) where
 
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Logger
@@ -20,18 +23,14 @@ import Tonatona (TonaM)
 import Tonatona.Environment (TonaEnvConfig)
 import qualified Tonatona.Environment as TonaEnv
 
--- instance MonadLogger (TonaM conf shared) where
---   monadLoggerLog :: ToLogStr msg => Loc -> LogSource -> LogLevel -> msg -> m ()
-
--- {-| Main function.
---  -}
--- run :: (TonaDbShared shared) => TonaDbM conf shared a -> TonaM conf shared a
--- run query = do
---   pool <- reader (dbPool . shared . snd)
---   runSqlPool query pool
-
--- runMigrate :: (TonaDbShared shared) => Migration -> TonaM conf shared ()
--- runMigrate migration = run $ runMigration migration
+-- XXX: We could get rid of this overlapping instance by making TonaM be a
+-- newtype wrapper instead of just a type alias.
+instance {-# OVERLAPPING #-} TonaLoggerShared shared => MonadLogger (TonaM conf shared) where
+  monadLoggerLog :: ToLogStr msg => Loc -> LogSource -> LogLevel -> msg -> TonaM conf shared ()
+  monadLoggerLog loc source level msg = do
+    let logstr = toLogStr msg
+    logger <- reader (loggerAction . shared . snd)
+    liftIO $ logger loc source level logstr
 
 -- Shared
 
@@ -39,10 +38,18 @@ class TonaLoggerShared shared where
   shared :: shared -> Shared
 
 data Shared = Shared
-  { logger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
+  { loggerAction :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
   }
+
+init :: (Loc -> LogSource -> LogLevel -> LogStr -> IO ()) -> IO Shared
+init logger = pure $ Shared logger
 
 stdoutLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
 stdoutLogger loc source level msg = do
   func <- runStdoutLoggingT $ LoggingT pure
+  func loc source level msg
+
+stderrLogger :: Loc -> LogSource -> LogLevel -> LogStr -> IO ()
+stderrLogger loc source level msg = do
+  func <- runStderrLoggingT $ LoggingT pure
   func loc source level msg
