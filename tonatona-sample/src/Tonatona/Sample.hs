@@ -46,7 +46,7 @@ $(share
 
 type TagAPI = "tag" :> (
   Capture "tagname" Text :> Capture "tagvalue" Text :> Post '[JSON] () :<|>
-    Capture "tagname" Text :> Get '[JSON] (Maybe Text)
+    Capture "tagname" Text :> Get '[JSON] [Text]
   )
 
 type API =
@@ -65,10 +65,14 @@ tagServer = postTag :<|> getTag
 
 postTag :: Text -> Text -> TonaM Config Shared ()
 postTag name val = do
-  undefined
+  TonaDb.run $
+    insert_ (Tag name val)
 
-getTag :: Text -> TonaM Config Shared (Maybe Text)
-getTag name = undefined
+getTag :: Text -> TonaM Config Shared [Text]
+getTag name = do
+  tagEnts <- TonaDb.run $
+    selectList [TagName ==. name] []
+  pure $ tagValue . entityVal <$> tagEnts
 
 redirectExample :: TonaM Config Shared Void
 redirectExample = TonaServant.redirect "https://google.com"
