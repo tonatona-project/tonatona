@@ -64,7 +64,6 @@ genConnectionPool ::
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
   -> IO ConnectionPool
 genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
-  -- TODO: Replace this logging call to the one from Tonatona.Logging
   let LoggingT runConnPool = createPostgresqlPool connStr connNum
   runConnPool logger
 
