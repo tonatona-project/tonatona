@@ -1,4 +1,9 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Tonatona.Sample
@@ -8,7 +13,10 @@ module Tonatona.Sample
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Semigroup ((<>))
+import Data.Text (Text)
 import Data.Void
+import Database.Persist.Postgresql
+import Database.Persist.TH
 import System.Envy (FromEnv(..))
 import Servant
 import Tonatona (Plug(..), TonaM)
@@ -21,19 +29,46 @@ import qualified Tonatona.Environment as TonaEnv
 import qualified Tonatona.Servant as TonaServant
 import Tonatona.Servant (TonaServantConfig(..))
 
+
+$(share
+  [ mkPersist sqlSettings {mpsGenerateLenses = False}
+  , mkMigrate "migrateAll"
+  ]
+  [persistLowerCase|
+  Tag
+    name      Text
+    value      Text
+
+    deriving Eq
+    deriving Show
+    |]
+ )
+
+type TagAPI = "tag" :> (
+  Capture "tagname" Text :> Capture "tagvalue" Text :> Post '[JSON] () :<|>
+    Capture "tagname" Text :> Get '[JSON] (Maybe Text)
+  )
+
 type API =
   "foo" :> Get '[JSON] Int :<|>
-  "bar" :> Get '[JSON] String :<|>
+  TagAPI :<|>
   "redirect-example" :> Get '[JSON] Void
 
 server :: ServerT API (TonaM Config Shared)
-server = getFoo :<|> getBar :<|> redirectExample
+server = getFoo :<|> tagServer :<|> redirectExample
 
 getFoo :: TonaM Config Shared Int
 getFoo = pure 1
 
-getBar :: TonaM Config Shared String
-getBar = pure "bar"
+tagServer :: ServerT TagAPI (TonaM Config Shared)
+tagServer = postTag :<|> getTag
+
+postTag :: Text -> Text -> TonaM Config Shared ()
+postTag name val = do
+  undefined
+
+getTag :: Text -> TonaM Config Shared (Maybe Text)
+getTag name = undefined
 
 redirectExample :: TonaM Config Shared Void
 redirectExample = TonaServant.redirect "https://google.com"
