@@ -36,6 +36,7 @@ run ::
   -> TonaM conf shared ()
 run servantServer = do
   (conf, shared) <- ask
+  -- TODO: Add middleware to log requests.  Try to use Tonatona.Logging
   liftIO $ Warp.run (port (config conf)) $ runServant @conf @shared @api conf shared servantServer
 
 runServant ::

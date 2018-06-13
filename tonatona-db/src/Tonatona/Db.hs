@@ -1,3 +1,6 @@
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module Tonatona.Db
   ( run
   , Config(..)
@@ -10,9 +13,14 @@ module Tonatona.Db
   ) where
 
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Reader (ReaderT, ask)
+import Control.Monad.Logger (runStdoutLoggingT)
+import Control.Monad.Reader (ReaderT, reader)
+import Data.ByteString (ByteString)
 import Data.Semigroup ((<>))
-import System.Envy (FromEnv(..), (.!=), env, envMaybe)
+import Data.String (IsString)
+import Database.Persist.Postgresql (createPostgresqlPool)
+import Database.Persist.Sql (ConnectionPool, SqlBackend, runSqlPool)
+import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
 import Tonatona (TonaM)
 import Tonatona.Environment (TonaEnvConfig)
 import qualified Tonatona.Environment as TonaEnv
@@ -20,34 +28,34 @@ import qualified Tonatona.Environment as TonaEnv
 {-| Main type
  - TODO make this an opaque type, and appropreate Monad instead of `IO`
  -}
-type TonaDbM conf shared a
-   = (TonaDbConfig conf, TonaEnvConfig conf, TonaDbShared shared) =>
-       ReaderT (conf, shared) IO a
+type TonaDbM conf shared
+  = ReaderT SqlBackend (TonaM conf shared)
 
 {-| Main function.
  -}
-run :: (TonaDbConfig conf, TonaEnvConfig conf, TonaDbShared shared) => TonaDbM conf shared a -> TonaM conf shared a
-run = id
+run :: (TonaDbShared shared) => TonaDbM conf shared a -> TonaM conf shared a
+run query = do
+  pool <- reader (dbPool . shared . snd)
+  runSqlPool query pool
 
 migrate :: (TonaDbConfig conf, TonaEnvConfig conf) => TonaDbM conf shared ()
 migrate = do
-  (conf, shared') <- ask
-  let env' = TonaEnv.environment $ TonaEnv.config conf
-  liftIO $
-    putStrLn $
-    "This function can use shared connection pool: " <>
-    (dbPool . shared $ shared')
-  liftIO $
-    putStrLn $
-    "This function can use ENV environment variable to decide behaviour: " <> show env'
-  liftIO $ putStrLn $ "Migrating: " <> (dbString . config $ conf)
+  undefined
+  -- (conf, shared') <- ask
+  -- let env' = TonaEnv.environment $ TonaEnv.config conf
+  -- liftIO $
+  --   putStrLn $
+  --   "This function can use shared connection pool: " <>
+  --   (dbPool . shared $ shared')
+  -- liftIO $
+  --   putStrLn $
+  --   "This function can use ENV environment variable to decide behaviour: " <> show env'
+  -- liftIO $ putStrLn $ "Migrating: " <> (dbString . config $ conf)
 
 
 -- Shared
 
 -- Dummy type for demonstration
-type ConnectionPool = String
-
 class TonaDbShared shared where
   shared :: shared -> Shared
 
@@ -57,27 +65,33 @@ data Shared = Shared
   deriving (Show)
 
 init :: (TonaDbConfig config) => config -> IO Shared
-init conf = Shared
-  <$> genConnectionPool (config conf)
+init conf = Shared <$> genConnectionPool (config conf)
 
 genConnectionPool :: Config -> IO ConnectionPool
-genConnectionPool Config {dbString} = do
-  putStrLn "Generationg dummy Connection Pool..."
-  print dbString
-  pure "Dummy Connection Pool"
-
+genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) =
+  -- TODO: Replace this logging call to the one from Tonatona.Logging
+  runStdoutLoggingT $ createPostgresqlPool connStr connNum
 
 -- Config
 
+newtype DbConnStr = DbConnStr
+  { unDbConnStr :: ByteString
+  } deriving newtype (Eq, IsString, Read, Show, Var)
+
+newtype DbConnNum = DbConnNum { unDbConnNum :: Int }
+  deriving newtype (Eq, Num, Read, Show, Var)
+
 data Config = Config
-  { dbString :: String
+  { dbConnString :: DbConnStr
+  , dbConnNum :: DbConnNum
   }
   deriving (Show)
 
-
 instance FromEnv Config where
-  fromEnv = Config
-    <$> envMaybe "TONA_DB_DB_STRING" .!= "postgresql://myuser:mypass@localhost:5432/mydb"
+  fromEnv =
+    Config
+      <$> envMaybe "TONA_DB_DB_CONN_STRING" .!= "postgresql://myuser:mypass@localhost:5432/mydb"
+      <*> envMaybe "TONA_DB_DB_CONN_NUM" .!= 10
 
 class TonaDbConfig config where
   config :: config -> Config
