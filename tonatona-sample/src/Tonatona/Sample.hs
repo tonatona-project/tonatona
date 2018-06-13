@@ -69,10 +69,9 @@ tagServer = postTag :<|> getTag
 postTag :: Text -> Text -> TonaM Config Shared ()
 postTag name val = do
   TonaDb.run $ do
-    lift $
-      $(logInfo) $
-        "in postTag, in TonaDb.run, inserting a tag with name = " <>
-        name <> ", val = " <> val
+    $(logInfo) $
+      "in postTag, in TonaDb.run, inserting a tag with name = " <>
+      name <> ", val = " <> val
     insert_ (Tag name val)
 
 getTag :: Text -> TonaM Config Shared [Text]
