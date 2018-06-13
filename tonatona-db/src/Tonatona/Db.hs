@@ -78,8 +78,8 @@ data Config = Config
 instance FromEnv Config where
   fromEnv =
     Config
-      <$> envMaybe "TONA_DB_DB_CONN_STRING" .!= "postgresql://myuser:mypass@localhost:5432/mydb"
-      <*> envMaybe "TONA_DB_DB_CONN_NUM" .!= 10
+      <$> envMaybe "TONA_DB_CONN_STRING" .!= "postgresql://myuser:mypass@localhost:5432/mydb"
+      <*> envMaybe "TONA_DB_CONN_NUM" .!= 10
 
 class TonaDbConfig config where
   config :: config -> Config
