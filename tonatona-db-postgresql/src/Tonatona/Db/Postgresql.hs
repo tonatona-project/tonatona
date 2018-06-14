@@ -12,7 +12,8 @@ module Tonatona.Db.Postgresql
   , DbConnStr(..)
   , DbConnNum(..)
   , TonaDb.TonaDbConfig(..)
-  , Shared
+  , Shared(..)
+  , SharedSql(..)
   , Tonatona.Db.Postgresql.init
   , TonaDb.TonaDbSqlShared(..)
   , runPostgres
@@ -30,7 +31,7 @@ import Database.Persist.Postgresql (createPostgresqlPool)
 import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool)
 import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
 import Tonatona (TonaM)
-import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared, TonaDbConfig)
+import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared(..), SharedSql, TonaDbConfig)
 import qualified Tonatona.Db.Sql as TonaDb
 import Tonatona.Environment (TonaEnvConfig)
 import qualified Tonatona.Environment as TonaEnv
@@ -46,17 +47,17 @@ genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
 
 runPostgres ::
      MonadUnliftIO m
-  => Config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
+  => Pool SqlBackend
   -> ReaderT SqlBackend m a
   -> m a
-runPostgres conf logger query = do
-  pool <- liftIO $ genConnectionPool conf logger
+runPostgres pool query = do
   runSqlPool query pool
 
 init :: forall config backend.
      (TonaDbConfig config)
   => config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> IO Shared
-init conf logger = TonaDb.init conf logger runPostgres
+  -> IO SharedSql
+init conf logger = do
+  pool <- liftIO $ genConnectionPool (TonaDb.config conf) logger
+  pure $ Shared $ \query -> runPostgres pool query

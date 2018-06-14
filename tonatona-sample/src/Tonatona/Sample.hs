@@ -138,7 +138,7 @@ instance TonaServantConfig Config where
 -- Shared
 
 data Shared = Shared
-  { tonaDb :: TonaDb.Shared
+  { tonaDb :: TonaDb.SharedSql
   , tonaLogger :: TonaLogger.Shared
   }
 

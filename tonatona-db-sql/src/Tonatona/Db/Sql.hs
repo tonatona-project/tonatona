@@ -12,8 +12,8 @@ module Tonatona.Db.Sql
   , DbConnStr(..)
   , DbConnNum(..)
   , TonaDb.TonaDbConfig(..)
-  , Shared
-  , TonaDb.init
+  , SharedSql
+  , TonaDb.Shared(Shared)
   , TonaDbSqlShared(..)
   , runMigrate
   ) where
@@ -37,13 +37,13 @@ import UnliftIO
 type TonaDbM conf shared
   = ReaderT SqlBackend (TonaM conf shared)
 
-type Shared = TonaDb.Shared SqlBackend
+type SharedSql = TonaDb.Shared SqlBackend
 
 runMigrate :: (TonaDbSqlShared shared) => Migration -> TonaM conf shared ()
 runMigrate migration = TonaDb.run $ runMigration migration
 
 class TonaDbSqlShared shared where
-  shared :: shared -> Shared
+  shared :: shared -> SharedSql
 
 instance {-# OVERLAPPABLE #-} TonaDbSqlShared shared => TonaDbShared SqlBackend shared where
   shared = Tonatona.Db.Sql.shared

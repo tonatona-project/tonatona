@@ -12,27 +12,28 @@ module Tonatona.Db.Sqlite
   , DbConnStr(..)
   , DbConnNum(..)
   , TonaDb.TonaDbConfig(..)
-  , Shared
+  , Shared(..)
+  , SharedSql
   , Tonatona.Db.Sqlite.init
   , TonaDb.TonaDbSqlShared(..)
-  , runSqlite
   , TonaDb.runMigrate
   ) where
 
 import Control.Monad.IO.Class
 import Control.Monad.Logger
-import Control.Monad.Reader (ReaderT, reader)
+import Control.Monad.Reader (ReaderT, reader, runReaderT)
 import Control.Monad.Trans (lift)
 import Data.ByteString (ByteString)
 import Data.Pool (Pool)
 import Data.Semigroup ((<>))
 import Data.String (IsString)
 import Data.Text.Encoding (decodeUtf8)
-import Database.Persist.Sqlite (createSqlitePool, withSqliteConn)
+import Database.Persist.Sqlite (createSqlitePool, withSqliteConn, wrapConnection)
 import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool, runSqlConn)
+import Database.Sqlite (open)
 import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
 import Tonatona (TonaM)
-import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared, TonaDbConfig)
+import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared(..), SharedSql, TonaDbConfig(..))
 import qualified Tonatona.Db.Sql as TonaDb
 import Tonatona.Environment (TonaEnvConfig)
 import qualified Tonatona.Environment as TonaEnv
@@ -47,26 +48,17 @@ genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
         LoggingT runConnPool = createSqlitePool textConnStr connNum
     runConnPool logger
 
-runSqlite ::
-     forall m a. MonadUnliftIO m
-  => Config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> ReaderT SqlBackend m a
-  -> m a
-runSqlite conf@(Config (DbConnStr connStr) _) logger query
-  | connStr == ":memory:" = do
-    let textConnStr = decodeUtf8 connStr
-        LoggingT res =
-          withSqliteConn textConnStr $
-            \backend -> lift $ runSqlConn query backend
-    res logger
-  | otherwise = do
-    pool <- liftIO $ genConnectionPool conf logger
-    runSqlPool query pool
-
 init :: forall config backend.
      (TonaDbConfig config)
   => config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> IO Shared
-init conf logger = TonaDb.init conf logger runSqlite
+  -> IO SharedSql
+init conf logger =
+  case dbConnString (config conf) of
+    ":memory:" -> do
+      conn <- open ":memory:"
+      backend <- wrapConnection conn logger
+      pure $ Shared $ \query -> runReaderT query backend
+    _ -> do
+      pool <- liftIO $ genConnectionPool (config conf) logger
+      pure $ Shared $ \query -> runSqlPool query pool

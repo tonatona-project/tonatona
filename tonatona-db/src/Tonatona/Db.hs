@@ -69,17 +69,3 @@ class TonaDbShared backend shared | shared -> backend where
 data Shared backend = Shared
   { runDb :: forall m a. MonadUnliftIO m => ReaderT backend m a -> m a
   }
-
-init :: forall config backend.
-     (TonaDbConfig config)
-  => config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> ( forall m a.
-       MonadUnliftIO m =>
-       Config ->
-       (Loc -> LogSource -> LogLevel -> LogStr -> IO ()) ->
-       ReaderT backend m a ->
-       m a
-     )
-  -> IO (Shared backend)
-init conf logger dbRunner = pure $ Shared (dbRunner (config conf) logger)

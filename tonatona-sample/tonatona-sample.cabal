@@ -27,6 +27,8 @@ library
                      , text
                      , tonatona
                      , tonatona-db-postgresql
+                     , tonatona-db-sqlite
+                     , tonatona-db-sql
                      , tonatona-environment
                      , tonatona-logger
                      , tonatona-servant
