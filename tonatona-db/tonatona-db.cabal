@@ -24,6 +24,7 @@ library
                      , mtl
                      , persistent
                      , persistent-postgresql
+                     , resource-pool
                      , tonatona
                      , tonatona-environment
                      , unliftio

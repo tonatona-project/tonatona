@@ -21,7 +21,7 @@ import Servant
 import Tonatona (Plug(..), TonaM, lift)
 import qualified Tonatona as Tona
 import qualified Tonatona.IO as TonaIO
-import Tonatona.Db (TonaDbConfig(..), TonaDbShared(..))
+import Tonatona.Db (TonaDbConfig(..), TonaDbShared(..), runPostgres)
 import qualified Tonatona.Db as TonaDb
 import Tonatona.Environment (TonaEnvConfig(..))
 import qualified Tonatona.Environment as TonaEnv
@@ -121,16 +121,16 @@ instance TonaServantConfig Config where
 -- Shared
 
 data Shared = Shared
-  { tonaDb :: TonaDb.Shared
+  { tonaDb :: TonaDb.Shared SqlBackend
   , tonaLogger :: TonaLogger.Shared
   }
 
 instance Plug Config Shared where
   init conf = Shared
-    <$> TonaDb.init conf stdoutLogger
+    <$> TonaDb.init conf stdoutLogger runPostgres
     <*> TonaLogger.init stdoutLogger
 
-instance TonaDbShared Shared where
+instance TonaDbShared SqlBackend Shared where
   shared = tonaDb
 
 instance TonaLoggerShared Shared where
