@@ -5,7 +5,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Tonatona.Db.Postgresql
+module Tonatona.Db.Sqlite
   ( TonaDb.run
   , TonaDb.TonaDbM
   , Config(..)
@@ -13,9 +13,9 @@ module Tonatona.Db.Postgresql
   , DbConnNum(..)
   , TonaDb.TonaDbConfig(..)
   , Shared
-  , Tonatona.Db.Postgresql.init
+  , Tonatona.Db.Sqlite.init
   , TonaDb.TonaDbSqlShared(..)
-  , runPostgres
+  , runSqlite
   , TonaDb.runMigrate
   ) where
 
@@ -26,7 +26,8 @@ import Data.ByteString (ByteString)
 import Data.Pool (Pool)
 import Data.Semigroup ((<>))
 import Data.String (IsString)
-import Database.Persist.Postgresql (createPostgresqlPool)
+import Data.Text.Encoding (decodeUtf8)
+import Database.Persist.Sqlite (createSqlitePool)
 import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool)
 import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
 import Tonatona (TonaM)
@@ -41,22 +42,25 @@ genConnectionPool ::
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
   -> IO (Pool SqlBackend)
 genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
-  let LoggingT runConnPool = createPostgresqlPool connStr connNum
-  runConnPool logger
+    let textConnStr = decodeUtf8 connStr
+        LoggingT runConnPool = createSqlitePool textConnStr connNum
+    runConnPool logger
 
-runPostgres ::
+runSqlite ::
      MonadUnliftIO m
   => Config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
   -> ReaderT SqlBackend m a
   -> m a
-runPostgres conf logger query = do
-  pool <- liftIO $ genConnectionPool conf logger
-  runSqlPool query pool
+runSqlite conf@(Config (DbConnStr connStr) _) logger query
+  | connStr == ":memory:" = undefined
+  | otherwise = do
+    pool <- liftIO $ genConnectionPool conf logger
+    runSqlPool query pool
 
 init :: forall config backend.
      (TonaDbConfig config)
   => config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
   -> IO Shared
-init conf logger = TonaDb.init conf logger runPostgres
+init conf logger = TonaDb.init conf logger runSqlite
