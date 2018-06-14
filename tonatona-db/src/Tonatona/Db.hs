@@ -4,23 +4,21 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Tonatona.Db
-  -- ( run
-  -- , Config(..)
-  -- , Shared(..)
-  -- , Tonatona.Db.init
-  -- , TonaDbM
-  -- , TonaDbConfig(..)
-  -- , TonaDbShared(..)
-  -- , runMigrate
-  -- ) where
-  where
+  ( TonaDbM
+  , run
+  , DbConnStr(..)
+  , DbConnNum(..)
+  , Config(..)
+  , TonaDbConfig(..)
+  , TonaDbShared(..)
+  , Shared(..)
+  ) where
 
 import Control.Monad.Reader (ReaderT, reader)
 import Data.ByteString (ByteString)
 import Data.String (IsString)
 import System.Envy (FromEnv(..), Var, (.!=), envMaybe)
 import Tonatona (TonaM)
-import UnliftIO (MonadUnliftIO)
 
 type TonaDbM backend conf shared
   = ReaderT backend (TonaM conf shared)
@@ -62,5 +60,5 @@ class TonaDbShared backend shared | shared -> backend where
   shared :: shared -> Shared backend
 
 data Shared backend = Shared
-  { runDb :: forall m a. MonadUnliftIO m => ReaderT backend m a -> m a
+  { runDb :: forall conf shared a. ReaderT backend (TonaM conf shared) a -> TonaM conf shared a
   }
