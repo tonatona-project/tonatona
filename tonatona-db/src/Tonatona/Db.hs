@@ -2,17 +2,18 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Tonatona.Db
-  ( run
-  , Config(..)
-  , Shared(..)
-  , Tonatona.Db.init
-  , TonaDbM
-  , TonaDbConfig(..)
-  , TonaDbShared(..)
-  , runMigrate
-  ) where
+  -- ( run
+  -- , Config(..)
+  -- , Shared(..)
+  -- , Tonatona.Db.init
+  -- , TonaDbM
+  -- , TonaDbConfig(..)
+  -- , TonaDbShared(..)
+  -- , runMigrate
+  -- ) where
+  where
 
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.IO.Class
 import Control.Monad.Logger
 import Control.Monad.Reader (ReaderT, reader)
 import Data.ByteString (ByteString)
@@ -24,6 +25,7 @@ import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
 import Tonatona (TonaM)
 import Tonatona.Environment (TonaEnvConfig)
 import qualified Tonatona.Environment as TonaEnv
+import UnliftIO
 
 {-| Main type
  - TODO make this an opaque type, and appropreate Monad instead of `IO`
@@ -35,38 +37,11 @@ type TonaDbM conf shared
  -}
 run :: (TonaDbShared shared) => TonaDbM conf shared a -> TonaM conf shared a
 run query = do
-  pool <- reader (dbPool . shared . snd)
-  runSqlPool query pool
+  DbRunner f <- reader (runDb . shared . snd)
+  f query
 
-runMigrate :: (TonaDbShared shared) => Migration -> TonaM conf shared ()
-runMigrate migration = run $ runMigration migration
-
--- Shared
-
--- Dummy type for demonstration
-class TonaDbShared shared where
-  shared :: shared -> Shared
-
-data Shared = Shared
-  { dbPool :: ConnectionPool
-  }
-  deriving (Show)
-
-init ::
-     (TonaDbConfig config)
-  => config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> IO Shared
-init conf logger = Shared <$> genConnectionPool (config conf) logger
-
-genConnectionPool ::
-     Config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> IO ConnectionPool
-genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
-  let LoggingT runConnPool = createPostgresqlPool connStr connNum
-  runConnPool logger
-
+-- runMigrate :: (TonaDbShared shared) => Migration -> TonaM conf shared ()
+-- runMigrate migration = run $ runMigration migration
 
 -- Config
 
@@ -91,3 +66,39 @@ instance FromEnv Config where
 
 class TonaDbConfig config where
   config :: config -> Config
+
+-- Shared
+
+class TonaDbShared shared where
+  shared :: shared -> Shared
+
+newtype DbRunner = DbRunner { unDbRunner :: forall m a. MonadUnliftIO m => ReaderT SqlBackend m a -> m a }
+
+data Shared = Shared
+  { runDb :: DbRunner
+  }
+
+init ::
+     (TonaDbConfig config)
+  => config
+  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
+  -> IO Shared
+init conf logger = pure $ Shared $ DbRunner (runPostgres (config conf) logger)
+
+genConnectionPool ::
+     Config
+  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
+  -> IO ConnectionPool
+genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
+  let LoggingT runConnPool = createPostgresqlPool connStr connNum
+  runConnPool logger
+
+runPostgres ::
+     (MonadIO m, MonadUnliftIO m)
+  => Config
+  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
+  -> ReaderT SqlBackend m a
+  -> m a
+runPostgres conf logger query = do
+  pool <- liftIO $ genConnectionPool conf logger
+  runSqlPool query pool
