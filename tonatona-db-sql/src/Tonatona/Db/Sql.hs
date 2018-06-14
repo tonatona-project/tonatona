@@ -4,6 +4,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Tonatona.Db.Sql
   ( TonaDb.run
@@ -18,21 +19,11 @@ module Tonatona.Db.Sql
   , runMigrate
   ) where
 
-import Control.Monad.IO.Class
-import Control.Monad.Logger
-import Control.Monad.Reader (ReaderT, reader)
-import Data.ByteString (ByteString)
-import Data.Pool (Pool)
-import Data.Semigroup ((<>))
-import Data.String (IsString)
-import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool)
-import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
+import Control.Monad.Reader (ReaderT)
+import Database.Persist.Sql (Migration, SqlBackend, runMigration)
 import Tonatona (TonaM)
 import Tonatona.Db (Config(..), DbConnStr(..), DbConnNum(..), TonaDbShared)
 import qualified Tonatona.Db as TonaDb
-import Tonatona.Environment (TonaEnvConfig)
-import qualified Tonatona.Environment as TonaEnv
-import UnliftIO
 
 type TonaDbM conf shared
   = ReaderT SqlBackend (TonaM conf shared)
