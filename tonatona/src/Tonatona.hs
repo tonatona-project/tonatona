@@ -11,7 +11,6 @@ import Control.Monad.Reader (ReaderT, runReaderT)
 import Control.Monad.Trans (lift)
 import Data.Semigroup ((<>))
 import System.Envy (FromEnv, decodeEnv)
-import qualified System.Envy as Envy
 
 {-| Main type
  - TODO make this an opaque type, and appropreate Monad instead of `IO`

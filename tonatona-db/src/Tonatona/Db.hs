@@ -15,17 +15,12 @@ module Tonatona.Db
   -- ) where
   where
 
-import Control.Monad.IO.Class
-import Control.Monad.Logger
 import Control.Monad.Reader (ReaderT, reader)
 import Data.ByteString (ByteString)
-import Data.Semigroup ((<>))
 import Data.String (IsString)
-import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
+import System.Envy (FromEnv(..), Var, (.!=), envMaybe)
 import Tonatona (TonaM)
-import Tonatona.Environment (TonaEnvConfig)
-import qualified Tonatona.Environment as TonaEnv
-import UnliftIO
+import UnliftIO (MonadUnliftIO)
 
 type TonaDbM backend conf shared
   = ReaderT backend (TonaM conf shared)

@@ -5,20 +5,20 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Tonatona.Sample
   where
 
-import Control.Monad.IO.Class (liftIO)
 import Data.Aeson (ToJSON(toJSON))
 import Data.Semigroup ((<>))
 import Data.Text (Text)
-import Data.Void
-import Database.Persist.Postgresql
-import Database.Persist.TH
+import Data.Void (Void, absurd)
+import Database.Persist.Postgresql ((==.), entityVal, insert_, selectList)
+import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowerCase, share, sqlSettings)
 import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
 import Servant
-import Tonatona (Plug(..), TonaM, lift)
+import Tonatona (Plug(..), TonaM)
 import qualified Tonatona as Tona
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
 import qualified Tonatona.Db.Sqlite as TonaDbSqlite
@@ -26,7 +26,6 @@ import Tonatona.Db.Sql (TonaDbConfig, TonaDbSqlShared)
 import qualified Tonatona.Db.Sql as TonaDb
 import Tonatona.Environment (TonaEnvConfig(..))
 import qualified Tonatona.Environment as TonaEnv
-import qualified Tonatona.IO as TonaIO
 import Tonatona.Logger (TonaLoggerShared(..), logDebug, logInfo, stdoutLogger)
 import qualified Tonatona.Logger as TonaLogger
 import qualified Tonatona.Servant as TonaServant
