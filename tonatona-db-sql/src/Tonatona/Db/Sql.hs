@@ -16,7 +16,6 @@ module Tonatona.Db.Sql
   , TonaDb.init
   , TonaDbSqlShared(..)
   , runMigrate
-  , runPostgres
   ) where
 
 import Control.Monad.IO.Class
@@ -26,7 +25,6 @@ import Data.ByteString (ByteString)
 import Data.Pool (Pool)
 import Data.Semigroup ((<>))
 import Data.String (IsString)
-import Database.Persist.Postgresql (createPostgresqlPool)
 import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool)
 import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
 import Tonatona (TonaM)
@@ -43,24 +41,6 @@ type Shared = TonaDb.Shared SqlBackend
 
 runMigrate :: (TonaDbSqlShared shared) => Migration -> TonaM conf shared ()
 runMigrate migration = TonaDb.run $ runMigration migration
-
-genConnectionPool ::
-     Config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> IO (Pool SqlBackend)
-genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
-  let LoggingT runConnPool = createPostgresqlPool connStr connNum
-  runConnPool logger
-
-runPostgres ::
-     MonadUnliftIO m
-  => Config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> ReaderT SqlBackend m a
-  -> m a
-runPostgres conf logger query = do
-  pool <- liftIO $ genConnectionPool conf logger
-  runSqlPool query pool
 
 class TonaDbSqlShared shared where
   shared :: shared -> Shared
