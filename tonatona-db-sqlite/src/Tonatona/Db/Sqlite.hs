@@ -48,6 +48,7 @@ genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
         LoggingT runConnPool = createSqlitePool textConnStr connNum
     runConnPool logger
 
+-- TODO: Add function for freeing the pool.
 init :: forall config backend.
      (TonaDbConfig config)
   => config

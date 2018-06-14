@@ -53,6 +53,7 @@ runPostgres ::
 runPostgres pool query = do
   runSqlPool query pool
 
+-- TODO: Add function for freeing the pool.
 init :: forall config backend.
      (TonaDbConfig config)
   => config
