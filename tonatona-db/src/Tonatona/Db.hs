@@ -37,11 +37,11 @@ type TonaDbM conf shared
  -}
 run :: (TonaDbShared shared) => TonaDbM conf shared a -> TonaM conf shared a
 run query = do
-  DbRunner f <- reader (runDb . shared . snd)
+  f <- reader (runDb . shared . snd)
   f query
 
--- runMigrate :: (TonaDbShared shared) => Migration -> TonaM conf shared ()
--- runMigrate migration = run $ runMigration migration
+runMigrate :: (TonaDbShared shared) => Migration -> TonaM conf shared ()
+runMigrate migration = run $ runMigration migration
 
 -- Config
 
@@ -72,10 +72,8 @@ class TonaDbConfig config where
 class TonaDbShared shared where
   shared :: shared -> Shared
 
-newtype DbRunner = DbRunner { unDbRunner :: forall m a. MonadUnliftIO m => ReaderT SqlBackend m a -> m a }
-
 data Shared = Shared
-  { runDb :: DbRunner
+  { runDb :: forall m a. MonadUnliftIO m => ReaderT SqlBackend m a -> m a
   }
 
 init ::
@@ -83,7 +81,7 @@ init ::
   => config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
   -> IO Shared
-init conf logger = pure $ Shared $ DbRunner (runPostgres (config conf) logger)
+init conf logger = pure $ Shared (runPostgres (config conf) logger)
 
 genConnectionPool ::
      Config
