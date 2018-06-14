@@ -21,8 +21,10 @@ import Servant
 import Tonatona (Plug(..), TonaM, lift)
 import qualified Tonatona as Tona
 import qualified Tonatona.IO as TonaIO
-import Tonatona.Db (TonaDbConfig(..), TonaDbShared(..), runPostgres)
+import Tonatona.Db (TonaDbConfig(..), TonaDbShared(..))
 import qualified Tonatona.Db as TonaDb
+import Tonatona.Db.Sql (runPostgres)
+import qualified Tonatona.Db.Sql as TonaDbSql
 import Tonatona.Environment (TonaEnvConfig(..))
 import qualified Tonatona.Environment as TonaEnv
 import Tonatona.Logger (TonaLoggerShared(..), logDebug, logInfo, stdoutLogger)
@@ -89,7 +91,7 @@ app :: IO ()
 app =
   Tona.run $ do
     $(logDebug) "About to run migration..."
-    TonaDb.runMigrate migrateAll
+    TonaDbSql.runMigrate migrateAll
     $(logDebug) "About to run web server..."
     TonaServant.run @API server
 

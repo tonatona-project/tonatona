@@ -38,6 +38,7 @@ resolver: lts-11.13
 packages:
     - 'tonatona'
     - 'tonatona-db'
+    - 'tonatona-db-sql'
     - 'tonatona-environment'
     - 'tonatona-logger'
     - 'tonatona-sample'
