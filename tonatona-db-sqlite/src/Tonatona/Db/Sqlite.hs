@@ -3,7 +3,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
 
 module Tonatona.Db.Sqlite
   ( TonaDb.run
@@ -21,23 +23,14 @@ module Tonatona.Db.Sqlite
 
 import Control.Monad.IO.Class
 import Control.Monad.Logger
-import Control.Monad.Reader (ReaderT, reader, runReaderT)
-import Control.Monad.Trans (lift)
-import Data.ByteString (ByteString)
+import Control.Monad.Reader (runReaderT)
 import Data.Pool (Pool)
-import Data.Semigroup ((<>))
-import Data.String (IsString)
 import Data.Text.Encoding (decodeUtf8)
-import Database.Persist.Sqlite (createSqlitePool, withSqliteConn, wrapConnection)
-import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool, runSqlConn)
+import Database.Persist.Sqlite (createSqlitePool, wrapConnection)
+import Database.Persist.Sql (SqlBackend, runSqlPool)
 import Database.Sqlite (open)
-import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
-import Tonatona (TonaM)
 import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared(..), SharedSql, TonaDbConfig(..))
 import qualified Tonatona.Db.Sql as TonaDb
-import Tonatona.Environment (TonaEnvConfig)
-import qualified Tonatona.Environment as TonaEnv
-import UnliftIO
 
 genConnectionPool ::
      Config
@@ -49,7 +42,7 @@ genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
     runConnPool logger
 
 -- TODO: Add function for freeing the pool.
-init :: forall config backend.
+init :: forall config.
      (TonaDbConfig config)
   => config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
