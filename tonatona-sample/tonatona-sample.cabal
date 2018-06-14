@@ -26,7 +26,6 @@ library
                      , servant-server
                      , text
                      , tonatona
-                     , tonatona-db
                      , tonatona-db-sql
                      , tonatona-environment
                      , tonatona-logger

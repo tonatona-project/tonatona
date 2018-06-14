@@ -21,10 +21,8 @@ import Servant
 import Tonatona (Plug(..), TonaM, lift)
 import qualified Tonatona as Tona
 import qualified Tonatona.IO as TonaIO
-import Tonatona.Db (TonaDbConfig(..), TonaDbShared(..))
-import qualified Tonatona.Db as TonaDb
-import Tonatona.Db.Sql (runPostgres)
-import qualified Tonatona.Db.Sql as TonaDbSql
+import Tonatona.Db.Sql (TonaDbConfig, TonaDbSqlShared, runPostgres)
+import qualified Tonatona.Db.Sql as TonaDb
 import Tonatona.Environment (TonaEnvConfig(..))
 import qualified Tonatona.Environment as TonaEnv
 import Tonatona.Logger (TonaLoggerShared(..), logDebug, logInfo, stdoutLogger)
@@ -91,7 +89,7 @@ app :: IO ()
 app =
   Tona.run $ do
     $(logDebug) "About to run migration..."
-    TonaDbSql.runMigrate migrateAll
+    TonaDb.runMigrate migrateAll
     $(logDebug) "About to run web server..."
     TonaServant.run @API server
 
@@ -123,7 +121,7 @@ instance TonaServantConfig Config where
 -- Shared
 
 data Shared = Shared
-  { tonaDb :: TonaDb.Shared SqlBackend
+  { tonaDb :: TonaDb.Shared
   , tonaLogger :: TonaLogger.Shared
   }
 
@@ -132,7 +130,7 @@ instance Plug Config Shared where
     <$> TonaDb.init conf stdoutLogger runPostgres
     <*> TonaLogger.init stdoutLogger
 
-instance TonaDbShared SqlBackend Shared where
+instance TonaDbSqlShared Shared where
   shared = tonaDb
 
 instance TonaLoggerShared Shared where

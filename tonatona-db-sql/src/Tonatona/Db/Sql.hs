@@ -1,20 +1,23 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Tonatona.Db.Sql
-  -- ( run
-  -- , Config(..)
-  -- , Shared(..)
-  -- , Tonatona.Db.init
-  -- , TonaDbM
-  -- , TonaDbConfig(..)
-  -- , TonaDbShared(..)
-  -- , runMigrate
-  -- ) where
-  where
+  ( TonaDb.run
+  , TonaDbM
+  , Config(..)
+  , DbConnStr(..)
+  , DbConnNum(..)
+  , TonaDb.TonaDbConfig(..)
+  , Shared
+  , TonaDb.init
+  , TonaDbSqlShared(..)
+  , runMigrate
+  , runPostgres
+  ) where
 
 import Control.Monad.IO.Class
 import Control.Monad.Logger
@@ -27,16 +30,14 @@ import Database.Persist.Postgresql (createPostgresqlPool)
 import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool)
 import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
 import Tonatona (TonaM)
+import Tonatona.Db (Config(..), DbConnStr(..), DbConnNum(..), TonaDbShared)
+import qualified Tonatona.Db as TonaDb
 import Tonatona.Environment (TonaEnvConfig)
-import Tonatona.Db (TonaDbShared)
-import Tonatona.Db as TonaDb
 import qualified Tonatona.Environment as TonaEnv
 import UnliftIO
 
 type TonaDbM conf shared
   = ReaderT SqlBackend (TonaM conf shared)
-
-type TonaDbSqlShared = TonaDbShared SqlBackend
 
 type Shared = TonaDb.Shared SqlBackend
 
@@ -60,3 +61,9 @@ runPostgres ::
 runPostgres conf logger query = do
   pool <- liftIO $ genConnectionPool conf logger
   runSqlPool query pool
+
+class TonaDbSqlShared shared where
+  shared :: shared -> Shared
+
+instance {-# OVERLAPPABLE #-} TonaDbSqlShared shared => TonaDbShared SqlBackend shared where
+  shared = Tonatona.Db.Sql.shared
