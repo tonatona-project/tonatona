@@ -22,7 +22,6 @@ module Tonatona.Db.Postgresql
   , TonaDb.runMigrate
   ) where
 
-import Control.Monad.IO.Class
 import Control.Monad.Logger
 import Control.Monad.Reader (ReaderT)
 import Data.Pool (Pool)
