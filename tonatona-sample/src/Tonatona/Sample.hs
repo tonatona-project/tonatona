@@ -10,21 +10,23 @@ module Tonatona.Sample
   where
 
 import Control.Monad.IO.Class (liftIO)
-import Data.Aeson
+import Data.Aeson (ToJSON(toJSON))
 import Data.Semigroup ((<>))
 import Data.Text (Text)
 import Data.Void
 import Database.Persist.Postgresql
 import Database.Persist.TH
-import System.Envy (FromEnv(..))
+import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
 import Servant
 import Tonatona (Plug(..), TonaM, lift)
 import qualified Tonatona as Tona
-import qualified Tonatona.IO as TonaIO
-import Tonatona.Db.Postgresql (TonaDbConfig, TonaDbSqlShared)
-import qualified Tonatona.Db.Postgresql as TonaDb
+import qualified Tonatona.Db.Postgresql as TonaDbPostgres
+import qualified Tonatona.Db.Sqlite as TonaDbSqlite
+import Tonatona.Db.Sql (TonaDbConfig, TonaDbSqlShared)
+import qualified Tonatona.Db.Sql as TonaDb
 import Tonatona.Environment (TonaEnvConfig(..))
 import qualified Tonatona.Environment as TonaEnv
+import qualified Tonatona.IO as TonaIO
 import Tonatona.Logger (TonaLoggerShared(..), logDebug, logInfo, stdoutLogger)
 import qualified Tonatona.Logger as TonaLogger
 import qualified Tonatona.Servant as TonaServant
@@ -95,8 +97,22 @@ app =
 
 -- Config
 
+data DbToUse = PostgreSQL | Sqlite deriving Show
+
+instance FromEnv DbToUse where
+  fromEnv = envMaybe "DB_TO_USE" .!= PostgreSQL
+
+instance Var DbToUse where
+  toVar PostgreSQL = "postgresql"
+  toVar Sqlite = "sqlite"
+
+  fromVar "postgresql" = Just PostgreSQL
+  fromVar "sqlite" = Just Sqlite
+  fromVar _ = Nothing
+
 data Config = Config
   { tonaDb :: TonaDb.Config
+  , dbToUse :: DbToUse
   , tonaEnv :: TonaEnv.Config
   , tonaServant :: TonaServant.Config
   }
@@ -105,6 +121,7 @@ data Config = Config
 instance FromEnv Config where
   fromEnv = Config
     <$> fromEnv
+    <*> fromEnv
     <*> fromEnv
     <*> fromEnv
 
@@ -126,9 +143,14 @@ data Shared = Shared
   }
 
 instance Plug Config Shared where
-  init conf = Shared
-    <$> TonaDb.init conf stdoutLogger
-    <*> TonaLogger.init stdoutLogger
+  init conf = do
+    let db =
+          case dbToUse conf of
+            Sqlite -> TonaDbSqlite.init conf stdoutLogger
+            PostgreSQL -> TonaDbPostgres.init conf stdoutLogger
+    Shared
+      <$> db
+      <*> TonaLogger.init stdoutLogger
 
 instance TonaDbSqlShared Shared where
   shared = tonaDb
