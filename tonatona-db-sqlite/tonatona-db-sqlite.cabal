@@ -25,6 +25,7 @@ library
                      , persistent
                      , persistent-sqlite
                      , resource-pool
+                     , text
                      , tonatona
                      , tonatona-db-sql
                      , tonatona-environment

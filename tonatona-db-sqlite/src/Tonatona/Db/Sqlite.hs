@@ -22,13 +22,14 @@ module Tonatona.Db.Sqlite
 import Control.Monad.IO.Class
 import Control.Monad.Logger
 import Control.Monad.Reader (ReaderT, reader)
+import Control.Monad.Trans (lift)
 import Data.ByteString (ByteString)
 import Data.Pool (Pool)
 import Data.Semigroup ((<>))
 import Data.String (IsString)
 import Data.Text.Encoding (decodeUtf8)
-import Database.Persist.Sqlite (createSqlitePool)
-import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool)
+import Database.Persist.Sqlite (createSqlitePool, withSqliteConn)
+import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool, runSqlConn)
 import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
 import Tonatona (TonaM)
 import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared, TonaDbConfig)
@@ -47,13 +48,18 @@ genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
     runConnPool logger
 
 runSqlite ::
-     MonadUnliftIO m
+     forall m a. MonadUnliftIO m
   => Config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
   -> ReaderT SqlBackend m a
   -> m a
 runSqlite conf@(Config (DbConnStr connStr) _) logger query
-  | connStr == ":memory:" = undefined
+  | connStr == ":memory:" = do
+    let textConnStr = decodeUtf8 connStr
+        LoggingT res =
+          withSqliteConn textConnStr $
+            \backend -> lift $ runSqlConn query backend
+    res logger
   | otherwise = do
     pool <- liftIO $ genConnectionPool conf logger
     runSqlPool query pool
