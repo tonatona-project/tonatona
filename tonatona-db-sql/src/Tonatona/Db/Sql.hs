@@ -13,8 +13,8 @@ module Tonatona.Db.Sql
   , DbConnStr(..)
   , DbConnNum(..)
   , TonaDb.TonaDbConfig(..)
-  , SharedSql
-  , TonaDb.Shared(Shared)
+  , Shared
+  , mkShared
   , TonaDbSqlShared(..)
   , runMigrate
   ) where
@@ -22,19 +22,19 @@ module Tonatona.Db.Sql
 import Control.Monad.Reader (ReaderT)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration)
 import Tonatona (TonaM)
-import Tonatona.Db (Config(..), DbConnStr(..), DbConnNum(..), TonaDbShared)
+import Tonatona.Db (Config(..), DbConnStr(..), DbConnNum(..), TonaDbShared, mkShared)
 import qualified Tonatona.Db as TonaDb
 
 type TonaDbM conf shared
   = ReaderT SqlBackend (TonaM conf shared)
 
-type SharedSql = TonaDb.Shared SqlBackend
+type Shared = TonaDb.Shared SqlBackend
 
 runMigrate :: (TonaDbSqlShared shared) => Migration -> TonaM conf shared ()
 runMigrate migration = TonaDb.run $ runMigration migration
 
 class TonaDbSqlShared shared where
-  shared :: shared -> SharedSql
+  shared :: shared -> Shared
 
 instance {-# OVERLAPPABLE #-} TonaDbSqlShared shared => TonaDbShared SqlBackend shared where
   shared = Tonatona.Db.Sql.shared

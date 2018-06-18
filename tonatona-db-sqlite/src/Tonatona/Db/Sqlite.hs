@@ -14,8 +14,7 @@ module Tonatona.Db.Sqlite
   , DbConnStr(..)
   , DbConnNum(..)
   , TonaDb.TonaDbConfig(..)
-  , Shared(..)
-  , SharedSql
+  , Shared
   , Tonatona.Db.Sqlite.init
   , TonaDb.TonaDbSqlShared(..)
   , TonaDb.runMigrate
@@ -29,7 +28,7 @@ import Data.Text.Encoding (decodeUtf8)
 import Database.Persist.Sqlite (createSqlitePool, wrapConnection)
 import Database.Persist.Sql (SqlBackend, runSqlPool)
 import Database.Sqlite (open)
-import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared(..), SharedSql, TonaDbConfig(..))
+import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared, TonaDbConfig(..), mkShared)
 import qualified Tonatona.Db.Sql as TonaDb
 
 genConnectionPool ::
@@ -46,13 +45,13 @@ init :: forall config.
      (TonaDbConfig config)
   => config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> IO SharedSql
+  -> IO Shared
 init conf logger =
   case dbConnString (config conf) of
     ":memory:" -> do
       conn <- open ":memory:"
       backend <- wrapConnection conn logger
-      pure $ Shared $ \query -> runReaderT query backend
+      pure $ mkShared $ \query -> runReaderT query backend
     _ -> do
       pool <- liftIO $ genConnectionPool (config conf) logger
-      pure $ Shared $ \query -> runSqlPool query pool
+      pure $ mkShared $ \query -> runSqlPool query pool

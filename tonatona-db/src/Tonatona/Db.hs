@@ -11,7 +11,8 @@ module Tonatona.Db
   , Config(..)
   , TonaDbConfig(..)
   , TonaDbShared(..)
-  , Shared(..)
+  , Shared
+  , mkShared
   ) where
 
 import Control.Monad.Reader (ReaderT, reader)
@@ -62,3 +63,8 @@ class TonaDbShared backend shared | shared -> backend where
 data Shared backend = Shared
   { runDb :: forall conf shared a. ReaderT backend (TonaM conf shared) a -> TonaM conf shared a
   }
+
+mkShared ::
+     (forall conf shared a. ReaderT backend (TonaM conf shared) a -> TonaM conf shared a)
+  -> Shared backend
+mkShared = Shared

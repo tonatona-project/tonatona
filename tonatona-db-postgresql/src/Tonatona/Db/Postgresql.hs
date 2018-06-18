@@ -14,22 +14,22 @@ module Tonatona.Db.Postgresql
   , DbConnStr(..)
   , DbConnNum(..)
   , TonaDb.TonaDbConfig(..)
-  , Shared(..)
-  , SharedSql
+  , Shared
   , Tonatona.Db.Postgresql.init
   , TonaDb.TonaDbSqlShared(..)
   , runPostgres
   , TonaDb.runMigrate
   ) where
 
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Logger
 import Control.Monad.Reader (ReaderT)
 import Data.Pool (Pool)
 import Database.Persist.Postgresql (createPostgresqlPool)
 import Database.Persist.Sql (SqlBackend, runSqlPool)
-import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared(..), SharedSql, TonaDbConfig)
+import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared, TonaDbConfig, mkShared)
 import qualified Tonatona.Db.Sql as TonaDb
-import UnliftIO
+import UnliftIO (MonadUnliftIO)
 
 genConnectionPool ::
      Config
@@ -52,7 +52,7 @@ init :: forall config.
      (TonaDbConfig config)
   => config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> IO SharedSql
+  -> IO Shared
 init conf logger = do
   pool <- liftIO $ genConnectionPool (TonaDb.config conf) logger
-  pure $ Shared $ \query -> runPostgres pool query
+  pure $ mkShared $ \query -> runPostgres pool query
