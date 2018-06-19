@@ -3,6 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeSynonymInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Tonatona.Logger
   ( TonaLoggerShared(..)
@@ -10,6 +11,7 @@ module Tonatona.Logger
   , Tonatona.Logger.init
   , stdoutLogger
   , stderrLogger
+  , noLogger
   , logDebug
   , logInfo
   , logError
@@ -18,10 +20,22 @@ module Tonatona.Logger
 
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Logger
-import Control.Monad.Reader (ReaderT, reader)
+  ( Loc
+  , LoggingT(..)
+  , LogLevel
+  , LogSource
+  , LogStr
+  , MonadLogger(..)
+  , ToLogStr(toLogStr)
+  , logDebug
+  , logError
+  , logInfo
+  , logWarn
+  , runStdoutLoggingT
+  , runStderrLoggingT
+  )
+import Control.Monad.Reader (reader)
 import Tonatona (TonaM)
-import Tonatona.Environment (TonaEnvConfig)
-import qualified Tonatona.Environment as TonaEnv
 
 -- XXX: We could get rid of this overlapping instance by making TonaM be a
 -- newtype wrapper instead of just a type alias.

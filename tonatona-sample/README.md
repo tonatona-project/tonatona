@@ -5,16 +5,13 @@ A example app using `tonatona` and its plugins.
 ```
 $ ENV="Production" TONA_DB_CONN_STRING="postgresql://tonatonasample:foobar@localhost:5432/tonatonasample" make run
 ...
-stack exec -- tonatona-sample-app
-Generationg dummy Connection Pool...
-"foo"
-This function can use shared connection pool: Dummy Connection Pool
-This function can use ENV environment variable to decide behaviour: Production
-Migrating: foo
-dbPool (Dummy Connection Pool) is shared
-This function can use shared connection pool: Dummy Connection Pool
-This function can use ENV environment variable to decide behaviour: Production
-Migrating: foo
+```
+
+Run the example app using sqlite:
+
+```
+$ ENV="Production" TONA_DB_CONN_STRING=":memory:" DB_TO_USE="sqlite" make run
+...
 ```
 
 ## Steps to install and set up postgres

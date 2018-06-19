@@ -1,4 +1,4 @@
-name:                tonatona-db
+name:                tonatona-db-sql
 version:             0.1.0.0
 synopsis:            meta web application framework
 description:
@@ -16,14 +16,16 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Tonatona.Db
+  exposed-modules:     Tonatona.Db.Sql
   build-depends:       base >= 4.7 && < 5
                      , bytestring
                      , envy
                      , monad-logger
                      , mtl
                      , persistent
+                     , resource-pool
                      , tonatona
+                     , tonatona-db
                      , tonatona-environment
                      , unliftio
   default-language:    Haskell2010
@@ -39,16 +41,16 @@ library
                      , ScopedTypeVariables
                      , ViewPatterns
 
-test-suite tonatona-db-test
+test-suite tonatona-db-sql-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
-                     , tonatona-db
+                     , tonatona-db-sql
   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
   default-language:    Haskell2010
 
-test-suite tonatona-db-doctest
+test-suite tonatona-db-sql-doctest
   type:                exitcode-stdio-1.0
   main-is:             DocTest.hs
   hs-source-dirs:      test

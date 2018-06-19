@@ -10,24 +10,26 @@ module Tonatona.Servant
   , redirect
   , Config(..)
   , TonaServantConfig(..)
+  , Host(..)
+  , Port
+  , Protocol(..)
   ) where
 
 import Control.Exception (catch)
 import Control.Monad.Catch (throwM)
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Reader (ReaderT, ask, reader, runReaderT)
+import Control.Monad.Reader (ask, reader, runReaderT)
 import Data.ByteString (ByteString)
-import Data.Semigroup ((<>))
-import Data.String
-import Data.Text
+import Data.String (IsString)
+import Data.Text (Text)
 import Network.HTTP.Types.Header
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp (Port)
 import qualified Network.Wai.Handler.Warp as Warp
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Servant
-import System.Envy (FromEnv(..), Var(..), (.!=), decodeEnv, env, envMaybe)
-import Tonatona
+import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
+import Tonatona (Plug, TonaM)
 
 reqLogMiddleware :: TonaServantConfig conf => TonaM conf shared Middleware
 reqLogMiddleware = do
@@ -109,6 +111,7 @@ instance Var ReqLog where
   fromVar "verbose" = Just ReqLogVerbose
   fromVar "normal" = Just ReqLogNormal
   fromVar "quiet" = Just ReqLogQuiet
+  fromVar _ = Nothing
 
 data Config = Config
   { host :: Host
@@ -117,15 +120,6 @@ data Config = Config
   , reqLog :: ReqLog
   }
   deriving (Show)
-
-defaultConfig :: Config
-defaultConfig =
-  Config
-    { host = "localhost"
-    , protocol = "http"
-    , port = 8000
-    , reqLog = ReqLogVerbose
-    }
 
 instance FromEnv Config where
   fromEnv = Config

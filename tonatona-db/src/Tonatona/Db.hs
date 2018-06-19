@@ -1,72 +1,35 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Tonatona.Db
-  ( run
+  ( TonaDbM
+  , run
+  , DbConnStr(..)
+  , DbConnNum(..)
   , Config(..)
-  , Shared(..)
-  , Tonatona.Db.init
-  , TonaDbM
   , TonaDbConfig(..)
   , TonaDbShared(..)
-  , runMigrate
+  , Shared
+  , mkShared
   ) where
 
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Logger
 import Control.Monad.Reader (ReaderT, reader)
 import Data.ByteString (ByteString)
-import Data.Semigroup ((<>))
 import Data.String (IsString)
-import Database.Persist.Postgresql (createPostgresqlPool)
-import Database.Persist.Sql (ConnectionPool, Migration, SqlBackend, runMigration, runSqlPool)
-import System.Envy (FromEnv(..), Var, (.!=), env, envMaybe)
+import System.Envy (FromEnv(..), Var, (.!=), envMaybe)
 import Tonatona (TonaM)
-import Tonatona.Environment (TonaEnvConfig)
-import qualified Tonatona.Environment as TonaEnv
 
-{-| Main type
- - TODO make this an opaque type, and appropreate Monad instead of `IO`
- -}
-type TonaDbM conf shared
-  = ReaderT SqlBackend (TonaM conf shared)
+type TonaDbM backend conf shared
+  = ReaderT backend (TonaM conf shared)
 
 {-| Main function.
  -}
-run :: (TonaDbShared shared) => TonaDbM conf shared a -> TonaM conf shared a
+run :: (TonaDbShared backend shared) => TonaDbM backend conf shared a -> TonaM conf shared a
 run query = do
-  pool <- reader (dbPool . shared . snd)
-  runSqlPool query pool
-
-runMigrate :: (TonaDbShared shared) => Migration -> TonaM conf shared ()
-runMigrate migration = run $ runMigration migration
-
--- Shared
-
--- Dummy type for demonstration
-class TonaDbShared shared where
-  shared :: shared -> Shared
-
-data Shared = Shared
-  { dbPool :: ConnectionPool
-  }
-  deriving (Show)
-
-init ::
-     (TonaDbConfig config)
-  => config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> IO Shared
-init conf logger = Shared <$> genConnectionPool (config conf) logger
-
-genConnectionPool ::
-     Config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
-  -> IO ConnectionPool
-genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
-  let LoggingT runConnPool = createPostgresqlPool connStr connNum
-  runConnPool logger
-
+  f <- reader (runDb . shared . snd)
+  f query
 
 -- Config
 
@@ -91,3 +54,17 @@ instance FromEnv Config where
 
 class TonaDbConfig config where
   config :: config -> Config
+
+-- Shared
+
+class TonaDbShared backend shared | shared -> backend where
+  shared :: shared -> Shared backend
+
+data Shared backend = Shared
+  { runDb :: forall conf shared a. ReaderT backend (TonaM conf shared) a -> TonaM conf shared a
+  }
+
+mkShared ::
+     (forall conf shared a. ReaderT backend (TonaM conf shared) a -> TonaM conf shared a)
+  -> Shared backend
+mkShared = Shared
