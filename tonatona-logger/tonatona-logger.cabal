@@ -23,7 +23,6 @@ library
                      , monad-logger
                      , mtl
                      , tonatona
-                     , tonatona-environment
   default-language:    Haskell2010
   ghc-options:         -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates -fwarn-monomorphism-restriction
   default-extensions:  DefaultSignatures
