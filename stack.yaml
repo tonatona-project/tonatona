@@ -39,6 +39,7 @@ packages:
     - 'tonatona'
     - 'tonatona-db-postgresql'
     - 'tonatona-db-sqlite'
+    - 'tonatona-email'
     - 'tonatona-environment'
     - 'tonatona-logger'
     - 'tonatona-sample'
