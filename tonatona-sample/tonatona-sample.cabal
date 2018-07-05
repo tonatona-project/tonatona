@@ -30,6 +30,7 @@ library
                      , tonatona
                      , tonatona-db-postgresql
                      , tonatona-db-sqlite
+                     , tonatona-email-sendmail
                      , tonatona-environment
                      , tonatona-logger
                      , tonatona-servant

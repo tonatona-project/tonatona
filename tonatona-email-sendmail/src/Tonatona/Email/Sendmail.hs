@@ -1,15 +1,16 @@
 module Tonatona.Email.Sendmail
   ( send
   , Tonatona.Email.Sendmail.init
+  , TonaEmailShared(..)
+  , Shared(..)
+  , module Network.Mail.Mime
+  -- , NetworkMail.simpleMail'
   ) where
 
-import Network.Mail.Mime (Mail, renderSendMail)
-import Tonatona (TonaM)
+import Control.Monad.IO.Class (liftIO)
+import Network.Mail.Mime
 
-send :: Mail -> TonaM conf shared ()
-send mail = do
-  sendingFunc <- readerShared sendEmail
-  sendingFunc mail
+import Tonatona.Email (Shared(..), TonaEmailShared(..), send)
 
 init :: IO Shared
 init = pure $ Shared (liftIO . renderSendMail)
