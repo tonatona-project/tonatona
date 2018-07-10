@@ -191,7 +191,6 @@ instance Plug Config Shared where
             PostgreSQL -> SharedPostgres <$> TonaDbPostgres.init conf stdoutLogger
     Shared
       <$> db
-      <*> TonaEmail.init
       <*> TonaLogger.init stdoutLogger
 
 instance TonaDbSqlite.HasShared Shared where
