@@ -1,3 +1,3 @@
-# Tonatona
+# tonatona-environment
 
-A main module for Tonatona, pluggable meta web application framework.
+A module for TonaTona for reading the type of environment the program is being run in, whether Developement, Testing, Production, etc.

@@ -1,3 +1,3 @@
-# Tonatona
+# tonatona-email
 
-A main module for Tonatona, pluggable meta web application framework.
+A module for tonatona that provides an ability to send email.
