@@ -1,6 +1,6 @@
 module Tonatona.Environment
   ( Config(..)
-  , TonaEnvConfig(..)
+  , HasConfig(..)
   , Environment(..)
   ) where
 
@@ -19,7 +19,7 @@ instance FromEnv Config where
   fromEnv = Config
     <$> envMaybe "ENV" .!= Development
 
-class TonaEnvConfig config where
+class HasConfig config where
   config :: config -> Config
 
 data Environment
