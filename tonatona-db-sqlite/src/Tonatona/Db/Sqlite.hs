@@ -13,14 +13,14 @@ module Tonatona.Db.Sqlite
   , Config(..)
   , DbConnStr(..)
   , DbConnNum(..)
-  , TonaDb.TonaDbConfig(..)
+  , TonaDb.HasConfig(..)
   , Shared
   , Tonatona.Db.Sqlite.init
-  , TonaDb.TonaDbSqlShared(..)
+  , TonaDb.HasShared(..)
   , TonaDb.runMigrate
   ) where
 
-import Control.Monad.IO.Class
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Logger
 import Control.Monad.Reader (runReaderT)
 import Data.Pool (Pool)
@@ -28,7 +28,7 @@ import Data.Text.Encoding (decodeUtf8)
 import Database.Persist.Sqlite (createSqlitePool, wrapConnection)
 import Database.Persist.Sql (SqlBackend, runSqlPool)
 import Database.Sqlite (open)
-import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared, TonaDbConfig(..), mkShared)
+import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), HasConfig(config), Shared, mkShared)
 import qualified Tonatona.Db.Sql as TonaDb
 
 genConnectionPool ::
@@ -42,7 +42,7 @@ genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
 
 -- TODO: Add function for freeing the pool.
 init :: forall config.
-     (TonaDbConfig config)
+     HasConfig config
   => config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
   -> IO Shared

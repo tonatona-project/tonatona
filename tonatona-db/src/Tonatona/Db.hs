@@ -9,8 +9,8 @@ module Tonatona.Db
   , DbConnStr(..)
   , DbConnNum(..)
   , Config(..)
-  , TonaDbConfig(..)
-  , TonaDbShared(..)
+  , HasConfig(..)
+  , HasShared(..)
   , Shared
   , mkShared
   ) where
@@ -26,7 +26,7 @@ type TonaDbM backend conf shared
 
 {-| Main function.
  -}
-run :: (TonaDbShared backend shared) => TonaDbM backend conf shared a -> TonaM conf shared a
+run :: HasShared backend shared => TonaDbM backend conf shared a -> TonaM conf shared a
 run query = do
   f <- reader (runDb . shared . snd)
   f query
@@ -52,12 +52,12 @@ instance FromEnv Config where
       <$> envMaybe "TONA_DB_CONN_STRING" .!= "postgresql://myuser:mypass@localhost:5432/mydb"
       <*> envMaybe "TONA_DB_CONN_NUM" .!= 10
 
-class TonaDbConfig config where
+class HasConfig config where
   config :: config -> Config
 
 -- Shared
 
-class TonaDbShared backend shared | shared -> backend where
+class HasShared backend shared | shared -> backend where
   shared :: shared -> Shared backend
 
 data Shared backend = Shared

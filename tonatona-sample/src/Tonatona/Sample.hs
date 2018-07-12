@@ -21,7 +21,6 @@ import Tonatona (Plug(..), TonaM)
 import qualified Tonatona as Tona
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
 import qualified Tonatona.Db.Sqlite as TonaDbSqlite
-import Tonatona.Db.Sql (TonaDbConfig, TonaDbSqlShared)
 import qualified Tonatona.Db.Sql as TonaDb
 import qualified Tonatona.Environment as TonaEnv
 import Tonatona.Logger (logDebug, logInfo, stdoutLogger)
@@ -121,7 +120,7 @@ instance FromEnv Config where
     <*> fromEnv
     <*> fromEnv
 
-instance TonaDbConfig Config where
+instance TonaDb.HasConfig Config where
   config = tonaDb
 
 instance TonaEnv.HasConfig Config where
@@ -148,7 +147,7 @@ instance Plug Config Shared where
       <$> db
       <*> TonaLogger.init stdoutLogger
 
-instance TonaDbSqlShared Shared where
+instance TonaDb.HasShared Shared where
   shared = tonaDb
 
 instance TonaLogger.HasShared Shared where
