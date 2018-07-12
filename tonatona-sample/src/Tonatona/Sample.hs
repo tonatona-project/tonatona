@@ -27,7 +27,6 @@ import qualified Tonatona.Environment as TonaEnv
 import Tonatona.Logger (logDebug, logInfo, stdoutLogger)
 import qualified Tonatona.Logger as TonaLogger
 import qualified Tonatona.Servant as TonaServant
-import Tonatona.Servant (TonaServantConfig(..))
 
 
 $(share
@@ -128,7 +127,7 @@ instance TonaDbConfig Config where
 instance TonaEnv.HasConfig Config where
   config = tonaEnv
 
-instance TonaServantConfig Config where
+instance TonaServant.HasConfig Config where
   config = tonaServant
 
 
