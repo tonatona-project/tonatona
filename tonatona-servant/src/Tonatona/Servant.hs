@@ -9,7 +9,7 @@ module Tonatona.Servant
   ( Tonatona.Servant.run
   , redirect
   , Config(..)
-  , TonaServantConfig(..)
+  , HasConfig(..)
   , Host(..)
   , Port
   , Protocol(..)
@@ -31,7 +31,7 @@ import Servant
 import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
 import Tonatona (Plug, TonaM)
 
-reqLogMiddleware :: TonaServantConfig conf => TonaM conf shared Middleware
+reqLogMiddleware :: HasConfig conf => TonaM conf shared Middleware
 reqLogMiddleware = do
   logger <- reader (reqLog . config . fst)
   case logger of
@@ -43,7 +43,7 @@ reqLogMiddleware = do
  -}
 run ::
      forall api conf shared.
-     (HasServer api '[], Plug conf shared, TonaServantConfig conf)
+     (HasServer api '[], Plug conf shared, HasConfig conf)
   => ServerT api (TonaM conf shared)
   -> TonaM conf shared ()
 run servantServer = do
@@ -128,5 +128,5 @@ instance FromEnv Config where
     <*> envMaybe "TONA_SERVANT_PORT" .!= 8000
     <*> envMaybe "TONA_SERVANT_REQLOG" .!= ReqLogVerbose
 
-class TonaServantConfig config where
+class HasConfig config where
   config :: config -> Config

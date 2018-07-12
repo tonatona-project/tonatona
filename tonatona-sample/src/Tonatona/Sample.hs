@@ -7,8 +7,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Tonatona.Sample
-  where
+module Tonatona.Sample where
 
 import Data.Aeson (ToJSON(toJSON))
 import Data.Semigroup ((<>))
@@ -22,14 +21,11 @@ import Tonatona (Plug(..), TonaM)
 import qualified Tonatona as Tona
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
 import qualified Tonatona.Db.Sqlite as TonaDbSqlite
-import Tonatona.Db.Sql (TonaDbConfig, TonaDbSqlShared)
 import qualified Tonatona.Db.Sql as TonaDb
-import Tonatona.Environment (TonaEnvConfig(..))
 import qualified Tonatona.Environment as TonaEnv
-import Tonatona.Logger (TonaLoggerShared(..), logDebug, logInfo, stdoutLogger)
+import Tonatona.Logger (logDebug, logInfo, stdoutLogger)
 import qualified Tonatona.Logger as TonaLogger
 import qualified Tonatona.Servant as TonaServant
-import Tonatona.Servant (TonaServantConfig(..))
 
 
 $(share
@@ -124,13 +120,13 @@ instance FromEnv Config where
     <*> fromEnv
     <*> fromEnv
 
-instance TonaDbConfig Config where
+instance TonaDb.HasConfig Config where
   config = tonaDb
 
-instance TonaEnvConfig Config where
+instance TonaEnv.HasConfig Config where
   config = tonaEnv
 
-instance TonaServantConfig Config where
+instance TonaServant.HasConfig Config where
   config = tonaServant
 
 
@@ -151,8 +147,8 @@ instance Plug Config Shared where
       <$> db
       <*> TonaLogger.init stdoutLogger
 
-instance TonaDbSqlShared Shared where
+instance TonaDb.HasShared Shared where
   shared = tonaDb
 
-instance TonaLoggerShared Shared where
+instance TonaLogger.HasShared Shared where
   shared = tonaLogger

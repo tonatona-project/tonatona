@@ -6,7 +6,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Tonatona.Logger
-  ( TonaLoggerShared(..)
+  ( HasShared(..)
   , Shared(..)
   , Tonatona.Logger.init
   , stdoutLogger
@@ -39,7 +39,7 @@ import Tonatona (TonaM)
 
 -- XXX: We could get rid of this overlapping instance by making TonaM be a
 -- newtype wrapper instead of just a type alias.
-instance {-# OVERLAPPING #-} TonaLoggerShared shared => MonadLogger (TonaM conf shared) where
+instance {-# OVERLAPPING #-} HasShared shared => MonadLogger (TonaM conf shared) where
   monadLoggerLog :: ToLogStr msg => Loc -> LogSource -> LogLevel -> msg -> TonaM conf shared ()
   monadLoggerLog loc source level msg = do
     let logstr = toLogStr msg
@@ -48,7 +48,7 @@ instance {-# OVERLAPPING #-} TonaLoggerShared shared => MonadLogger (TonaM conf 
 
 -- Shared
 
-class TonaLoggerShared shared where
+class HasShared shared where
   shared :: shared -> Shared
 
 data Shared = Shared

@@ -13,10 +13,10 @@ module Tonatona.Db.Postgresql
   , Config(..)
   , DbConnStr(..)
   , DbConnNum(..)
-  , TonaDb.TonaDbConfig(..)
+  , TonaDb.HasConfig(..)
   , Shared
   , Tonatona.Db.Postgresql.init
-  , TonaDb.TonaDbSqlShared(..)
+  , TonaDb.HasShared(..)
   , runPostgres
   , TonaDb.runMigrate
   ) where
@@ -27,7 +27,7 @@ import Control.Monad.Reader (ReaderT)
 import Data.Pool (Pool)
 import Database.Persist.Postgresql (createPostgresqlPool)
 import Database.Persist.Sql (SqlBackend, runSqlPool)
-import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), Shared, TonaDbConfig, mkShared)
+import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), HasConfig, Shared, mkShared)
 import qualified Tonatona.Db.Sql as TonaDb
 import UnliftIO (MonadUnliftIO)
 
@@ -49,7 +49,7 @@ runPostgres pool query = do
 
 -- TODO: Add function for freeing the pool.
 init :: forall config.
-     (TonaDbConfig config)
+     HasConfig config
   => config
   -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
   -> IO Shared
