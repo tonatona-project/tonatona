@@ -26,7 +26,7 @@ library
                      , persistent-postgresql
                      , resource-pool
                      , tonatona
-                     , tonatona-db-sql
+                     , tonatona-db
                      , tonatona-environment
                      , unliftio
   default-language:    Haskell2010
