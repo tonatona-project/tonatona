@@ -9,19 +9,20 @@
 
 module Tonatona.Sample where
 
+import Control.Monad.Reader (ReaderT)
 import Data.Aeson (ToJSON(toJSON))
 import Data.Semigroup ((<>))
 import Data.Text (Text)
 import Data.Void (Void, absurd)
-import Database.Persist.Postgresql ((==.), entityVal, insert_, selectList)
+import Database.Persist.Sql (Migration, SqlBackend, (==.), entityVal, insert_, selectList)
 import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowerCase, share, sqlSettings)
 import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
 import Servant
-import Tonatona (Plug(..), TonaM)
+import Tonatona (Plug(..), TonaM, askConf)
 import qualified Tonatona as Tona
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
 import qualified Tonatona.Db.Sqlite as TonaDbSqlite
-import qualified Tonatona.Db.Sql as TonaDb
+import qualified Tonatona.Db as TonaDb
 import qualified Tonatona.Environment as TonaEnv
 import Tonatona.Logger (logDebug, logInfo, stdoutLogger)
 import qualified Tonatona.Logger as TonaLogger
@@ -65,7 +66,7 @@ tagServer = postTag :<|> getTag
 
 postTag :: Text -> Text -> TonaM Config Shared ()
 postTag name val = do
-  TonaDb.run $ do
+  sharedDbRun $ do
     $(logInfo) $
       "in postTag, in TonaDb.run, inserting a tag with name = " <>
       name <> ", val = " <> val
@@ -73,7 +74,7 @@ postTag name val = do
 
 getTag :: Text -> TonaM Config Shared [Text]
 getTag name = do
-  tagEnts <- TonaDb.run $
+  tagEnts <- sharedDbRun $
     selectList [TagName ==. name] []
   pure $ tagValue . entityVal <$> tagEnts
 
@@ -86,7 +87,7 @@ app :: IO ()
 app =
   Tona.run $ do
     $(logDebug) "About to run migration..."
-    TonaDb.runMigrate migrateAll
+    sharedDbMigrate migrateAll
     $(logDebug) "About to run web server..."
     TonaServant.run @API server
 
@@ -133,22 +134,56 @@ instance TonaServant.HasConfig Config where
 -- Shared
 
 data Shared = Shared
-  { tonaDb :: TonaDb.Shared
+  { tonaDb :: SharedDb
   , tonaLogger :: TonaLogger.Shared
   }
+
+
+data SharedDb
+  = SharedSqlite TonaDbSqlite.Shared
+  | SharedPostgres TonaDbPostgres.Shared
+
+sharedDbRun ::
+     (TonaDbPostgres.HasShared shared, TonaDbSqlite.HasShared shared)
+  => ReaderT SqlBackend (TonaM Config shared) a
+  -> TonaM Config shared a
+sharedDbRun query = do
+  conf <- askConf
+  case dbToUse conf of
+    Sqlite -> TonaDbSqlite.run query
+    PostgreSQL -> TonaDbPostgres.run query
+
+sharedDbMigrate ::
+     (TonaDbPostgres.HasShared shared, TonaDbSqlite.HasShared shared)
+  => Migration
+  -> TonaM Config shared ()
+sharedDbMigrate migration = do
+  conf <- askConf
+  case dbToUse conf of
+    Sqlite -> TonaDbSqlite.runMigrate migration
+    PostgreSQL -> TonaDbPostgres.runMigrate migration
 
 instance Plug Config Shared where
   init conf = do
     let db =
           case dbToUse conf of
-            Sqlite -> TonaDbSqlite.init conf stdoutLogger
-            PostgreSQL -> TonaDbPostgres.init conf stdoutLogger
+            Sqlite -> SharedSqlite <$> TonaDbSqlite.init conf stdoutLogger
+            PostgreSQL -> SharedPostgres <$> TonaDbPostgres.init conf stdoutLogger
     Shared
       <$> db
       <*> TonaLogger.init stdoutLogger
 
-instance TonaDb.HasShared Shared where
-  shared = tonaDb
+instance TonaDbSqlite.HasShared Shared where
+  shared s =
+    case (tonaDb :: Shared -> SharedDb) s of
+      SharedSqlite sqliteShared -> sqliteShared
+      _ -> error "This is not an sqlite shared type."
+
+instance TonaDbPostgres.HasShared Shared where
+  shared s =
+    case (tonaDb :: Shared -> SharedDb) s of
+      SharedPostgres postgresShared -> postgresShared
+      _ -> error "This is not a postgres shared type."
 
 instance TonaLogger.HasShared Shared where
   shared = tonaLogger

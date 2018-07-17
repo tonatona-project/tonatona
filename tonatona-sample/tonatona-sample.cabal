@@ -20,15 +20,17 @@ library
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , envy
+                     , mtl
+                     , persistent
                      , persistent-postgresql
                      , persistent-template
                      , servant
                      , servant-server
                      , text
                      , tonatona
+                     , tonatona-db
                      , tonatona-db-postgresql
                      , tonatona-db-sqlite
-                     , tonatona-db-sql
                      , tonatona-environment
                      , tonatona-logger
                      , tonatona-servant
