@@ -4,15 +4,10 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Tonatona.Db
-  ( TonaDbM
-  , run
-  , DbConnStr(..)
+  ( DbConnStr(..)
   , DbConnNum(..)
   , Config(..)
   , HasConfig(..)
-  , HasShared(..)
-  , Shared
-  , mkShared
   ) where
 
 import Control.Monad.Reader (ReaderT, reader)
@@ -20,16 +15,6 @@ import Data.ByteString (ByteString)
 import Data.String (IsString)
 import System.Envy (FromEnv(..), Var, (.!=), envMaybe)
 import Tonatona (TonaM)
-
-type TonaDbM backend conf shared
-  = ReaderT backend (TonaM conf shared)
-
-{-| Main function.
- -}
-run :: HasShared backend shared => TonaDbM backend conf shared a -> TonaM conf shared a
-run query = do
-  f <- reader (runDb . shared . snd)
-  f query
 
 -- Config
 
@@ -54,17 +39,3 @@ instance FromEnv Config where
 
 class HasConfig config where
   config :: config -> Config
-
--- Shared
-
-class HasShared backend shared | shared -> backend where
-  shared :: shared -> Shared backend
-
-data Shared backend = Shared
-  { runDb :: forall conf shared a. ReaderT backend (TonaM conf shared) a -> TonaM conf shared a
-  }
-
-mkShared ::
-     (forall conf shared a. ReaderT backend (TonaM conf shared) a -> TonaM conf shared a)
-  -> Shared backend
-mkShared = Shared
