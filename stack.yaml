@@ -37,7 +37,6 @@ resolver: lts-11.13
 # will not be run. This is useful for tweaking upstream packages.
 packages:
     - 'tonatona'
-    - 'tonatona-db'
     - 'tonatona-db-postgresql'
     - 'tonatona-db-sqlite'
     - 'tonatona-environment'

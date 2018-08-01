@@ -23,13 +23,15 @@ module Tonatona.Db.Sqlite
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Logger (Loc, LoggingT(..), LogLevel, LogSource, LogStr)
 import Control.Monad.Reader (ReaderT, runReaderT)
+import Data.ByteString (ByteString)
 import Data.Pool (Pool)
+import Data.String (IsString)
 import Data.Text.Encoding (decodeUtf8)
 import Database.Persist.Sqlite (createSqlitePool, wrapConnection)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
 import Database.Sqlite (open)
+import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
 import Tonatona (TonaM, readerShared)
-import Tonatona.Db (Config(..), DbConnStr(..), DbConnNum(..), HasConfig(..))
 
 type TonaDbM conf shared
   = ReaderT SqlBackend (TonaM conf shared)
@@ -59,17 +61,6 @@ init conf logger =
       pool <- liftIO $ genConnectionPool (config conf) logger
       pure $ Shared (SqliteConnPool pool)
 
-class HasShared shared where
-  shared :: shared -> Shared
-
-data SqliteConn
-  = SqliteConn SqlBackend
-  | SqliteConnPool (Pool SqlBackend)
-
-data Shared = Shared
-  { sqliteConn :: SqliteConn
-  }
-
 runMigrate :: HasShared shared => Migration -> TonaM conf shared ()
 runMigrate migration = run $ runMigration migration
 
@@ -80,3 +71,37 @@ run query = do
   case connType of
     SqliteConn sqlBackend -> runReaderT query sqlBackend
     SqliteConnPool pool -> runSqlPool query pool
+
+
+newtype DbConnStr = DbConnStr
+  { unDbConnStr :: ByteString
+  } deriving newtype (Eq, IsString, Read, Show, Var)
+
+newtype DbConnNum = DbConnNum { unDbConnNum :: Int }
+  deriving newtype (Eq, Num, Read, Show, Var)
+
+data Config = Config
+  { dbConnString :: DbConnStr
+  , dbConnNum :: DbConnNum
+  }
+  deriving (Show)
+
+instance FromEnv Config where
+  fromEnv =
+    Config
+      <$> envMaybe "TONA_DB_SQLITE_CONN_STRING" .!= ":memory:"
+      <*> envMaybe "TONA_DB_SQLITE_CONN_NUM" .!= 10
+
+class HasConfig config where
+  config :: config -> Config
+
+data SqliteConn
+  = SqliteConn SqlBackend
+  | SqliteConnPool (Pool SqlBackend)
+
+data Shared = Shared
+  { sqliteConn :: SqliteConn
+  }
+
+class HasShared shared where
+  shared :: shared -> Shared

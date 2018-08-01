@@ -28,7 +28,6 @@ library
                      , servant-server
                      , text
                      , tonatona
-                     , tonatona-db
                      , tonatona-db-postgresql
                      , tonatona-db-sqlite
                      , tonatona-environment

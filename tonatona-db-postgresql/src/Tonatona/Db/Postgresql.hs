@@ -23,13 +23,14 @@ module Tonatona.Db.Postgresql
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Logger (Loc, LoggingT(..), LogLevel, LogSource, LogStr)
 import Control.Monad.Reader (ReaderT)
+import Data.ByteString (ByteString)
 import Data.Pool (Pool)
+import Data.String (IsString)
 import Database.Persist.Postgresql (createPostgresqlPool)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
+import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
 import Tonatona (TonaM, readerShared)
-import Tonatona.Db (Config(..), DbConnStr(..), DbConnNum(..), HasConfig(..))
 import UnliftIO (MonadUnliftIO)
-
 
 type TonaDbM conf shared
   = ReaderT SqlBackend (TonaM conf shared)
@@ -52,13 +53,6 @@ init conf logger = do
   pool <- liftIO $ genConnectionPool (config conf) logger
   pure $ Shared pool
 
-class HasShared shared where
-  shared :: shared -> Shared
-
-data Shared = Shared
-  { connPool :: Pool SqlBackend
-  }
-
 runMigrate :: HasShared shared => Migration -> TonaM conf shared ()
 runMigrate migration = run $ runMigration migration
 
@@ -67,3 +61,40 @@ run :: HasShared shared => TonaDbM conf shared a -> TonaM conf shared a
 run query = do
   connPool <- readerShared (connPool . shared)
   runSqlPool query connPool
+
+------------
+-- Config --
+------------
+
+newtype DbConnStr = DbConnStr
+  { unDbConnStr :: ByteString
+  } deriving newtype (Eq, IsString, Read, Show, Var)
+
+newtype DbConnNum = DbConnNum { unDbConnNum :: Int }
+  deriving newtype (Eq, Num, Read, Show, Var)
+
+data Config = Config
+  { dbConnString :: DbConnStr
+  , dbConnNum :: DbConnNum
+  }
+  deriving (Show)
+
+instance FromEnv Config where
+  fromEnv =
+    Config
+      <$> envMaybe "TONA_DB_POSTGRESQL_CONN_STRING" .!= "postgresql://myuser:mypass@localhost:5432/mydb"
+      <*> envMaybe "TONA_DB_POSTGRESQL_CONN_NUM" .!= 10
+
+class HasConfig config where
+  config :: config -> Config
+
+------------
+-- Shared --
+------------
+
+data Shared = Shared
+  { connPool :: Pool SqlBackend
+  }
+
+class HasShared shared where
+  shared :: shared -> Shared

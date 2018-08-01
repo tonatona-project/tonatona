@@ -22,7 +22,6 @@ import Tonatona (Plug(..), TonaM, askConf)
 import qualified Tonatona as Tona
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
 import qualified Tonatona.Db.Sqlite as TonaDbSqlite
-import qualified Tonatona.Db as TonaDb
 import qualified Tonatona.Environment as TonaEnv
 import Tonatona.Logger (logDebug, logInfo, stdoutLogger)
 import qualified Tonatona.Logger as TonaLogger
@@ -107,7 +106,8 @@ instance Var DbToUse where
   fromVar _ = Nothing
 
 data Config = Config
-  { tonaDb :: TonaDb.Config
+  { tonaDbPostgres :: TonaDbPostgres.Config
+  , tonaDbSqlite :: TonaDbSqlite.Config
   , dbToUse :: DbToUse
   , tonaEnv :: TonaEnv.Config
   , tonaServant :: TonaServant.Config
@@ -115,14 +115,19 @@ data Config = Config
   deriving (Show)
 
 instance FromEnv Config where
-  fromEnv = Config
-    <$> fromEnv
-    <*> fromEnv
-    <*> fromEnv
-    <*> fromEnv
+  fromEnv =
+    Config
+      <$> fromEnv
+      <*> fromEnv
+      <*> fromEnv
+      <*> fromEnv
+      <*> fromEnv
 
-instance TonaDb.HasConfig Config where
-  config = tonaDb
+instance TonaDbPostgres.HasConfig Config where
+  config = tonaDbPostgres
+
+instance TonaDbSqlite.HasConfig Config where
+  config = tonaDbSqlite
 
 instance TonaEnv.HasConfig Config where
   config = tonaEnv
