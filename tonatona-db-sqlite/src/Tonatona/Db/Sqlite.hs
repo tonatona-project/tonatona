@@ -8,28 +8,33 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
 module Tonatona.Db.Sqlite
-  ( TonaDb.run
-  , TonaDb.TonaDbM
+  ( run
+  , TonaDbM
   , Config(..)
   , DbConnStr(..)
   , DbConnNum(..)
-  , TonaDb.HasConfig(..)
+  , HasConfig(..)
   , Shared
   , Tonatona.Db.Sqlite.init
-  , TonaDb.HasShared(..)
-  , TonaDb.runMigrate
+  , HasShared(..)
+  , runMigrate
   ) where
 
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Logger
-import Control.Monad.Reader (runReaderT)
+import Control.Monad.Logger (Loc, LoggingT(..), LogLevel, LogSource, LogStr)
+import Control.Monad.Reader (ReaderT, runReaderT)
+import Data.ByteString (ByteString)
 import Data.Pool (Pool)
+import Data.String (IsString)
 import Data.Text.Encoding (decodeUtf8)
 import Database.Persist.Sqlite (createSqlitePool, wrapConnection)
-import Database.Persist.Sql (SqlBackend, runSqlPool)
+import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
 import Database.Sqlite (open)
-import Tonatona.Db.Sql (Config(..), DbConnStr(..), DbConnNum(..), HasConfig(config), Shared, mkShared)
-import qualified Tonatona.Db.Sql as TonaDb
+import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
+import Tonatona (TonaM, readerShared)
+
+type TonaDbM conf shared
+  = ReaderT SqlBackend (TonaM conf shared)
 
 genConnectionPool ::
      Config
@@ -51,7 +56,52 @@ init conf logger =
     ":memory:" -> do
       conn <- open ":memory:"
       backend <- wrapConnection conn logger
-      pure $ mkShared $ \query -> runReaderT query backend
+      pure $ Shared (SqliteConn backend)
     _ -> do
       pool <- liftIO $ genConnectionPool (config conf) logger
-      pure $ mkShared $ \query -> runSqlPool query pool
+      pure $ Shared (SqliteConnPool pool)
+
+runMigrate :: HasShared shared => Migration -> TonaM conf shared ()
+runMigrate migration = run $ runMigration migration
+
+-- | Main function.
+run :: HasShared shared => TonaDbM conf shared a -> TonaM conf shared a
+run query = do
+  connType <- readerShared (sqliteConn . shared)
+  case connType of
+    SqliteConn sqlBackend -> runReaderT query sqlBackend
+    SqliteConnPool pool -> runSqlPool query pool
+
+
+newtype DbConnStr = DbConnStr
+  { unDbConnStr :: ByteString
+  } deriving newtype (Eq, IsString, Read, Show, Var)
+
+newtype DbConnNum = DbConnNum { unDbConnNum :: Int }
+  deriving newtype (Eq, Num, Read, Show, Var)
+
+data Config = Config
+  { dbConnString :: DbConnStr
+  , dbConnNum :: DbConnNum
+  }
+  deriving (Show)
+
+instance FromEnv Config where
+  fromEnv =
+    Config
+      <$> envMaybe "TONA_DB_SQLITE_CONN_STRING" .!= ":memory:"
+      <*> envMaybe "TONA_DB_SQLITE_CONN_NUM" .!= 10
+
+class HasConfig config where
+  config :: config -> Config
+
+data SqliteConn
+  = SqliteConn SqlBackend
+  | SqliteConnPool (Pool SqlBackend)
+
+data Shared = Shared
+  { sqliteConn :: SqliteConn
+  }
+
+class HasShared shared where
+  shared :: shared -> Shared
