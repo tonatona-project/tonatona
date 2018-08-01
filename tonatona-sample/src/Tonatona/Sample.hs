@@ -22,7 +22,7 @@ import Tonatona (Plug(..), TonaM, askConf)
 import qualified Tonatona as Tona
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
 import qualified Tonatona.Db.Sqlite as TonaDbSqlite
-import Tonatona.Email.Sendmail (Address(..), TonaEmailShared(..), simpleMail')
+import Tonatona.Email.Sendmail (Address(..), simpleMail')
 import qualified Tonatona.Email.Sendmail as TonaEmail
 import qualified Tonatona.Environment as TonaEnv
 import Tonatona.Logger (logDebug, logInfo, stdoutLogger)
@@ -154,7 +154,6 @@ instance TonaServant.HasConfig Config where
 
 data Shared = Shared
   { tonaDb :: SharedDb
-  , tonaEmail :: TonaEmail.Shared
   , tonaLogger :: TonaLogger.Shared
   }
 
@@ -207,6 +206,3 @@ instance TonaDbPostgres.HasShared Shared where
 
 instance TonaLogger.HasShared Shared where
   shared = tonaLogger
-
-instance TonaEmailShared Shared where
-  shared = tonaEmail
