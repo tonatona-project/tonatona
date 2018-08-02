@@ -1,3 +1,3 @@
-# tonatona-db
+# tonatona-logger
 
-A plugin for `tonatona` that adds features to access db.
+A plugin for `tonatona` that adds features to for logging.

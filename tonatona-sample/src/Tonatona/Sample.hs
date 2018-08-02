@@ -22,6 +22,8 @@ import Tonatona (Plug(..), TonaM, askConf)
 import qualified Tonatona as Tona
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
 import qualified Tonatona.Db.Sqlite as TonaDbSqlite
+import Tonatona.Email.Sendmail (Address(..), simpleMail')
+import qualified Tonatona.Email.Sendmail as TonaEmail
 import qualified Tonatona.Environment as TonaEnv
 import Tonatona.Logger (logDebug, logInfo, stdoutLogger)
 import qualified Tonatona.Logger as TonaLogger
@@ -50,10 +52,11 @@ type TagAPI = "tag" :> (
 type API =
   "foo" :> Get '[JSON] Int :<|>
   TagAPI :<|>
-  "redirect-example" :> Get '[JSON] Void
+  "redirect-example" :> Get '[JSON] Void :<|>
+  "send-email" :> Get '[JSON] Int
 
 server :: ServerT API (TonaM Config Shared)
-server = getFoo :<|> tagServer :<|> redirectExample
+server = getFoo :<|> tagServer :<|> redirectExample :<|> sendEmailExample
 
 getFoo :: TonaM Config Shared Int
 getFoo = do
@@ -79,6 +82,17 @@ getTag name = do
 
 redirectExample :: TonaM Config Shared Void
 redirectExample = TonaServant.redirect "https://google.com"
+
+sendEmailExample :: TonaM Config Shared Int
+sendEmailExample = do
+  let mail =
+        simpleMail'
+          (Address Nothing "foo@example.com")
+          (Address Nothing "bar@example.com")
+          "test email subject from foo to bar"
+          "This is a test email from foo@example.com to bar@example.com."
+  TonaEmail.send mail
+  pure 0
 
 instance ToJSON Void where toJSON = absurd
 
