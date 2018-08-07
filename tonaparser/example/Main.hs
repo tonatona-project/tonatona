@@ -1,9 +1,14 @@
 module Main where
 
-import TonaParser (FromEnv(fromEnv), (.||), argLong, argShort, decodeEnv, envDef, envVar)
+import TonaParser (FromEnv(fromEnv), (.||), argLong, argShort, decodeEnv, env, envDef, envVar)
 
 data Bar = Bar
   { baz :: String
+  } deriving Show
+
+data Foo = Foo
+  { foo :: Int
+  , bar :: Bar
   } deriving Show
 
 -- If environment variable "BAZ" exist, use the value
@@ -14,7 +19,12 @@ instance FromEnv Bar where
   fromEnv = Bar
     <$> envDef (envVar "BAZ" .|| argLong "baz" .|| argShort 'b') "baz"
 
+instance FromEnv Foo where
+  fromEnv = Foo
+    <$> env (envVar "FOO" .|| argLong "foo")
+    <*> fromEnv
+
 main :: IO ()
 main = do
-  (bar :: Maybe Bar) <- decodeEnv
-  print bar
+  (foo :: Maybe Foo) <- decodeEnv
+  print foo
