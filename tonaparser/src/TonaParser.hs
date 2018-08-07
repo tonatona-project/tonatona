@@ -115,8 +115,8 @@ getCmdLineArgs = do
   pure $ tupleList args
   where
     -- This throws away the last time if the input list is not even.
-    tupleList :: [a] -> [(a,a)]
-    tupleList (a:b:cs) = (a, b) : tupleList cs
+    tupleList :: [String] -> [(String,String)]
+    tupleList (a:b:cs) = (dropWhile (== '-') a, b) : tupleList cs
     tupleList _ = []
 
 env :: Var a => Source -> Parser a
