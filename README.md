@@ -4,15 +4,16 @@
 
 ## What is Tonatona?
 
-Tonatona is **meta** web application framework. It handles lots of boring tasks
-that are needed for real-world web development such as reading in values
+Tonatona is a **meta** application framework. It handles lots of boring tasks
+that are needed for real-world development such as reading in values
 defined in environment variables, setting up logging, sending emails, accessing
 databases, etc.
 
-Tonatona **does not** provide the core functionalities of web applications,
-such as routing, request parsing, response building, etc.  Instead, you can
-use Tonatona with your favorite web framework.  Tonatona should work with Servant,
-Spock, Yesod, and others.
+Tonatona can also be used with your favorite web framework as a meta web
+application framework.  Tonatona **does not** provide the core functionalities
+of web applications, such as routing, request parsing, response building, etc.
+Instead, you can use plugins like `tonatona-servant`, `tonatona-spock`, or
+`tonatona-yesod` to work with your favorite web framework.
 
 Tonatona provides a plugin architecture so that anyone can add plugins
 implementing arbitrary functionality.  This repository contains many standard
@@ -28,14 +29,14 @@ plugins that are helpful when writing Haskell applications.
 
 ## Goals for Tonatona
 
-Tonatona is meant to make it easy to write web applications.  Its goal is to
+Tonatona is meant to make it easy to write applications.  Its goal is to
 free the end-user from having to write anything but their application's
 business logic.
 
 We have the following goals and objectives in mind when developing Tonatona and
 the plugins.
 
--   Tonatona should make it easy to get up and running with writing web
+-   Tonatona should make it easy to get up and running with writing Haskell
     applications.  It is perfect when you are on a small team.
 
     When you team or project grows larger, it may be worthwhile to move away
