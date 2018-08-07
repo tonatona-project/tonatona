@@ -36,6 +36,7 @@ library
                      , DeriveDataTypeable
                      , DeriveFunctor
                      , DeriveGeneric
+                     , InstanceSigs
                      , MultiParamTypeClasses
                      , OverloadedStrings
                      , RankNTypes
@@ -54,6 +55,7 @@ executable tonaparser-example
                      , DeriveDataTypeable
                      , DeriveFunctor
                      , DeriveGeneric
+                     , InstanceSigs
                      , OverloadedStrings
                      , RankNTypes
                      , RecordWildCards

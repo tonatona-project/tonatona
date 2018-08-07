@@ -1,7 +1,9 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module TonaParser where
 
 import Control.Applicative (Alternative)
-import Control.Monad (MonadPlus)
+import Control.Monad (MonadPlus, ap)
 import Control.Monad.Except (ExceptT, MonadError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, runReaderT, reader)
@@ -143,16 +145,29 @@ envDef src df = Parser $ \conf ->
     Just a -> Just a
 
 newtype Parser a = Parser
-  { getConfig :: Config -> Maybe a
+  { unParser :: Config -> Maybe a
   }
   deriving (Functor
              -- , Monad
-             -- , Applicative
              -- , MonadError String
              -- , MonadIO
              -- , Alternative
              -- , MonadPlus
              )
+
+instance Applicative Parser where
+  pure a = Parser $ \conf -> Just a
+
+  (<*>) = ap
+
+instance Monad Parser where
+  (>>=) :: Parser a -> (a -> Parser b) -> Parser b
+  Parser func >>= f = Parser $ \conf ->
+    let maybeA = func conf
+    in
+    case maybeA of
+      Nothing -> Nothing
+      Just a -> unParser (f a) conf
 
 
 {-| Opaque type.
