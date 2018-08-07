@@ -1,6 +1,9 @@
-module TonaParser
-  (..) where
+module TonaParser where
 
+import Control.Applicative (Alternative)
+import Control.Monad (MonadPlus)
+import Control.Monad.Except (ExceptT, MonadError)
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, runReaderT, reader)
 import Control.Monad.Trans (lift)
 import Data.Semigroup ((<>))
@@ -49,14 +52,15 @@ class FromEnv a where
 
 newtype Parser a = Parser
   { getConfig :: Config a
-  } deriving ( Functor
-             , Monad
-             , Applicative
-             , MonadError String
-             , MonadIO
-             , Alternative
-             , MonadPlus
-             )
+  }
+  -- deriving ( Functor
+  --            , Monad
+  --            , Applicative
+  --            , MonadError String
+  --            , MonadIO
+  --            , Alternative
+  --            , MonadPlus
+  --            )
 
 
 runParser :: ExceptT String IO a

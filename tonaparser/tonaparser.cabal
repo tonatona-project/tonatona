@@ -1,9 +1,9 @@
-name:                tonaparser.cabal
+name:                tonaparser
 version:             0.1.0.0
 synopsis:            meta web application framework
 description:
   `Tonatona` is **meta** web application framework, which handles lots of annoying and boring tasks on real world web development such as environment variables, logging, etc...
-homepage:            http://github.com/arow-oss/tonaparser/#readme
+homepage:            http://github.com/arow-oss/tonatona/#readme
 license:             MIT
 license-file:        LICENSE
 author:              ARoW Co., Ltd.
@@ -16,8 +16,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Tonatona
-                     , Tonatona.IO
+  exposed-modules:     TonaParser
   build-depends:       base >= 4.7 && < 5
                      , envy
                      , monad-logger
@@ -59,4 +58,4 @@ test-suite tonaparser-doctest
 
 source-repository head
   type:     git
-  location: https://github.com/arow-oss/tonaparser
+  location: https://github.com/arow-oss/tonatona
