@@ -39,7 +39,7 @@ the plugins.
 -   Tonatona should make it easy to get up and running with writing Haskell
     applications.  It is perfect when you are on a small team.
 
-    When you team or project grows larger, it may be worthwhile to move away
+    When your team or project grows larger, it may be worthwhile to move away
     from Tonatona onto hand-written logging, DB access, etc.
 
 -   Make the end-user write a little boilerplate code up front in order to provide
