@@ -34,8 +34,8 @@ applications!"
 
 Tonatona achieves this goal by providing a plugin-based architecture.  There
 are many production-ready plugins to use in your own code.  In order to start
-using a new plugin, often all you have to do is add a few additional
-configuration options.
+using a new plugin, often all you have to do just import it!  No need to
+specify configuration from within your application.
 
 ## How to use Tonatona
 
@@ -52,9 +52,10 @@ Tonatona has the additional general features that apply to every plugin:
 -   Make the end-user write a little boilerplate code up front in order to provide
     ease-of-use when writing their own business logic.
 
--   At runtime, plugins should be able to be configured by providing
-    environment variables.  Changing the value of the environment variables
-    should change the runtime behavior of your code.
+-   End users should be able to use many plugins without any configuration code
+    or setup code.  Plugins should be configured to get configuration options
+    from environment variables, command line flags, etc.  Plugins should be
+    configured with reasonable defaults.
 
 -   It should be possible to switch plugins just by rewriting the import statements.
 
