@@ -19,6 +19,24 @@ Tonatona provides a plugin architecture so that anyone can add plugins
 implementing arbitrary functionality.  This repository contains many standard
 plugins that are helpful when writing Haskell applications.
 
+## Goals for Tonatona
+
+The most important goal of Tonatona is to make development speed fast and
+maintenance cost low.
+
+In the Haskell community, you often hear things like, "Haskell makes it easy to
+maintain applications, but it takes a lot of time to create completely new,
+production-ready applications."
+
+Tonatona's goal is to change this to "Haskell is great to maintain big
+applications, AND it is super-easy to create completely new, production-ready
+applications!"
+
+Tonatona achieves this goal by providing a plugin-based architecture.  There
+are many production-ready plugins to use in your own code.  In order to start
+using a new plugin, often all you have to do is add a few additional
+configuration options.
+
 ## How to use Tonatona
 
 (TODO)
@@ -27,20 +45,9 @@ plugins that are helpful when writing Haskell applications.
 
 (TODO)
 
-## Goals for Tonatona
+## Additional Features
 
-Tonatona is meant to make it easy to write applications.  Its goal is to
-free the end-user from having to write anything but their application's
-business logic.
-
-We have the following goals and objectives in mind when developing Tonatona and
-the plugins.
-
--   Tonatona should make it easy to get up and running with writing Haskell
-    applications.  It is perfect when you are on a small team.
-
-    When your team or project grows larger, it may be worthwhile to move away
-    from Tonatona onto hand-written logging, DB access, etc.
+Tonatona has the additional general features that apply to every plugin:
 
 -   Make the end-user write a little boilerplate code up front in order to provide
     ease-of-use when writing their own business logic.
