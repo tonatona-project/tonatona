@@ -10,7 +10,7 @@ import Control.Monad.Reader (ReaderT, runReaderT, reader)
 import Control.Monad.Trans (lift)
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.Maybe (listToMaybe, mapMaybe)
+import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
 import Data.Semigroup ((<>))
 import System.Environment (getArgs, getEnvironment)
 import System.Envy (Var(fromVar))
@@ -89,17 +89,45 @@ class FromEnv a where
   fromEnv :: Parser a
 
 decodeEnv :: FromEnv a => IO (Maybe a)
-decodeEnv = do
+decodeEnv = decodeEnvWithMod [] [] []
+
+-- | This function is just like 'decodeEnv', but it provides a way to give
+-- alternatives for names environment variables and command line arguments.
+decodeEnvWithMod
+  :: FromEnv a
+  => [(String, String)]  -- ^ Alternatives for environment variables.
+  -> [(String, String)]  -- ^ Alternatvies for long command line flags.
+  -> [(Char, Char)]      -- ^ Alternatives for short command line flags
+  -> IO (Maybe a)
+decodeEnvWithMod envVarAlts cmdLineArgLongAlts cmdLineArgShortAlts = do
   let parser = fromEnv
   envVars <- getEnvVars
   cmdLineArgs <- getCmdLineArgs
-  pure $ runParser parser envVars cmdLineArgs
+  pure $
+    runParser
+      parser
+      envVars
+      cmdLineArgs
+      envVarAlts
+      cmdLineArgLongAlts
+      cmdLineArgShortAlts
 
-runParser :: Parser a -> Map String String -> [(String, String)] -> Maybe a
-runParser (Parser parserFunc) envVars cmdLineArgs =
-  let conf =
+runParser
+  :: Parser a
+  -> Map String String
+  -> [(String, String)]  -- ^ Actual command line arguments and values.
+  -> [(String, String)]  -- ^ Alternatives for environment variables.
+  -> [(String, String)]  -- ^ Alternatvies for long command line flags.
+  -> [(Char, Char)]  -- ^ Alternatvies for short command line flags.
+  -> Maybe a
+runParser parser envVars cmdLineArgs envVarAlts cmdLineLongAlts cmdLineShortAlts =
+  let Parser parserFunc = parser
+      conf =
         Config
           { confCmdLineArgs = cmdLineArgs
+          , confCmdLineLongAlts = cmdLineLongAlts
+          , confCmdLineShortAlts = cmdLineShortAlts
+          , confEnvVarAlts = envVarAlts
           , confEnvVars = envVars
           }
   in parserFunc conf
@@ -132,9 +160,35 @@ findValInSrc :: Config -> [InnerSource] -> Maybe String
 findValInSrc conf srcs = listToMaybe $ mapMaybe (findValInSrcs conf) srcs
 
 findValInSrcs :: Config -> InnerSource -> Maybe String
-findValInSrcs (Config cmdLineArgs _) (ArgLong str) = lookup str cmdLineArgs
-findValInSrcs (Config cmdLineArgs _) (ArgShort ch) = lookup [ch] cmdLineArgs
-findValInSrcs (Config _ envVars) (EnvVar var) = Map.lookup var envVars
+findValInSrcs conf innerSource =
+  let cmdLineArgs = confCmdLineArgs conf
+      cmdLineLongAlts = confCmdLineLongAlts conf
+      cmdLineShortAlts = confCmdLineShortAlts conf
+      envVars = confEnvVars conf
+      envVarAlts = confEnvVarAlts conf
+  in
+  case innerSource of
+    ArgLong str -> findValInCmdLineLong cmdLineArgs cmdLineLongAlts str
+    ArgShort ch -> findValInCmdLineShort cmdLineArgs cmdLineShortAlts ch
+    EnvVar var -> findValInEnvVar envVars envVarAlts var
+
+findValInCmdLineLong
+  :: [(String, String)] -> [(String, String)] -> String -> Maybe String
+findValInCmdLineLong args alts str =
+  let valToLookup = fromMaybe str $ lookup str alts
+  in lookup valToLookup args
+
+findValInCmdLineShort
+  :: [(String, String)] -> [(Char, Char)] -> Char -> Maybe String
+findValInCmdLineShort args alts ch =
+  let valToLookup = fromMaybe ch $ lookup ch alts
+  in lookup [valToLookup] args
+
+findValInEnvVar
+  :: Map String String -> [(String, String)] -> String -> Maybe String
+findValInEnvVar args alts var =
+  let valToLookup = fromMaybe var $ lookup var alts
+  in Map.lookup valToLookup args
 
 envDef :: Var a => Source -> a -> Parser a
 envDef src df = Parser $ \conf ->
@@ -169,27 +223,25 @@ instance Monad Parser where
       Nothing -> Nothing
       Just a -> unParser (f a) conf
 
-
 {-| Opaque type.
  -}
 data Config = Config
   { confCmdLineArgs :: [(String, String)]
+  , confCmdLineLongAlts :: [(String, String)]
+  , confCmdLineShortAlts :: [(Char, Char)]
+  , confEnvVarAlts :: [(String, String)]
   , confEnvVars :: Map String String
   }
-
 
 data InnerSource
   = EnvVar String
   | ArgLong String
   | ArgShort Char
 
-
 newtype Source = Source { unSource :: [InnerSource] }
-
 
 (.||) :: Source -> Source -> Source
 (.||) (Source a) (Source b) = Source (a ++ b)
-
 
 envVar :: String -> Source
 envVar name =
