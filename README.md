@@ -69,6 +69,11 @@ the plugins.
 Information about contributing new plugins can be found in
 [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+In general, new plugins will be accepted to Tonatona if they are widely useful.
+For instance, a plugin adding support for a widely used database library will
+probably be accepted, while a plugin adding support for a proprietary library
+not widely used will probably not be accepted.
+
 ## Maintainers
 
 - [Kadzuya OKAMOTO](https://github.com/arowM)
