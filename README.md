@@ -74,6 +74,11 @@ For instance, a plugin adding support for a widely used database library will
 probably be accepted, while a plugin adding support for a proprietary library
 not widely used will probably not be accepted.
 
+If your plugin is not accepted into this repository, you are free to support it
+as a third-party repository, release it on Hackage, etc.  If you are using
+Tonatona in a larger project, you will probably end up creating a few of your
+own plugins!
+
 ## Maintainers
 
 - [Kadzuya OKAMOTO](https://github.com/arowM)
