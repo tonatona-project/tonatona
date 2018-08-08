@@ -1,6 +1,6 @@
 module Main where
 
-import TonaParser (FromEnv(fromEnv), (.||), argLong, argShort, decodeEnv, env, envDef, envVar)
+import TonaParser (FromEnv(fromEnv), (.||), argLong, argShort, decodeEnvWithMod, env, envDef, envVar)
 
 data Bar = Bar
   { baz :: String
@@ -26,5 +26,6 @@ instance FromEnv Foo where
 
 main :: IO ()
 main = do
-  (foo :: Maybe Foo) <- decodeEnv
+  (foo :: Maybe Foo) <-
+    decodeEnvWithMod [("BAZ", "NEW_BAZ")] [("foo", "new-foo")] [('b', 'c')]
   print foo
