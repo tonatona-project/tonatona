@@ -55,7 +55,7 @@ main = do
         defParserAlts
           { cmdLineLongAlts = [("foo", "new-foo")]
           , cmdLineShortAlts = [('b', 'c')]
-          , envVarAlts = [("BAZ", "NEW_BAZ")]
+          , envVarAlts = [("BAR_BAZ", "NEW_BAR_BAZ")]
           }
   (foo :: Maybe Foo) <- decodeEnvWith alts defParserMods
   print foo
