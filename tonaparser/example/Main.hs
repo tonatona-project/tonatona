@@ -1,6 +1,23 @@
 module Main where
 
-import TonaParser (FromEnv(fromEnv), (.||), argLong, argShort, decodeEnvWithMod, env, envDef, envVar)
+import Data.Semigroup ((<>))
+
+import TonaParser
+  ( FromEnv(fromEnv)
+  , Parser
+  , ParserAlts(..)
+  , ParserMods(..)
+  , (.||)
+  , argLong
+  , argShort
+  , decodeEnvWith
+  , defParserAlts
+  , defParserMods
+  , env
+  , envDef
+  , envVar
+  , fromEnvWith
+  )
 
 data Bar = Bar
   { baz :: String
@@ -19,13 +36,26 @@ instance FromEnv Bar where
   fromEnv = Bar
     <$> envDef (envVar "BAZ" .|| argLong "baz" .|| argShort 'b') "baz"
 
+barWithPrefix :: Parser Bar
+barWithPrefix =
+  fromEnvWith $
+    defParserMods
+      { cmdLineLongMods = [("bar-" <>)]
+      , envVarMods = [("BAR_" <>)]
+      }
+
 instance FromEnv Foo where
   fromEnv = Foo
     <$> env (envVar "FOO" .|| argLong "foo")
-    <*> fromEnv
+    <*> barWithPrefix
 
 main :: IO ()
 main = do
-  (foo :: Maybe Foo) <-
-    decodeEnvWithMod [("BAZ", "NEW_BAZ")] [("foo", "new-foo")] [('b', 'c')]
+  let alts =
+        defParserAlts
+          { cmdLineLongAlts = [("foo", "new-foo")]
+          , cmdLineShortAlts = [('b', 'c')]
+          , envVarAlts = [("BAZ", "NEW_BAZ")]
+          }
+  (foo :: Maybe Foo) <- decodeEnvWith alts defParserMods
   print foo
