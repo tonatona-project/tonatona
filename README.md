@@ -34,7 +34,7 @@ applications!"
 
 Tonatona achieves this goal by providing a plugin-based architecture.  There
 are many production-ready plugins to use in your own code.  In order to start
-using a new plugin, often all you have to do just import it!  No need to
+using a new plugin, often all you have to do is just import it!  No need to
 specify configuration from within your application.
 
 ## How to use Tonatona
