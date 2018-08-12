@@ -5,13 +5,13 @@ import Data.Semigroup ((<>))
 import TonaParser
   ( FromEnv(fromEnv)
   , Parser
-  , ParserAlts(..)
+  , ParserRenames(..)
   , ParserMods(..)
   , (.||)
   , argLong
   , argShort
   , decodeEnvWith
-  , defParserAlts
+  , defParserRenames
   , defParserMods
   , env
   , envDef
@@ -51,11 +51,11 @@ instance FromEnv Foo where
 
 main :: IO ()
 main = do
-  let alts =
-        defParserAlts
-          { cmdLineLongAlts = [("foo", "new-foo")]
-          , cmdLineShortAlts = [('b', 'c')]
-          , envVarAlts = [("BAR_BAZ", "NEW_BAR_BAZ")]
+  let renames =
+        defParserRenames
+          { cmdLineLongRenames = [("foo", "new-foo")]
+          , cmdLineShortRenames = [('b', 'c')]
+          , envVarRenames = [("BAR_BAZ", "NEW_BAR_BAZ")]
           }
-  (foo :: Maybe Foo) <- decodeEnvWith alts defParserMods
+  (foo :: Maybe Foo) <- decodeEnvWith renames defParserMods
   print foo

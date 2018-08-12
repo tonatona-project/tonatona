@@ -44,74 +44,62 @@ import System.Envy (Var(fromVar))
     fromEnv = Foo
       <$> env (envVar "FOO" .|| argLong "foo")
       <*> barWithPrefix
- -}
 
--- data Foo = Foo
---   { foo :: Int
---   , bar :: Bar
---   }
+  data Foo = Foo
+    { foo :: Int
+    , bar :: Bar
+    }
 
-data Bar = Bar
-  { baz :: String
-  }
+  -- If environment variable "BAR_BAZ" exist, use the value
+  -- else if command line argument "--bar-baz" exist, use the value
+  -- else use default value "baz"
+  -- ( short hands argument "-b" was deactivated )
+  barWithPrefix :: Parser a
+  barWithPrefix =
+    modifyConfig $
+      modifyEnvVarKey ("BAR_" <>) .
+      modifyArgLongKey ("bar-" <>) .
+      modifyArgShortKey const Nothing
 
--- If environment variable "BAZ" exist, use the value
--- else if command line argument "--baz" exist, use the value
--- else if command line argument "-b" exist, use the value
--- else use default value "baz"
-instance FromEnv Bar where
-  fromEnv = Bar
-    <$> envDef (envVar "BAZ" .|| argLong "baz" .|| argShort 'b') "baz"
-
--- If environment variable "BAR_BAZ" exist, use the value
--- else if command line argument "--bar-baz" exist, use the value
--- else use default value "baz"
--- ( short hands argument "-b" was deactivated )
--- barWithPrefix :: Parser a
--- barWithPrefix =
---   modifyConfig $
---     modifyEnvVarKey ("BAR_" <>) .
---     modifyArgLongKey ("bar-" <>) .
---     modifyArgShortKey const Nothing
-
--- FromEnv Foo where
---   fromEnv = Foo
---     <$> env (envVar "FOO" .|| argLong "foo")
---     <*> barWithPrefix
+  FromEnv Foo where
+    fromEnv = Foo
+      <$> env (envVar "FOO" .|| argLong "foo")
+      <*> barWithPrefix
+  -}
 
 
 class FromEnv a where
   fromEnv :: Parser a
 
 decodeEnv :: FromEnv a => IO (Maybe a)
-decodeEnv = decodeEnvWith defParserAlts defParserMods
+decodeEnv = decodeEnvWith defParserRenames defParserMods
 
 -- | This function is just like 'decodeEnv', but it provides a way to give
 -- alternatives for names environment variables and command line arguments.
 decodeEnvWith
   :: FromEnv a
-  => ParserAlts
+  => ParserRenames
   -> ParserMods
   -> IO (Maybe a)
-decodeEnvWith parserAlts parserMods = do
+decodeEnvWith parserRenames parserMods = do
   envVars <- getEnvVars
   cmdLineArgs <- getCmdLineArgs
-  pure $ runParser fromEnv envVars cmdLineArgs parserAlts parserMods
+  pure $ runParser fromEnv envVars cmdLineArgs parserRenames parserMods
 
 runParser
   :: Parser a
   -> Map String String  -- ^ Environment variables.
   -> [(String, String)]  -- ^ Command line arguments and values.
-  -> ParserAlts
+  -> ParserRenames
   -> ParserMods
   -> Maybe a
-runParser parser envVars cmdLineArgs alts mods =
+runParser parser envVars cmdLineArgs renames mods =
   let Parser parserFunc = parser
       conf =
         Config
           { confCmdLineArgs = cmdLineArgs
           , confEnvVars = envVars
-          , confParserAlts = alts
+          , confParserRenames = renames
           , confParserMods = mods
           }
   in parserFunc conf
@@ -157,19 +145,19 @@ findValInSrcs :: Config -> InnerSource -> Maybe String
 findValInSrcs conf innerSource =
   let cmdLineArgs = confCmdLineArgs conf
       envVars = confEnvVars conf
-      alts = confParserAlts conf
+      renames = confParserRenames conf
       mods = confParserMods conf
-      longAlts = cmdLineLongAlts alts
-      shortAlts = cmdLineShortAlts alts
-      envAlts = envVarAlts alts
+      longRenames = cmdLineLongRenames renames
+      shortRenames = cmdLineShortRenames renames
+      envRenames = envVarRenames renames
       longMods = cmdLineLongMods mods
       shortMods = cmdLineShortMods mods
       envMods = envVarMods mods
   in
   case innerSource of
-    ArgLong str -> findValInCmdLineLong cmdLineArgs longAlts longMods str
-    ArgShort ch -> findValInCmdLineShort cmdLineArgs shortAlts shortMods ch
-    EnvVar var -> findValInEnvVar envVars envAlts envMods var
+    ArgLong str -> findValInCmdLineLong cmdLineArgs longRenames longMods str
+    ArgShort ch -> findValInCmdLineShort cmdLineArgs shortRenames shortMods ch
+    EnvVar var -> findValInEnvVar envVars envRenames envMods var
 
 findValInCmdLineLong
   :: [(String, String)]
@@ -177,9 +165,9 @@ findValInCmdLineLong
   -> [String -> String]
   -> String
   -> Maybe String
-findValInCmdLineLong args alts mods str =
+findValInCmdLineLong args renames mods str =
   let modifiedVal = applyMods mods str
-      valToLookup = lookupDef modifiedVal alts modifiedVal
+      valToLookup = lookupDef modifiedVal renames modifiedVal
   in lookup valToLookup args
 
 findValInCmdLineShort
@@ -188,9 +176,9 @@ findValInCmdLineShort
   -> [Char -> Char]
   -> Char
   -> Maybe String
-findValInCmdLineShort args alts mods ch =
+findValInCmdLineShort args renames mods ch =
   let modifiedVal = applyMods mods ch
-      valToLookup = lookupDef modifiedVal alts modifiedVal
+      valToLookup = lookupDef modifiedVal renames modifiedVal
   in lookup [valToLookup] args
 
 findValInEnvVar
@@ -199,9 +187,9 @@ findValInEnvVar
   -> [String -> String]
   -> String
   -> Maybe String
-findValInEnvVar args alts mods var =
+findValInEnvVar args renames mods var =
   let modifiedVal = applyMods mods var
-      valToLookup = lookupDef modifiedVal alts modifiedVal
+      valToLookup = lookupDef modifiedVal renames modifiedVal
   in Map.lookup valToLookup args
 
 applyMods :: [a -> a] -> a -> a
@@ -245,18 +233,18 @@ instance Monad Parser where
 data Config = Config
   { confCmdLineArgs :: [(String, String)]
   , confEnvVars :: Map String String
-  , confParserAlts :: ParserAlts
+  , confParserRenames :: ParserRenames
   , confParserMods :: ParserMods
   }
 
-data ParserAlts = ParserAlts
-  { cmdLineLongAlts :: [(String, String)]
-  , cmdLineShortAlts :: [(Char, Char)]
-  , envVarAlts :: [(String, String)]
+data ParserRenames = ParserRenames
+  { cmdLineLongRenames :: [(String, String)]
+  , cmdLineShortRenames :: [(Char, Char)]
+  , envVarRenames :: [(String, String)]
   }
 
-defParserAlts :: ParserAlts
-defParserAlts = ParserAlts [] [] []
+defParserRenames :: ParserRenames
+defParserRenames = ParserRenames [] [] []
 
 data ParserMods = ParserMods
   { cmdLineLongMods :: [String -> String]
