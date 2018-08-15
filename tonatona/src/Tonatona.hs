@@ -15,8 +15,8 @@ module Tonatona
 
 import Control.Monad.Reader (ReaderT, runReaderT, reader)
 import Control.Monad.Trans (lift)
-import Data.Semigroup ((<>))
-import System.Envy (FromEnv, decodeEnv)
+
+import TonaParser (FromEnv, decodeEnv)
 
 {-| Main type
  - TODO make this an opaque type, and appropreate Monad instead of `IO`
@@ -30,8 +30,8 @@ run :: Plug conf shared => TonaM conf shared a -> IO a
 run action = do
   mconf <- decodeEnv
   case mconf of
-    Left err -> error $ "Fail to decode env: " <> err
-    Right conf -> runWithConf conf action
+    Nothing -> error "Fail to decode env"
+    Just conf -> runWithConf conf action
 
 runWithConf :: Plug conf shared => conf -> TonaM conf shared a -> IO a
 runWithConf conf action = do

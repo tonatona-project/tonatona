@@ -30,7 +30,6 @@ import Database.Persist.Postgresql (createPostgresqlPool)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
 import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
 import Tonatona (TonaM, readerShared)
-import UnliftIO (MonadUnliftIO)
 
 type TonaDbM conf shared
   = ReaderT SqlBackend (TonaM conf shared)

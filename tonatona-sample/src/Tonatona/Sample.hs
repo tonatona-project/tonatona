@@ -16,8 +16,8 @@ import Data.Text (Text)
 import Data.Void (Void, absurd)
 import Database.Persist.Sql (Migration, SqlBackend, (==.), entityVal, insert_, selectList)
 import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowerCase, share, sqlSettings)
-import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
 import Servant
+import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
 import Tonatona (Plug(..), TonaM, askConf)
 import qualified Tonatona as Tona
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
@@ -109,7 +109,7 @@ app =
 data DbToUse = PostgreSQL | Sqlite deriving Show
 
 instance FromEnv DbToUse where
-  fromEnv = envMaybe "DB_TO_USE" .!= PostgreSQL
+  fromEnv = envDef (envVar "DB_TO_USE" .|| argLong "db-to-use") PostgreSQL
 
 instance Var DbToUse where
   toVar PostgreSQL = "postgresql"

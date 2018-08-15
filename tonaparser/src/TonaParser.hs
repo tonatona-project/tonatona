@@ -1,6 +1,9 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module TonaParser where
+module TonaParser
+  ( module TonaParser
+  , module System.Envy
+  )where
 
 import Control.Monad (ap)
 import Data.Map (Map)
@@ -8,7 +11,7 @@ import qualified Data.Map as Map
 import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
 import Data.Semigroup (Semigroup, (<>))
 import System.Environment (getArgs, getEnvironment)
-import System.Envy (Var(fromVar))
+import System.Envy (Var(fromVar, toVar))
 
 {-| Example
 

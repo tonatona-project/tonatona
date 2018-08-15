@@ -19,9 +19,9 @@ library
   exposed-modules:     Tonatona
                      , Tonatona.IO
   build-depends:       base >= 4.7 && < 5
-                     , envy
                      , monad-logger
                      , mtl
+                     , tonaparser
                      , wai
                      , wai-extra
                      , warp
