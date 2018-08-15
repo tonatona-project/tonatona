@@ -162,39 +162,35 @@ findValInSrcs conf innerSource =
 findValInCmdLineLong
   :: [(String, String)]
   -> [(String, String)]
-  -> [String -> String]
+  -> (String -> String)
   -> String
   -> Maybe String
-findValInCmdLineLong args renames mods str =
-  let modifiedVal = applyMods mods str
+findValInCmdLineLong args renames modFunc str =
+  let modifiedVal = modFunc str
       valToLookup = lookupDef modifiedVal renames modifiedVal
   in lookup valToLookup args
 
 findValInCmdLineShort
   :: [(String, String)]
   -> [(Char, Char)]
-  -> [Char -> Char]
+  -> (Char -> Char)
   -> Char
   -> Maybe String
-findValInCmdLineShort args renames mods ch =
-  let modifiedVal = applyMods mods ch
+findValInCmdLineShort args renames modFunc ch =
+  let modifiedVal = modFunc ch
       valToLookup = lookupDef modifiedVal renames modifiedVal
   in lookup [valToLookup] args
 
 findValInEnvVar
   :: Map String String
   -> [(String, String)]
-  -> [String -> String]
+  -> (String -> String)
   -> String
   -> Maybe String
-findValInEnvVar args renames mods var =
-  let modifiedVal = applyMods mods var
+findValInEnvVar args renames modFunc var =
+  let modifiedVal = modFunc var
       valToLookup = lookupDef modifiedVal renames modifiedVal
   in Map.lookup valToLookup args
-
-applyMods :: [a -> a] -> a -> a
-applyMods [] a = a
-applyMods (f:fs) a = applyMods fs $ f a
 
 lookupDef :: Eq a => a -> [(a, b)] -> b -> b
 lookupDef a pairs b = fromMaybe b $ lookup a pairs
@@ -247,18 +243,18 @@ defParserRenames :: ParserRenames
 defParserRenames = ParserRenames [] [] []
 
 data ParserMods = ParserMods
-  { cmdLineLongMods :: [String -> String]
-  , cmdLineShortMods :: [Char -> Char]
-  , envVarMods :: [String -> String]
+  { cmdLineLongMods :: String -> String
+  , cmdLineShortMods :: Char -> Char
+  , envVarMods :: String -> String
   }
 
 instance Semigroup ParserMods where
   ParserMods a b c <> ParserMods a' b' c' =
-    ParserMods (a <> a') (b <> b') (c <> c')
+    ParserMods (a' . a) (b' . b) (c' . c)
 
 instance Monoid ParserMods where
   mappend = (<>)
-  mempty = ParserMods mempty mempty mempty
+  mempty = ParserMods id id id
 
 defParserMods :: ParserMods
 defParserMods = mempty
