@@ -30,7 +30,8 @@ import Data.Text.Encoding (decodeUtf8)
 import Database.Persist.Sqlite (createSqlitePool, wrapConnection)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
 import Database.Sqlite (open)
-import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
+
+import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
 import Tonatona (TonaM, readerShared)
 
 type TonaDbM conf shared
@@ -88,9 +89,19 @@ data Config = Config
 
 instance FromEnv Config where
   fromEnv =
-    Config
-      <$> envMaybe "TONA_DB_SQLITE_CONN_STRING" .!= ":memory:"
-      <*> envMaybe "TONA_DB_SQLITE_CONN_NUM" .!= 10
+    let connStr =
+          envDef
+            ( envVar "TONA_DB_SQLITE_CONN_STRING" .||
+              argLong "sqlite-conn-string"
+            )
+            ":memory:"
+        connNum =
+          envDef
+            ( envVar "TONA_DB_SQLITE_CONN_NUM" .||
+              argLong "sqlite-conn-num"
+            )
+            10
+    in Config <$> connStr <*> connNum
 
 class HasConfig config where
   config :: config -> Config
