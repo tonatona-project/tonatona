@@ -6,18 +6,24 @@ module Tonatona.Environment
 
 import GHC.Generics (Generic)
 import Text.Read (readMaybe)
-import System.Envy (FromEnv(..), (.!=), envMaybe)
-import qualified System.Envy as Envy
+
+import TonaParser (FromEnv(..), Var(..), (.||), argLong, argShort, envDef, envVar)
 
 data Config = Config
   { environment :: Environment
   }
   deriving (Show)
 
-
 instance FromEnv Config where
-  fromEnv = Config
-    <$> envMaybe "ENV" .!= Development
+  fromEnv =
+    let env =
+          envDef
+            ( envVar "ENV" .||
+              argLong "env" .||
+              argShort 'e'
+            )
+            Development
+    in Config <$> env
 
 class HasConfig config where
   config :: config -> Config
@@ -29,6 +35,6 @@ data Environment
   | Test
   deriving (Eq, Generic, Show, Read)
 
-instance Envy.Var Environment where
+instance Var Environment where
   toVar = show
   fromVar = readMaybe

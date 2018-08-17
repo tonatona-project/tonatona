@@ -28,9 +28,9 @@ import Data.Pool (Pool)
 import Data.String (IsString)
 import Database.Persist.Postgresql (createPostgresqlPool)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
-import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
+
+import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
 import Tonatona (TonaM, readerShared)
-import UnliftIO (MonadUnliftIO)
 
 type TonaDbM conf shared
   = ReaderT SqlBackend (TonaM conf shared)
@@ -81,9 +81,19 @@ data Config = Config
 
 instance FromEnv Config where
   fromEnv =
-    Config
-      <$> envMaybe "TONA_DB_POSTGRESQL_CONN_STRING" .!= "postgresql://myuser:mypass@localhost:5432/mydb"
-      <*> envMaybe "TONA_DB_POSTGRESQL_CONN_NUM" .!= 10
+    let connStr =
+          envDef
+            ( envVar "TONA_DB_POSTGRESQL_CONN_STRING" .||
+              argLong "postgresql-conn-string"
+            )
+            "postgresql://myuser:mypass@localhost:5432/mydb"
+        connNum =
+          envDef
+            ( envVar "TONA_DB_POSTGRESQL_CONN_NUM" .||
+              argLong "postgresql-conn-num"
+            )
+            10
+    in Config <$> connStr <*> connNum
 
 class HasConfig config where
   config :: config -> Config

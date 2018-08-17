@@ -19,7 +19,6 @@ library
   exposed-modules:     Tonatona.Logger
   build-depends:       base >= 4.7 && < 5
                      , bytestring
-                     , envy
                      , monad-logger
                      , mtl
                      , tonatona
