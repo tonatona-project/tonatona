@@ -28,7 +28,8 @@ import Network.Wai.Handler.Warp (Port)
 import qualified Network.Wai.Handler.Warp as Warp
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Servant
-import System.Envy (FromEnv(..), Var(..), (.!=), envMaybe)
+
+import TonaParser (FromEnv(..), Var(..), (.||), argLong, argShort, envDef, envVar)
 import Tonatona (Plug, TonaM)
 
 reqLogMiddleware :: HasConfig conf => TonaM conf shared Middleware
@@ -122,11 +123,34 @@ data Config = Config
   deriving (Show)
 
 instance FromEnv Config where
-  fromEnv = Config
-    <$> envMaybe "TONA_SERVANT_HOST" .!= "localhost"
-    <*> envMaybe "TONA_SERVANT_PROTOCOL" .!= "http"
-    <*> envMaybe "TONA_SERVANT_PORT" .!= 8000
-    <*> envMaybe "TONA_SERVANT_REQLOG" .!= ReqLogVerbose
+  fromEnv =
+    let host =
+          envDef
+            ( envVar "TONA_SERVANT_HOST" .||
+              argLong "host" .||
+              argShort 'h'
+            )
+            ("localhost" :: Host)
+        protocol =
+          envDef
+            ( envVar "TONA_SERVANT_PROTOCOL" .||
+              argLong "protocol"
+            )
+            ("http" :: Protocol)
+        port =
+          envDef
+            ( envVar "TONA_SERVANT_PORT" .||
+              argLong "port" .||
+              argShort 'p'
+            )
+            (8000 :: Port)
+        reqlog =
+          envDef
+            ( envVar "TONA_SERVANT_REQLOG" .||
+              argLong "reqlog"
+            )
+            ReqLogVerbose
+    in Config <$> host <*> protocol <*> port <*> reqlog
 
 class HasConfig config where
   config :: config -> Config
