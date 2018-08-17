@@ -19,7 +19,6 @@ library
   exposed-modules:     Tonatona.Sample
   build-depends:       base >= 4.7 && < 5
                      , aeson
-                     , envy
                      , mtl
                      , persistent
                      , persistent-postgresql
@@ -27,6 +26,7 @@ library
                      , servant
                      , servant-server
                      , text
+                     , tonaparser
                      , tonatona
                      , tonatona-db-postgresql
                      , tonatona-db-sqlite

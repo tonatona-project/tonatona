@@ -19,7 +19,6 @@ library
   exposed-modules:     Tonatona.Servant
   build-depends:       base >= 4.7 && < 5
                      , bytestring
-                     , envy
                      , exceptions
                      , http-types
                      , monad-logger
@@ -27,6 +26,7 @@ library
                      , servant
                      , servant-server
                      , text
+                     , tonaparser
                      , tonatona
                      , tonatona-environment
                      , wai
