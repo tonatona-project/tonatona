@@ -74,6 +74,31 @@ import System.Envy (Var(fromVar, toVar))
 class FromEnv a where
   fromEnv :: Parser a
 
+modifyParserWith :: ParserRenames -> ParserMods -> Parser a -> Parser a
+modifyParserWith renames mods (Parser parserFunc) =
+  Parser $ \oldConfig ->
+    let newConfig =
+          oldConfig
+            { confParserRenames = renames <> confParserRenames oldConfig
+            , confParserMods = confParserMods oldConfig <> mods
+            }
+    in parserFunc newConfig
+
+modifyParserWithRenames :: ParserRenames -> Parser a -> Parser a
+modifyParserWithRenames renames = modifyParserWith renames defParserMods
+
+modifyParserWithMods :: ParserMods -> Parser a -> Parser a
+modifyParserWithMods = modifyParserWith defParserRenames
+
+fromEnvWith :: FromEnv a => ParserRenames -> ParserMods -> Parser a
+fromEnvWith renames mods = modifyParserWith renames mods fromEnv
+
+fromEnvWithRenames :: FromEnv a => ParserRenames -> Parser a
+fromEnvWithRenames renames = fromEnvWith renames defParserMods
+
+fromEnvWithMods :: FromEnv a => ParserMods -> Parser a
+fromEnvWithMods = fromEnvWith defParserRenames
+
 decodeEnv :: FromEnv a => IO (Maybe a)
 decodeEnv = decodeEnvWith defParserRenames defParserMods
 
@@ -106,16 +131,6 @@ runParser parser envVars cmdLineArgs renames mods =
           , confParserMods = mods
           }
   in parserFunc conf
-
-modifyParser :: Parser a -> ParserMods -> Parser a
-modifyParser (Parser parserFunc) parserMods = Parser $ \conf ->
-  parserFunc $
-    conf
-      { confParserMods = confParserMods conf <> parserMods
-      }
-
-fromEnvWith :: FromEnv a => ParserMods -> Parser a
-fromEnvWith = modifyParser fromEnv
 
 getEnvVars :: IO (Map String String)
 getEnvVars = do
@@ -242,8 +257,16 @@ data ParserRenames = ParserRenames
   , envVarRenames :: [(String, String)]
   }
 
+instance Semigroup ParserRenames where
+  ParserRenames a b c <> ParserRenames a' b' c' =
+    ParserRenames (a <> a') (b <> b') (c <> c')
+
+instance Monoid ParserRenames where
+  mappend = (<>)
+  mempty = ParserRenames [] [] []
+
 defParserRenames :: ParserRenames
-defParserRenames = ParserRenames [] [] []
+defParserRenames = mempty
 
 data ParserMods = ParserMods
   { cmdLineLongMods :: String -> String
