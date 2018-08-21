@@ -126,28 +126,28 @@ instance FromEnv Config where
   fromEnv =
     let host =
           envDef
-            ( envVar "TONA_SERVANT_HOST" .||
-              argLong "host" .||
-              argShort 'h'
+            ( argLong "host" .||
+              argShort 'h' .||
+              envVar "TONA_SERVANT_HOST"
             )
             ("localhost" :: Host)
         protocol =
           envDef
-            ( envVar "TONA_SERVANT_PROTOCOL" .||
-              argLong "protocol"
+            ( argLong "protocol" .||
+              envVar "TONA_SERVANT_PROTOCOL"
             )
             ("http" :: Protocol)
         port =
           envDef
-            ( envVar "TONA_SERVANT_PORT" .||
-              argLong "port" .||
-              argShort 'p'
+            ( argLong "port" .||
+              argShort 'p' .||
+              envVar "TONA_SERVANT_PORT"
             )
             (8000 :: Port)
         reqlog =
           envDef
-            ( envVar "TONA_SERVANT_REQLOG" .||
-              argLong "reqlog"
+            ( argLong "reqlog" .||
+              envVar "TONA_SERVANT_REQLOG"
             )
             ReqLogVerbose
     in Config <$> host <*> protocol <*> port <*> reqlog

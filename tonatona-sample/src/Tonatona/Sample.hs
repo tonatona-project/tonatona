@@ -109,7 +109,7 @@ app =
 data DbToUse = PostgreSQL | Sqlite deriving Show
 
 instance FromEnv DbToUse where
-  fromEnv = envDef (envVar "DB_TO_USE" .|| argLong "db-to-use") PostgreSQL
+  fromEnv = envDef (argLong "db-to-use" .|| envVar "DB_TO_USE") PostgreSQL
 
 instance Var DbToUse where
   toVar PostgreSQL = "postgresql"

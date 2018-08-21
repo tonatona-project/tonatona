@@ -18,9 +18,9 @@ instance FromEnv Config where
   fromEnv =
     let env =
           envDef
-            ( envVar "ENV" .||
-              argLong "env" .||
-              argShort 'e'
+            ( argLong "env" .||
+              argShort 'e' .||
+              envVar "ENV"
             )
             Development
     in Config <$> env

@@ -34,7 +34,7 @@ data Foo = Foo
 -- else use default value "baz"
 instance FromEnv Bar where
   fromEnv = Bar
-    <$> envDef (envVar "BAZ" .|| argLong "baz" .|| argShort 'b') "baz"
+    <$> envDef (argLong "baz" .|| argShort 'b' .|| envVar "BAZ") "baz"
 
 barWithPrefix :: Parser Bar
 barWithPrefix =
@@ -47,7 +47,7 @@ barWithPrefix =
 
 instance FromEnv Foo where
   fromEnv = Foo
-    <$> env (envVar "FOO" .|| argLong "foo")
+    <$> env (argLong "foo" .|| envVar "FOO")
     <*> barWithPrefix
 
 main :: IO ()

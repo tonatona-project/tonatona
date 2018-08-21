@@ -83,14 +83,14 @@ instance FromEnv Config where
   fromEnv =
     let connStr =
           envDef
-            ( envVar "TONA_DB_POSTGRESQL_CONN_STRING" .||
-              argLong "postgresql-conn-string"
+            ( argLong "postgresql-conn-string" .||
+              envVar "TONA_DB_POSTGRESQL_CONN_STRING"
             )
             "postgresql://myuser:mypass@localhost:5432/mydb"
         connNum =
           envDef
-            ( envVar "TONA_DB_POSTGRESQL_CONN_NUM" .||
-              argLong "postgresql-conn-num"
+            ( argLong "postgresql-conn-num" .||
+              envVar "TONA_DB_POSTGRESQL_CONN_NUM"
             )
             10
     in Config <$> connStr <*> connNum
