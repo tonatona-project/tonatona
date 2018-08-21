@@ -1,5 +1,10 @@
 # Tonatona
 
+[![Build Status](https://secure.travis-ci.org/arow-oss/tonatona.svg)](http://travis-ci.org/arow-oss/tonatona)
+[![Hackage](https://img.shields.io/hackage/v/tonatona.svg)](https://hackage.haskell.org/package/tonatona)
+[![Stackage LTS](http://stackage.org/package/tonatona/badge/lts)](http://stackage.org/lts/package/tonatona)
+[![Stackage Nightly](http://stackage.org/package/tonatona/badge/nightly)](http://stackage.org/nightly/package/tonatona)
+
 ![tonatona](https://user-images.githubusercontent.com/1481749/38623497-c455af60-3de0-11e8-8683-a215d074e7e0.jpg)
 
 ## What is Tonatona?
