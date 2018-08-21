@@ -17,7 +17,7 @@ import Data.Void (Void, absurd)
 import Database.Persist.Sql (Migration, SqlBackend, (==.), entityVal, insert_, selectList)
 import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowerCase, share, sqlSettings)
 import Servant
-import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
+import TonaParser (FromEnv(..), ParserMods(..), Var(..), (.||), argLong, defParserMods, envDef, envVar, fromEnvWithMods)
 import Tonatona (Plug(..), TonaM, askConf)
 import qualified Tonatona as Tona
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
@@ -130,12 +130,19 @@ data Config = Config
 
 instance FromEnv Config where
   fromEnv =
-    Config
-      <$> fromEnv
-      <*> fromEnv
-      <*> fromEnv
-      <*> fromEnv
-      <*> fromEnv
+    let postgres =
+          fromEnvWithMods
+            defParserMods
+              { envVarMods = ("POSTGRESQL_" <>)
+              , cmdLineLongMods = ("postgresql-" <>)
+              }
+        sqlite =
+          fromEnvWithMods
+            defParserMods
+              { envVarMods = ("SQLITE_" <>)
+              , cmdLineLongMods = ("sqlite-" <>)
+              }
+    in Config <$> postgres <*> sqlite <*> fromEnv <*> fromEnv <*> fromEnv
 
 instance TonaDbPostgres.HasConfig Config where
   config = tonaDbPostgres

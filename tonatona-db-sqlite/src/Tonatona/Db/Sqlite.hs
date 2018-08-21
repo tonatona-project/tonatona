@@ -91,14 +91,14 @@ instance FromEnv Config where
   fromEnv =
     let connStr =
           envDef
-            ( argLong "sqlite-conn-string" .||
-              envVar "TONA_DB_SQLITE_CONN_STRING"
+            ( argLong "db-conn-string" .||
+              envVar "DB_CONN_STRING"
             )
             ":memory:"
         connNum =
           envDef
-            ( argLong "sqlite-conn-num" .||
-              envVar "TONA_DB_SQLITE_CONN_NUM"
+            ( argLong "db-conn-num" .||
+              envVar "DB_CONN_NUM"
             )
             10
     in Config <$> connStr <*> connNum
