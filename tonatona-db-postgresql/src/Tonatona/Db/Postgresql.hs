@@ -83,13 +83,13 @@ instance FromEnv Config where
   fromEnv =
     let connStr =
           envDef
-            ( argLong "postgresql-conn-string" .||
+            ( argLong "db-conn-string" .||
               envVar "DB_CONN_STRING"
             )
             "postgresql://myuser:mypass@localhost:5432/mydb"
         connNum =
           envDef
-            ( argLong "postgresql-conn-num" .||
+            ( argLong "db-conn-num" .||
               envVar "DB_CONN_NUM"
             )
             10
