@@ -38,10 +38,11 @@ instance FromEnv Bar where
 
 barWithPrefix :: Parser Bar
 barWithPrefix =
-  fromEnvWith $
+  fromEnvWith
+    defParserRenames
     defParserMods
-      { cmdLineLongMods = [("bar-" <>)]
-      , envVarMods = [("BAR_" <>)]
+      { cmdLineLongMods = ("bar-" <>)
+      , envVarMods = ("BAR_" <>)
       }
 
 instance FromEnv Foo where
