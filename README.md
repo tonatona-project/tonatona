@@ -44,7 +44,19 @@ specify configuration from within your application.
 
 ## How to use Tonatona
 
-(TODO)
+Using Tonatona is relatively simple. It requires declaring a few datatypes, as
+well as instances for classes provided by Tonatona.
+
+This section describes how to do this, using the
+[tonatona-db-sqlite](./tonatona-db-sqlite) plugin as an example.
+
+```haskell
+import Tonatona
+
+main :: IO ()
+main = pure ()
+```
+
 
 ## Available Plugins
 
@@ -116,15 +128,11 @@ Tonatona has the additional general features that apply to every plugin:
     For instance, it should be possible to go from using `tonatona-db-sqlite` to
     `tonatona-db-postgresql` just by changing the import statement
 
-    ```haskell
-    import qualified Tonatona.Db.Sqlite as TonaDb
-    ```
+    `import qualified Tonatona.Db.Sqlite as TonaDb`
 
     to
 
-    ```haskell
-    import qualified Tonatona.Db.Postgresql as TonaDb
-    ```
+    `import qualified Tonatona.Db.Postgresql as TonaDb`
 
 ## Contributing
 

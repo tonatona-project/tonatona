@@ -36,6 +36,7 @@ resolver: lts-11.13
 # non-dependency (i.e. a user package), and its test suites and benchmarks
 # will not be run. This is useful for tweaking upstream packages.
 packages:
+    - 'test/readme'
     - 'tonaparser'
     - 'tonatona'
     - 'tonatona-db-postgresql'
