@@ -48,7 +48,56 @@ specify configuration from within your application.
 
 ## Available Plugins
 
-(TODO)
+Tonatona has many plugins available.  Here are the plugins provided in this repository.
+
+*   [tonatona-db-postgresql](./tonatona-db-postgresql/README.md)
+
+    [![Hackage](https://img.shields.io/hackage/v/tonatona-db-postgresql.svg)](https://hackage.haskell.org/package/tonatona-db-postgresql)
+    [![Stackage LTS](http://stackage.org/package/tonatona-db-postgresql/badge/lts)](http://stackage.org/lts/package/tonatona-db-postgresql)
+    [![Stackage Nightly](http://stackage.org/package/tonatona-db-postgresql/badge/nightly)](http://stackage.org/nightly/package/tonatona-db-postgresql)
+
+    Provide access to a PostgreSQL database through the [persistent](http://hackage.haskell.org/package/persistent) library.
+
+*   [tonatona-db-sqlite](./tonatona-db-sqlite/README.md)
+
+    [![Hackage](https://img.shields.io/hackage/v/tonatona-db-sqlite.svg)](https://hackage.haskell.org/package/tonatona-db-sqlite)
+    [![Stackage LTS](http://stackage.org/package/tonatona-db-sqlite/badge/lts)](http://stackage.org/lts/package/tonatona-db-sqlite)
+    [![Stackage Nightly](http://stackage.org/package/tonatona-db-sqlite/badge/nightly)](http://stackage.org/nightly/package/tonatona-db-sqlite)
+
+    Provide access to a SQLite database through the [persistent](http://hackage.haskell.org/package/persistent) library.
+
+*   [tonatona-email-sendmail](./tonatona-email-sendmail/README.md)
+
+    [![Hackage](https://img.shields.io/hackage/v/tonatona-email-sendmail.svg)](https://hackage.haskell.org/package/tonatona-email-sendmail)
+    [![Stackage LTS](http://stackage.org/package/tonatona-email-sendmail/badge/lts)](http://stackage.org/lts/package/tonatona-email-sendmail)
+    [![Stackage Nightly](http://stackage.org/package/tonatona-email-sendmail/badge/nightly)](http://stackage.org/nightly/package/tonatona-email-sendmail)
+
+    Provide a way to easily send email directly by using `sendmail`.
+
+*   [tonatona-environment](./tonatona-environment/README.md)
+
+    [![Hackage](https://img.shields.io/hackage/v/tonatona-environment.svg)](https://hackage.haskell.org/package/tonatona-environment)
+    [![Stackage LTS](http://stackage.org/package/tonatona-environment/badge/lts)](http://stackage.org/lts/package/tonatona-environment)
+    [![Stackage Nightly](http://stackage.org/package/tonatona-environment/badge/nightly)](http://stackage.org/nightly/package/tonatona-environment)
+
+    Provide a way to figure out at runtime whether we are in a `development`
+    environment, `prodution` environment, or `testing` environment.
+
+*   [tonatona-logger](./tonatona-logger/README.md)
+
+    [![Hackage](https://img.shields.io/hackage/v/tonatona-logger.svg)](https://hackage.haskell.org/package/tonatona-logger)
+    [![Stackage LTS](http://stackage.org/package/tonatona-logger/badge/lts)](http://stackage.org/lts/package/tonatona-logger)
+    [![Stackage Nightly](http://stackage.org/package/tonatona-logger/badge/nightly)](http://stackage.org/nightly/package/tonatona-logger)
+
+    Provide a way to log to the console at runtime using [monad-logger](http://hackage.haskell.org/package/monad-logger).
+
+*   [tonatona-servant](./tonatona-servant/README.md)
+
+    [![Hackage](https://img.shields.io/hackage/v/tonatona-servant.svg)](https://hackage.haskell.org/package/tonatona-servant)
+    [![Stackage LTS](http://stackage.org/package/tonatona-servant/badge/lts)](http://stackage.org/lts/package/tonatona-servant)
+    [![Stackage Nightly](http://stackage.org/package/tonatona-servant/badge/nightly)](http://stackage.org/nightly/package/tonatona-servant)
+
+    Provide an easy way to run a [servant server](http://hackage.haskell.org/package/servant-server).
 
 ## Additional Features
 
