@@ -9,7 +9,6 @@ import TonaParser
   , ParserMods(..)
   , (.||)
   , argLong
-  , argShort
   , decodeEnvWith
   , defParserRenames
   , defParserMods
@@ -34,7 +33,7 @@ data Foo = Foo
 -- else use default value "baz"
 instance FromEnv Bar where
   fromEnv = Bar
-    <$> envDef (argLong "baz" .|| argShort 'b' .|| envVar "BAZ") "baz"
+    <$> envDef (argLong "baz" .|| envVar "BAZ") "baz"
 
 barWithPrefix :: Parser Bar
 barWithPrefix =
@@ -55,7 +54,6 @@ main = do
   let renames =
         defParserRenames
           { cmdLineLongRenames = [("foo", "new-foo")]
-          , cmdLineShortRenames = [('b', 'c')]
           , envVarRenames = [("BAR_BAZ", "NEW_BAR_BAZ")]
           }
   (foo :: Maybe Foo) <- decodeEnvWith renames defParserMods
