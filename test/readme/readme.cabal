@@ -16,9 +16,13 @@ test-suite readme
   main-is:        README.lhs
   build-depends:  base
                 , markdown-unlit
+                , persistent
                 , persistent-template
                 , text
+                , tonaparser
                 , tonatona
+                , tonatona-db-sqlite
+                , tonatona-logger
   ghc-options: -pgmL markdown-unlit
 
 source-repository head

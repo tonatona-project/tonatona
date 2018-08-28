@@ -56,14 +56,22 @@ First, we need some language pragmas and imports:
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
+import Control.Monad.IO.Class (liftIO)
 import Data.Text (Text)
+import Database.Persist.Class (insert_)
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
-import Tonatona ()
+import TonaParser (FromEnv(fromEnv), Parser)
+import Tonatona (Plug(init), TonaM)
+import qualified Tonatona as Tona
+import qualified Tonatona.Db.Sqlite as TonaDb
+import Tonatona.Logger (stdoutLogger)
 ```
 
 Next, we need to create a table definition.  The following creates a table to
@@ -82,15 +90,92 @@ $(share
       authorName Text
       contents   Text
 
-      deriving Eq
       deriving Show
     |]
  )
 ```
 
+Next, you need to create data types called `Config` and `Shared`.  These will be
+used for Tonatona:
+
+```haskell
+data Config = Config
+  { configTonaDb :: TonaDb.Config
+  }
+  deriving (Show)
+
+data Shared = Shared
+  { sharedTonaDb :: TonaDb.Shared
+  }
+```
+
+Your `Config` data type will contain configuration values that can be read in on
+the command line or through environment variables.  For instance,
+`TonaDb.Config` will contain the connection string for the SQLite database.  By
+default, this can be passed on the command line as `--db-conn-string` or as an
+environment variable as `DB_CONN_STRING`.  We will see this be used later.
+
+Your `Config` data type should generally contain `Tona*.Config` data types, as
+well as any of your own configuration options you would like to pick up from
+the environment.
+
+Your `Shared` data type will contain runtime values that will be needed by your
+application.  For instance, `TonaDb.Shared` will contain a connection to the
+SQLite database.  This can only be constructed at runtime and is not a value
+that can be passed in through a command line flag or environment variable.
+
+Your `Shared` data type should generally contain `Tona*.Shared` data types, as
+well as any runtime values your application needs.
+
+There are some plugins that only have either a `Config` or `Shared` data type,
+but not both.
+
+Tonatona needs to be told how to parse your `Config` data type from the
+available command line flags and environment variables.  The `FromEnv` class is
+used for this.  The following is a simple example of this, for when your
+`Config` just contains `Tona*.Config` data types:
+
+```haskell
+instance FromEnv Config where
+  fromEnv :: Parser Config
+  fromEnv = Config <$> fromEnv
+```
+
+```haskell
+instance TonaDb.HasConfig Config where
+  config :: Config -> TonaDb.Config
+  config (Config tonaDbConf) = tonaDbConf
+
+instance TonaDb.HasShared Shared where
+  shared :: Shared -> TonaDb.Shared
+  shared (Shared tonaDbShared) = tonaDbShared
+```
+
+```haskell
+instance Plug Config Shared where
+  init :: Config -> IO Shared
+  init conf = Shared <$> TonaDb.init conf stdoutLogger
+```
+
+
+```haskell
+myApp :: TonaM Config Shared ()
+myApp = do
+  TonaDb.runMigrate migrateAll
+  TonaDb.run $ insert_ $ BlogPost "Mr. Foo Bar" "This is an example blog post"
+  liftIO $ putStrLn "Successfully inserted a blog post!"
+```
+
+```haskell
+type Tona = TonaM Config Shared
+
+myApp' :: Tona ()
+myApp' = myApp
+```
+
 ```haskell
 main :: IO ()
-main = pure ()
+main = Tona.run myApp'
 ```
 
 
