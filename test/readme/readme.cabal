@@ -16,6 +16,8 @@ test-suite readme
   main-is:        README.lhs
   build-depends:  base
                 , markdown-unlit
+                , persistent-template
+                , text
                 , tonatona
   ghc-options: -pgmL markdown-unlit
 

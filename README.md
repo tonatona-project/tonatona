@@ -50,9 +50,45 @@ well as instances for classes provided by Tonatona.
 This section describes how to do this, using the
 [tonatona-db-sqlite](./tonatona-db-sqlite) plugin as an example.
 
-```haskell
-import Tonatona
+First, we need some language pragmas and imports:
 
+```haskell
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
+
+import Data.Text (Text)
+import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
+import Tonatona ()
+```
+
+Next, we need to create a table definition.  The following creates a table to
+hold blog posts.  It will have 3 columns: `id`, `author_name`, and `contents`.
+
+Creating a table definition is a requirement for using
+[persistent](http://hackage.haskell.org/package/persistent), which is what
+`tonatona-db-sqlite` is using internally.  This is not a requirement for
+Tonatona in general, just the `tonatona-db-sqlite` package.
+
+```haskell
+$(share
+  [mkPersist sqlSettings, mkMigrate "migrateAll"]
+  [persistLowerCase|
+    BlogPost
+      authorName Text
+      contents   Text
+
+      deriving Eq
+      deriving Show
+    |]
+ )
+```
+
+```haskell
 main :: IO ()
 main = pure ()
 ```
