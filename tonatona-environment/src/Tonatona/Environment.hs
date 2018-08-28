@@ -7,7 +7,7 @@ module Tonatona.Environment
 import GHC.Generics (Generic)
 import Text.Read (readMaybe)
 
-import TonaParser (FromEnv(..), Var(..), (.||), argLong, argShort, envDef, envVar)
+import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
 
 data Config = Config
   { environment :: Environment
@@ -19,7 +19,6 @@ instance FromEnv Config where
     let env =
           envDef
             ( argLong "env" .||
-              argShort 'e' .||
               envVar "ENV"
             )
             Development

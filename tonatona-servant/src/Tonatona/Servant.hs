@@ -29,7 +29,7 @@ import qualified Network.Wai.Handler.Warp as Warp
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Servant
 
-import TonaParser (FromEnv(..), Var(..), (.||), argLong, argShort, envDef, envVar)
+import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
 import Tonatona (Plug, TonaM)
 
 reqLogMiddleware :: HasConfig conf => TonaM conf shared Middleware
@@ -127,7 +127,6 @@ instance FromEnv Config where
     let host =
           envDef
             ( argLong "host" .||
-              argShort 'h' .||
               envVar "HOST"
             )
             ("localhost" :: Host)
@@ -140,7 +139,6 @@ instance FromEnv Config where
         port =
           envDef
             ( argLong "port" .||
-              argShort 'p' .||
               envVar "PORT"
             )
             (8000 :: Port)
