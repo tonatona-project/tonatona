@@ -42,6 +42,7 @@ library
                      , DeriveGeneric
                      , DuplicateRecordFields
                      , MultiParamTypeClasses
+                     , NoMonomorphismRestriction
                      , OverloadedStrings
                      , RankNTypes
                      , RecordWildCards
