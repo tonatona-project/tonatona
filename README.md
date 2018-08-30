@@ -154,7 +154,7 @@ instance TonaDb.HasConfig Config where
 
 The `TonaDb.HasShared` class is similar for `TonaDb.Shared` and your `Shared`:
 
-```
+```haskell
 instance TonaDb.HasShared Shared where
   shared :: Shared -> TonaDb.Shared
   shared (Shared tonaDbShared) = tonaDbShared
