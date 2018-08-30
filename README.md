@@ -141,15 +141,33 @@ instance FromEnv Config where
   fromEnv = Config <$> fromEnv
 ```
 
+Tonatona also requires a little bit of boilerplate code.  You must help
+Tonatona figure out how to get the `TonaDb.Config` from your `Config`.  This is
+done with the `TonaDb.HasConfig` class.  This code should be very simple to
+write:
+
 ```haskell
 instance TonaDb.HasConfig Config where
   config :: Config -> TonaDb.Config
   config (Config tonaDbConf) = tonaDbConf
+```
 
+The `TonaDb.HasShared` class is similar for `TonaDb.Shared` and your `Shared`:
+
+```
 instance TonaDb.HasShared Shared where
   shared :: Shared -> TonaDb.Shared
   shared (Shared tonaDbShared) = tonaDbShared
 ```
+
+Now, you have to help Tonatona figure out how to create your `Shared` data type from your `Config` data type.
+
+Most of the Tonatona plugins expose a method called `init` that can be used to
+do this easily.  Generally you just need to pass your `Config` data type to the
+`init` method, along with other options.
+
+In the following code, `TonaDb.init` will return `IO TonaDb.Shared`, which you
+can wrap into your `Shared` data type.
 
 ```haskell
 instance Plug Config Shared where
@@ -157,6 +175,14 @@ instance Plug Config Shared where
   init conf = Shared <$> TonaDb.init conf stdoutLogger
 ```
 
+Now that we have all the easy code working, it is time to actually write your application!
+
+The following is an example of using the `TonaM` monad.  You can see how
+`TonaDb.runMigrate` as well as `TonaDb.run` are used, both of which return
+values in the `TonaM` monad.
+
+`TonaM` has an instance of `MonadIO`, so you can do any `IO` operation with
+`liftIO` as well.
 
 ```haskell
 myApp :: TonaM Config Shared ()
@@ -166,6 +192,9 @@ myApp = do
   liftIO $ putStrLn "Successfully inserted a blog post!"
 ```
 
+It is often convenient to create a type synonym for `TonaM`.  The following
+uses a type synonym called `Tona`:
+
 ```haskell
 type Tona = TonaM Config Shared
 
@@ -173,11 +202,28 @@ myApp' :: Tona ()
 myApp' = myApp
 ```
 
+Finally, you can use the `Tona.run` function actually run your application:
+
 ```haskell
 main :: IO ()
 main = Tona.run myApp'
 ```
 
+A summary of the steps you need to take is as follows:
+
+1.  Create a `Config` and `Shared` data type for your application.  If you want
+    to use multiple plugins, just have your data types hold multiple
+    `Tona*.Config` and `Tona*.Shared` types.
+
+1.  Create a `FromEnv` instance for your `Config` data type.
+
+1.  Create a `Tona*.HasConfig` and `Tona*.HasShared` instance for each of the plugins you are using.
+
+1.  Create a `Plug` instance to show how to create your `Shared` type from your `Config` type.
+
+1.  Actually write your application using the `TonaM` monad.
+
+1.  Run your application with the `Tona.run` function.
 
 ## Available Plugins
 
