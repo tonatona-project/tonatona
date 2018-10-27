@@ -1,28 +1,23 @@
-{-# LANGUAGE FunctionalDependencies #-}
-
 module Tonatona
   ( run
   , runWithConf
   , runWithConfAndShared
-  , readerConf
-  , readerShared
+  , asksConf
+  , asksShared
   , askConf
   , askShared
   , TonaM
   , Plug(..)
-  , lift
   ) where
 
-import Control.Monad.Reader (ReaderT, runReaderT, reader)
-import Control.Monad.Trans (lift)
+import RIO
 
 import TonaParser (FromEnv, decodeEnv)
 
 {-| Main type
- - TODO make this an opaque type, and appropreate Monad instead of `IO`
  -}
 type TonaM conf shared
-   = ReaderT (conf, shared) IO
+   = RIO (conf, shared)
 
 {-| Main function.
  -}
@@ -39,19 +34,19 @@ runWithConf conf action = do
   runWithConfAndShared conf shared action
 
 runWithConfAndShared :: conf -> shared -> TonaM conf shared a -> IO a
-runWithConfAndShared conf shared action = runReaderT action (conf, shared)
+runWithConfAndShared conf shared action = runRIO (conf, shared) action
 
-readerConf :: (conf -> a) -> TonaM conf shared a
-readerConf f = reader (f . fst)
+asksConf :: (conf -> a) -> TonaM conf shared a
+asksConf f = asks (f . fst)
 
-readerShared :: (shared -> a) -> TonaM conf shared a
-readerShared f = reader (f . snd)
+asksShared :: (shared -> a) -> TonaM conf shared a
+asksShared f = asks (f . snd)
 
 askConf :: TonaM conf shared conf
-askConf = readerConf id
+askConf = asksConf id
 
 askShared :: TonaM conf shared shared
-askShared = readerShared id
+askShared = asksShared id
 
 {-| A type class for configuration.
  - The 'config' is supposed to be an instance of 'FromEnv'.

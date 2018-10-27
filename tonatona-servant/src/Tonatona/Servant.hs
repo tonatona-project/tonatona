@@ -1,8 +1,4 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Tonatona.Servant
@@ -15,13 +11,8 @@ module Tonatona.Servant
   , Protocol(..)
   ) where
 
-import Control.Exception (catch)
-import Control.Monad.Catch (throwM)
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Reader (ask, reader, runReaderT)
-import Data.ByteString (ByteString)
-import Data.String (IsString)
-import Data.Text (Text)
+import RIO
+
 import Network.HTTP.Types.Header
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp (Port)
@@ -30,11 +21,11 @@ import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Servant
 
 import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
-import Tonatona (Plug, TonaM)
+import Tonatona (TonaM)
 
 reqLogMiddleware :: HasConfig conf => TonaM conf shared Middleware
 reqLogMiddleware = do
-  logger <- reader (reqLog . config . fst)
+  logger <- asks (reqLog . config . fst)
   case logger of
     ReqLogVerbose -> pure logStdoutDev
     ReqLogNormal -> pure logStdout
@@ -43,8 +34,8 @@ reqLogMiddleware = do
 {-| Main function.
  -}
 run ::
-     forall api conf shared.
-     (HasServer api '[], Plug conf shared, HasConfig conf)
+     forall (api :: *) conf shared.
+     (HasServer api '[], HasConfig conf)
   => ServerT api (TonaM conf shared)
   -> TonaM conf shared ()
 run servantServer = do
@@ -54,7 +45,7 @@ run servantServer = do
   liftIO $ Warp.run (port (config conf)) $ loggingMiddleware app
 
 runServant ::
-     forall api conf shared. HasServer api '[]
+     forall (api :: *) conf shared. HasServer api '[]
   => conf
   -> shared
   -> ServerT api (TonaM conf shared)
@@ -63,9 +54,11 @@ runServant conf shared servantServer =
   serve (Proxy @api) $ hoistServer (Proxy @api) transformation servantServer
   where
     transformation
-      :: forall a. TonaM conf shared a -> Handler a
+      :: forall a. TonaM conf shared a -> Servant.Handler a
     transformation action = do
-      let ioAction = Right <$> runReaderT action (conf, shared)
+      let
+        -- ioAction :: IO (Either ServantErr a)
+        ioAction = Right <$> runRIO (conf, shared) action
       eitherRes <- liftIO $ ioAction `catch` \(e :: ServantErr) -> pure $ Left e
       case eitherRes of
         Right res -> pure res

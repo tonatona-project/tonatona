@@ -3,7 +3,8 @@ module Tonatona.Email.Sendmail
   , module Network.Mail.Mime
   ) where
 
-import Control.Monad.IO.Class (liftIO)
+import RIO
+
 import Network.Mail.Mime
 
 import Tonatona (TonaM)

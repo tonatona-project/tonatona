@@ -1,7 +1,8 @@
 module Main where
 
-import Data.Semigroup ((<>))
+import RIO
 
+import Say (sayShow)
 import TonaParser
   ( FromEnv(fromEnv)
   , Parser
@@ -29,7 +30,6 @@ data Foo = Foo
 
 -- If environment variable "BAZ" exist, use the value
 -- else if command line argument "--baz" exist, use the value
--- else if command line argument "-b" exist, use the value
 -- else use default value "baz"
 instance FromEnv Bar where
   fromEnv = Bar
@@ -57,4 +57,4 @@ main = do
           , envVarRenames = [("BAR_BAZ", "NEW_BAR_BAZ")]
           }
   (foo :: Maybe Foo) <- decodeEnvWith renames defParserMods
-  print foo
+  sayShow $ show foo

@@ -1,7 +1,7 @@
-
 module Main (main) where
 
-import Data.Semigroup ((<>))
+import RIO
+
 import System.FilePath.Glob (glob)
 import Test.DocTest (doctest)
 
@@ -12,43 +12,47 @@ doDocTest :: [String] -> IO ()
 doDocTest options =
   doctest $
     options <>
-    ghcExtensions <>
-    -- This was added because doctest was segfaulting:
-    -- https://github.com/sol/doctest/issues/162
-    ["-v"]
+    ghcExtensions
 
 ghcExtensions :: [String]
 ghcExtensions =
-    [ "-XConstraintKinds"
+    [ "-XAutoDeriveTypeable"
+    , "-XBangPatterns"
+    , "-XBinaryLiterals"
+    , "-XConstraintKinds"
     , "-XDataKinds"
+    , "-XDefaultSignatures"
     , "-XDeriveDataTypeable"
+    , "-XDeriveFoldable"
     , "-XDeriveFunctor"
     , "-XDeriveGeneric"
-    , "-XDuplicateRecordFields"
+    , "-XDeriveTraversable"
+    , "-XDoAndIfThenElse"
     , "-XEmptyDataDecls"
+    , "-XExistentialQuantification"
     , "-XFlexibleContexts"
     , "-XFlexibleInstances"
+    , "-XFunctionalDependencies"
     , "-XGADTs"
     , "-XGeneralizedNewtypeDeriving"
     , "-XInstanceSigs"
+    , "-XKindSignatures"
     , "-XLambdaCase"
+    , "-XMonadFailDesugaring"
     , "-XMultiParamTypeClasses"
+    , "-XMultiWayIf"
     , "-XNamedFieldPuns"
     , "-XNoImplicitPrelude"
-    , "-XNoMonomorphismRestriction"
-    , "-XOverloadedLabels"
-    , "-XOverloadedLists"
     , "-XOverloadedStrings"
-    , "-XPackageImports"
-    , "-XPatternSynonyms"
+    , "-XPartialTypeSignatures"
+    , "-XPatternGuards"
     , "-XPolyKinds"
     , "-XRankNTypes"
     , "-XRecordWildCards"
     , "-XScopedTypeVariables"
     , "-XStandaloneDeriving"
     , "-XTupleSections"
-    , "-XTypeApplications"
     , "-XTypeFamilies"
-    , "-XTypeOperators"
+    , "-XTypeSynonymInstances"
     , "-XViewPatterns"
     ]

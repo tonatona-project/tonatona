@@ -1,0 +1,73 @@
+name: readme
+version: "0.1.0.0"
+category: "Framework, Test, Tonatona, Web"
+synopsis: Test to make sure the code compiles in the README.md
+description:
+  Test to make sure the code compiles in the README.md
+license: "MIT"
+author: "Kadzuya Okamoto, Dennis Gosnell"
+copyright: "ARoW https://arow.info"
+maintainer: "arow.okamoto+github@gmail.com"
+
+ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror
+default-extensions:
+  - AutoDeriveTypeable
+  - BangPatterns
+  - BinaryLiterals
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - DoAndIfThenElse
+  - DuplicateRecordFields
+  - EmptyDataDecls
+  - ExistentialQuantification
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - KindSignatures
+  - LambdaCase
+  - MonadFailDesugaring
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - NoImplicitPrelude
+  - OverloadedStrings
+  - PartialTypeSignatures
+  - PatternGuards
+  - PolyKinds
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - Strict
+  - StrictData
+  - TupleSections
+  - TypeFamilies
+  - TypeSynonymInstances
+  - ViewPatterns
+
+dependencies:
+  - base >= 4.7 && < 5
+  - markdown-unlit
+  - persistent
+  - persistent-template
+  - text
+  - tonaparser
+  - tonatona
+  - tonatona-db-sqlite
+  - tonatona-logger
+
+tests:
+  readme:
+    main: "README.lhs"
+    ghc-options: -pgmL markdown-unlit
+
+github: arow-oss/tonatona

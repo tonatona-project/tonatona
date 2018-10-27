@@ -1,5 +1,3 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 module TonaParser
   ( module System.Envy
   , decodeEnv
@@ -28,11 +26,10 @@ module TonaParser
   , argLong
   )where
 
+import RIO
+import qualified RIO.Map as Map
+
 import Control.Monad (ap)
-import Data.Map (Map)
-import qualified Data.Map as Map
-import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
-import Data.Semigroup (Semigroup, (<>))
 import System.Environment (getArgs, getEnvironment)
 import System.Envy (Var(fromVar, toVar))
 
@@ -313,7 +310,7 @@ data InnerSource
   | ArgLong String
   | ArgShort Char
 
-newtype Source = Source { unSource :: [InnerSource] }
+newtype Source = Source { _unSource :: [InnerSource] }
 
 (.||) :: Source -> Source -> Source
 (.||) (Source a) (Source b) = Source (a ++ b)
@@ -325,5 +322,5 @@ envVar name =
 argLong :: String -> Source
 argLong name = Source [ArgLong name]
 
-argShort :: Char -> Source
-argShort name = Source [ArgShort name]
+-- argShort :: Char -> Source
+-- argShort name = Source [ArgShort name]

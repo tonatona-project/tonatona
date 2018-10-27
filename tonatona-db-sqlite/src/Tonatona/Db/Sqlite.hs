@@ -1,11 +1,4 @@
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE NoMonomorphismRestriction #-}
 
 module Tonatona.Db.Sqlite
   ( run
@@ -20,29 +13,26 @@ module Tonatona.Db.Sqlite
   , runMigrate
   ) where
 
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Logger (Loc, LoggingT(..), LogLevel, LogSource, LogStr)
-import Control.Monad.Reader (ReaderT, runReaderT)
-import Data.ByteString (ByteString)
+import RIO
+
+import Control.Monad.Logger as Logger (Loc, LoggingT(..), LogLevel, LogSource, LogStr)
 import Data.Pool (Pool)
-import Data.String (IsString)
-import Data.Text.Encoding (decodeUtf8)
 import Database.Persist.Sqlite (createSqlitePool, wrapConnection)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
 import Database.Sqlite (open)
 
 import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
-import Tonatona (TonaM, readerShared)
+import Tonatona (TonaM, asksShared)
 
 type TonaDbM conf shared
   = ReaderT SqlBackend (TonaM conf shared)
 
 genConnectionPool ::
      Config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
+  -> (Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ())
   -> IO (Pool SqlBackend)
 genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
-    let textConnStr = decodeUtf8 connStr
+    let textConnStr = decodeUtf8Lenient connStr
         LoggingT runConnPool = createSqlitePool textConnStr connNum
     runConnPool logger
 
@@ -50,7 +40,7 @@ genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
 init :: forall config.
      HasConfig config
   => config
-  -> (Loc -> LogSource -> LogLevel -> LogStr -> IO ())
+  -> (Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ())
   -> IO Shared
 init conf logger =
   case dbConnString (config conf) of
@@ -68,7 +58,7 @@ runMigrate migration = run $ runMigration migration
 -- | Main function.
 run :: HasShared shared => TonaDbM conf shared a -> TonaM conf shared a
 run query = do
-  connType <- readerShared (sqliteConn . shared)
+  connType <- asksShared (sqliteConn . shared)
   case connType of
     SqliteConn sqlBackend -> runReaderT query sqlBackend
     SqliteConnPool pool -> runSqlPool query pool

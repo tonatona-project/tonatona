@@ -4,9 +4,9 @@ module Tonatona.Environment
   , Environment(..)
   ) where
 
-import GHC.Generics (Generic)
-import Text.Read (readMaybe)
+import RIO
 
+import GHC.Generics (Generic)
 import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
 
 data Config = Config

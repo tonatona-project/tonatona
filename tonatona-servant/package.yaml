@@ -1,0 +1,97 @@
+name: tonatona-servant
+version: "0.1.0.0"
+category: "Library, Tonatona, Servant, Web"
+synopsis: tonatona plugin for servant.
+description:
+  Tonatona plugin for @servant@.
+  This package provides a tonatona plugin for @servant@.
+license: "MIT"
+author: "Kadzuya Okamoto, Dennis Gosnell"
+copyright: "ARoW https://arow.info"
+maintainer: "arow.okamoto+github@gmail.com"
+
+extra-source-files:
+  - README.md
+
+ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror
+default-extensions:
+  - AutoDeriveTypeable
+  - BangPatterns
+  - BinaryLiterals
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - DoAndIfThenElse
+  - EmptyDataDecls
+  - ExistentialQuantification
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - KindSignatures
+  - LambdaCase
+  - MonadFailDesugaring
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - NoImplicitPrelude
+  - OverloadedStrings
+  - PartialTypeSignatures
+  - PatternGuards
+  - PolyKinds
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - Strict
+  - StrictData
+  - TupleSections
+  - TypeFamilies
+  - TypeSynonymInstances
+  - ViewPatterns
+
+dependencies:
+  - base >= 4.7 && < 5
+  - exceptions
+  - http-types
+  - monad-logger
+  - rio
+  - servant
+  - servant-server
+  - tonaparser
+  - tonatona
+  - wai
+  - wai-extra
+  - warp
+
+library:
+  source-dirs:
+    - src
+  exposed-modules:
+    - Tonatona.Servant
+
+tests:
+  spec:
+    main: "Spec.hs"
+    other-modules: []
+    source-dirs:
+      - test
+    dependencies:
+      - tonatona
+  doctest:
+    main: "DocTest.hs"
+    other-modules: []
+    source-dirs:
+      - test
+    dependencies:
+      - doctest
+      - Glob
+
+github: arow-oss/tonatona
