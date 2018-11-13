@@ -1,67 +1,100 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Tonatona.Logger
-  ( HasShared(..)
-  , Shared(..)
-  , Tonatona.Logger.init
-  , stdoutLogger
-  , stderrLogger
-  , noLogger
-  , Logger.logDebug
-  , Logger.logInfo
-  , Logger.logError
-  , Logger.logWarn
+  ( Config(..)
+  , DeployMode(..)
+  , Verbose(..)
   ) where
 
 import RIO
 
-import Control.Monad.Logger as Logger
-  ( Loc
-  , LoggingT(..)
-  , LogLevel
-  , LogSource
-  , LogStr
-  , MonadLogger(..)
-  , ToLogStr(toLogStr)
-  , logDebug
-  , logError
-  , logInfo
-  , logWarn
-  , runStdoutLoggingT
-  , runStderrLoggingT
+import GHC.Generics (Generic)
+import Tonatona (HasConfig(..), HasParser(..))
+import TonaParser
+  ( Parser(..)
+  , Var(..)
+  , (.||)
+  , argLong
+  , envVar
+  , optionalVal
   )
-import Tonatona (TonaM)
 
--- XXX: We could get rid of this overlapping instance by making TonaM be a
--- newtype wrapper instead of just a type alias.
-instance {-# OVERLAPPING #-} HasShared shared => MonadLogger (TonaM conf shared) where
-  monadLoggerLog :: ToLogStr msg => Loc -> Logger.LogSource -> Logger.LogLevel -> msg -> TonaM conf shared ()
-  monadLoggerLog loc source level msg = do
-    let logstr = toLogStr msg
-    logger <- asks (loggerAction . shared . snd)
-    liftIO $ logger loc source level logstr
 
--- Shared
+-- Config
 
-class HasShared shared where
-  shared :: shared -> Shared
 
-data Shared = Shared
-  { loggerAction :: Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ()
+data Config = Config
+  { mode :: DeployMode
+  , verbose :: Verbose
+  , logOptions :: LogOptions
+  , logFunc :: LogFunc
   }
 
-init :: (Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ()) -> IO Shared
-init logger = pure $ Shared logger
+instance HasParser a Config where
+  parser = do
+    mode <- parser
+    verbose <- parser
+    Parser $ \_ action -> do
+      options <- defaultLogOptions mode verbose
+      withLogFunc options $ \lf ->
+        action $ Config mode verbose options lf
 
-stdoutLogger :: Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ()
-stdoutLogger loc source level msg = do
-  func <- runStdoutLoggingT $ LoggingT pure
-  func loc source level msg
+instance (HasConfig env Config) => HasLogFunc env where
+  logFuncL = lens (logFunc . config) $
+    error "Setter for logFuncL is not defined"
 
-stderrLogger :: Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ()
-stderrLogger loc source level msg = do
-  func <- runStderrLoggingT $ LoggingT pure
-  func loc source level msg
 
-noLogger :: Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ()
-noLogger _ _ _ _ = pure ()
+-- Verbose
+
+
+newtype Verbose = Verbose { unVerbose :: Bool }
+  deriving (Show, Read, Eq)
+
+instance HasParser a Verbose where
+  parser = Verbose <$>
+    optionalVal
+      "Make the operation more talkative"
+      (argLong "verbose" .|| envVar "VERBOSE")
+      False
+
+
+-- DeployMode
+
+
+data DeployMode
+  = Development
+  | Production
+  | Staging
+  | Test
+  deriving (Eq, Generic, Show, Read)
+
+instance Var DeployMode where
+  toVar = show
+  fromVar = readMaybe
+
+instance HasParser a DeployMode where
+  parser =
+    optionalVal
+      "Application deployment mode to run"
+      (argLong "env" .|| envVar "ENV")
+      Development
+
+
+-- Logger options
+
+
+{-| Default way to create 'LogOptions'.
+ -}
+defaultLogOptions :: (MonadIO m) => DeployMode -> Verbose -> m LogOptions
+defaultLogOptions env verbose = do
+  logOptionsHandle stderr $ defaultVerbosity env verbose
+
+
+{-| Default setting for verbosity.
+ -}
+defaultVerbosity :: DeployMode -> Verbose -> Bool
+defaultVerbosity env (Verbose v) =
+  case (v, env) of
+    (False, Development) -> True
+    _ -> v

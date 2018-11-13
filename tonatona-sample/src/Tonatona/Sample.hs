@@ -1,32 +1,26 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Tonatona.Sample where
 
-import Control.Monad.Reader (ReaderT)
+import RIO
+
 import Data.Aeson (ToJSON(toJSON))
-import Data.Semigroup ((<>))
-import Data.Text (Text)
 import Data.Void (Void, absurd)
 import Database.Persist.Sql (Migration, SqlBackend, (==.), entityVal, insert_, selectList)
 import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowerCase, share, sqlSettings)
 import Servant
-import TonaParser (FromEnv(..), ParserMods(..), Var(..), (.||), argLong, defParserMods, envDef, envVar, fromEnvWithMods)
-import Tonatona (Plug(..), TonaM, askConf)
+import TonaParser (Parser(..), Var(..), (.||), argLong, envVar, optionalVal)
+import Tonatona (HasConfig(..), HasParser(..))
 import qualified Tonatona as Tona
+import qualified Tonatona.Logger as TonaLogger
 import qualified Tonatona.Db.Postgresql as TonaDbPostgres
 import qualified Tonatona.Db.Sqlite as TonaDbSqlite
 import Tonatona.Email.Sendmail (Address(..), simpleMail')
 import qualified Tonatona.Email.Sendmail as TonaEmail
-import qualified Tonatona.Environment as TonaEnv
-import Tonatona.Logger (logDebug, logInfo, stdoutLogger)
-import qualified Tonatona.Logger as TonaLogger
 import qualified Tonatona.Servant as TonaServant
 
 
@@ -55,35 +49,43 @@ type API =
   "redirect-example" :> Get '[JSON] Void :<|>
   "send-email" :> Get '[JSON] Int
 
-server :: ServerT API (TonaM Config Shared)
+app :: IO ()
+app =
+  Tona.run $ do
+    logDebug $ display ("About to run migration..." :: Text)
+    sharedDbMigrate migrateAll
+    logDebug $ display ("About to run web server..." :: Text)
+    TonaServant.run @API server
+
+server :: ServerT API (RIO Config)
 server = getFoo :<|> tagServer :<|> redirectExample :<|> sendEmailExample
 
-getFoo :: TonaM Config Shared Int
+getFoo :: RIO Config Int
 getFoo = do
-  $(logInfo) "in getFoo, returning 1"
+  logInfo $ display ("in getFoo, returning 1" :: Text)
   pure 1
 
-tagServer :: ServerT TagAPI (TonaM Config Shared)
+tagServer :: ServerT TagAPI (RIO Config)
 tagServer = postTag :<|> getTag
 
-postTag :: Text -> Text -> TonaM Config Shared ()
+postTag :: Text -> Text -> RIO Config ()
 postTag name val = do
   sharedDbRun $ do
-    $(logInfo) $
-      "in postTag, in TonaDb.run, inserting a tag with name = " <>
-      name <> ", val = " <> val
+    -- logInfo $ display $
+    --   "in postTag, in TonaDb.run, inserting a tag with name = " <>
+    --   name <> ", val = " <> val
     insert_ (Tag name val)
 
-getTag :: Text -> TonaM Config Shared [Text]
+getTag :: Text -> RIO Config [Text]
 getTag name = do
   tagEnts <- sharedDbRun $
     selectList [TagName ==. name] []
   pure $ tagValue . entityVal <$> tagEnts
 
-redirectExample :: TonaM Config Shared Void
+redirectExample :: RIO Config Void
 redirectExample = TonaServant.redirect "https://google.com"
 
-sendEmailExample :: TonaM Config Shared Int
+sendEmailExample :: RIO Config Int
 sendEmailExample = do
   let mail =
         simpleMail'
@@ -96,20 +98,16 @@ sendEmailExample = do
 
 instance ToJSON Void where toJSON = absurd
 
-app :: IO ()
-app =
-  Tona.run $ do
-    $(logDebug) "About to run migration..."
-    sharedDbMigrate migrateAll
-    $(logDebug) "About to run web server..."
-    TonaServant.run @API server
-
 -- Config
 
 data DbToUse = PostgreSQL | Sqlite deriving Show
 
-instance FromEnv DbToUse where
-  fromEnv = envDef (argLong "db-to-use" .|| envVar "DB_TO_USE") PostgreSQL
+instance HasParser a DbToUse where
+  parser =
+    optionalVal
+      "Database type to use (postgresql|sqlite)"
+      (argLong "db-to-use" .|| envVar "DB_TO_USE")
+      PostgreSQL
 
 instance Var DbToUse where
   toVar PostgreSQL = "postgresql"
@@ -120,96 +118,67 @@ instance Var DbToUse where
   fromVar _ = Nothing
 
 data Config = Config
-  { tonaDbPostgres :: TonaDbPostgres.Config
-  , tonaDbSqlite :: TonaDbSqlite.Config
+  { tonaLogger :: TonaLogger.Config
   , dbToUse :: DbToUse
-  , tonaEnv :: TonaEnv.Config
+  , tonaDb :: TonaDbConfig
   , tonaServant :: TonaServant.Config
   }
-  deriving (Show)
 
-instance FromEnv Config where
-  fromEnv =
-    let postgres =
-          fromEnvWithMods
-            defParserMods
-              { envVarMods = ("POSTGRESQL_" <>)
-              , cmdLineLongMods = ("postgresql-" <>)
-              }
-        sqlite =
-          fromEnvWithMods
-            defParserMods
-              { envVarMods = ("SQLITE_" <>)
-              , cmdLineLongMods = ("sqlite-" <>)
-              }
-    in Config <$> postgres <*> sqlite <*> fromEnv <*> fromEnv <*> fromEnv
+data TonaDbConfig
+  = TonaDbPostgres TonaDbPostgres.Config
+  | TonaDbSqlite TonaDbSqlite.Config
 
-instance TonaDbPostgres.HasConfig Config where
-  config = tonaDbPostgres
+instance HasConfig Config TonaLogger.Config where
+  config = tonaLogger
 
-instance TonaDbSqlite.HasConfig Config where
-  config = tonaDbSqlite
+instance HasConfig Config TonaDbConfig where
+  config = tonaDb
 
-instance TonaEnv.HasConfig Config where
-  config = tonaEnv
+instance HasConfig Config TonaDbPostgres.Config where
+  config c = case tonaDb c of
+    TonaDbPostgres a -> a
+    _ -> error "This is not an postgres config type."
 
-instance TonaServant.HasConfig Config where
+instance HasConfig Config TonaDbSqlite.Config where
+  config c = case tonaDb c of
+    TonaDbSqlite a -> a
+    _ -> error "This is not an sqlite config type."
+
+instance HasConfig Config DbToUse where
+  config = dbToUse
+
+instance HasConfig Config TonaServant.Config where
   config = tonaServant
 
+dbParser :: DbToUse -> Parser a TonaDbConfig
+dbParser PostgreSQL = TonaDbPostgres <$> parser
+dbParser Sqlite = TonaDbSqlite <$> parser
 
--- Shared
+instance HasParser a Config where
+  parser = do
+    dbToUse <- parser
+    Config
+      <$> parser
+      <*> (pure dbToUse)
+      <*> dbParser dbToUse
+      <*> parser
 
-data Shared = Shared
-  { tonaDb :: SharedDb
-  , tonaLogger :: TonaLogger.Shared
-  }
 
 
-data SharedDb
-  = SharedSqlite TonaDbSqlite.Shared
-  | SharedPostgres TonaDbPostgres.Shared
+-- DB operators
+
 
 sharedDbRun ::
-     (TonaDbPostgres.HasShared shared, TonaDbSqlite.HasShared shared)
-  => ReaderT SqlBackend (TonaM Config shared) a
-  -> TonaM Config shared a
+     ReaderT SqlBackend (RIO Config) a -> RIO Config a
 sharedDbRun query = do
-  conf <- askConf
-  case dbToUse conf of
+  dbToUse <- asks config
+  case dbToUse of
     Sqlite -> TonaDbSqlite.run query
     PostgreSQL -> TonaDbPostgres.run query
 
-sharedDbMigrate ::
-     (TonaDbPostgres.HasShared shared, TonaDbSqlite.HasShared shared)
-  => Migration
-  -> TonaM Config shared ()
+sharedDbMigrate :: Migration -> RIO Config ()
 sharedDbMigrate migration = do
-  conf <- askConf
-  case dbToUse conf of
+  dbToUse <- asks config
+  case dbToUse of
     Sqlite -> TonaDbSqlite.runMigrate migration
     PostgreSQL -> TonaDbPostgres.runMigrate migration
-
-instance Plug Config Shared where
-  init conf = do
-    let db =
-          case dbToUse conf of
-            Sqlite -> SharedSqlite <$> TonaDbSqlite.init conf stdoutLogger
-            PostgreSQL -> SharedPostgres <$> TonaDbPostgres.init conf stdoutLogger
-    Shared
-      <$> db
-      <*> TonaLogger.init stdoutLogger
-
-instance TonaDbSqlite.HasShared Shared where
-  shared s =
-    case (tonaDb :: Shared -> SharedDb) s of
-      SharedSqlite sqliteShared -> sqliteShared
-      _ -> error "This is not an sqlite shared type."
-
-instance TonaDbPostgres.HasShared Shared where
-  shared s =
-    case (tonaDb :: Shared -> SharedDb) s of
-      SharedPostgres postgresShared -> postgresShared
-      _ -> error "This is not a postgres shared type."
-
-instance TonaLogger.HasShared Shared where
-  shared = tonaLogger

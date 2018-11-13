@@ -7,7 +7,5 @@ import RIO
 
 import Network.Mail.Mime
 
-import Tonatona (TonaM)
-
-send :: Mail -> TonaM conf shared ()
+send :: Mail -> RIO env ()
 send = liftIO . renderSendMail

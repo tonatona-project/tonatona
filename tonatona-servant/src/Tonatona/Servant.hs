@@ -5,7 +5,6 @@ module Tonatona.Servant
   ( Tonatona.Servant.run
   , redirect
   , Config(..)
-  , HasConfig(..)
   , Host(..)
   , Port
   , Protocol(..)
@@ -20,12 +19,12 @@ import qualified Network.Wai.Handler.Warp as Warp
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Servant
 
-import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
-import Tonatona (TonaM)
+import Tonatona (HasConfig(..), HasParser(..))
+import TonaParser (Parser, Var(..), (.||), argLong, envVar, optionalVal)
 
-reqLogMiddleware :: HasConfig conf => TonaM conf shared Middleware
+reqLogMiddleware :: (HasConfig env Config) => RIO env Middleware
 reqLogMiddleware = do
-  logger <- asks (reqLog . config . fst)
+  logger <- asks (reqLog . config)
   case logger of
     ReqLogVerbose -> pure logStdoutDev
     ReqLogNormal -> pure logStdout
@@ -34,37 +33,36 @@ reqLogMiddleware = do
 {-| Main function.
  -}
 run ::
-     forall (api :: *) conf shared.
-     (HasServer api '[], HasConfig conf)
-  => ServerT api (TonaM conf shared)
-  -> TonaM conf shared ()
+     forall (api :: *) env.
+     (HasServer api '[], HasConfig env Config)
+  => ServerT api (RIO env)
+  -> RIO env ()
 run servantServer = do
-  (conf, shared) <- ask
+  env <- ask
+  conf <- asks config
   loggingMiddleware <- reqLogMiddleware
-  let app = runServant @api conf shared servantServer
-  liftIO $ Warp.run (port (config conf)) $ loggingMiddleware app
+  let app = runServant @api env servantServer
+  liftIO $ Warp.run (port conf) $ loggingMiddleware app
 
 runServant ::
-     forall (api :: *) conf shared. HasServer api '[]
-  => conf
-  -> shared
-  -> ServerT api (TonaM conf shared)
+     forall (api :: *) env. (HasServer api '[])
+  => env
+  -> ServerT api (RIO env)
   -> Application
-runServant conf shared servantServer =
+runServant env servantServer =
   serve (Proxy @api) $ hoistServer (Proxy @api) transformation servantServer
   where
     transformation
-      :: forall a. TonaM conf shared a -> Servant.Handler a
+      :: forall a. RIO env a -> Servant.Handler a
     transformation action = do
       let
-        -- ioAction :: IO (Either ServantErr a)
-        ioAction = Right <$> runRIO (conf, shared) action
+        ioAction = Right <$> runRIO env action
       eitherRes <- liftIO $ ioAction `catch` \(e :: ServantErr) -> pure $ Left e
       case eitherRes of
         Right res -> pure res
         Left servantErr -> throwError servantErr
 
-redirect :: ByteString -> TonaM conf shared a
+redirect :: ByteString -> RIO env a
 redirect redirectLocation =
   throwM $
     err302
@@ -79,7 +77,7 @@ redirect redirectLocation =
 -- @some.url.com@.
 newtype Host = Host
   { unHost :: Text
-  } deriving (Eq, IsString, Read, Show, Var)
+  } deriving (Eq, IsString, Read, Show)
 
 -- | This defines the protocol part of a URL.
 --
@@ -87,7 +85,7 @@ newtype Host = Host
 -- @https@.
 newtype Protocol = Protocol
   { unProtocol :: Text
-  } deriving (Eq, IsString, Read, Show, Var)
+  } deriving (Eq, IsString, Read, Show)
 
 data ReqLog
   = ReqLogVerbose
@@ -115,33 +113,37 @@ data Config = Config
   }
   deriving (Show)
 
-instance FromEnv Config where
-  fromEnv =
-    let host =
-          envDef
-            ( argLong "host" .||
-              envVar "HOST"
-            )
-            ("localhost" :: Host)
-        protocol =
-          envDef
-            ( argLong "protocol" .||
-              envVar "PROTOCOL"
-            )
-            ("http" :: Protocol)
-        port =
-          envDef
-            ( argLong "port" .||
-              envVar "PORT"
-            )
-            (8000 :: Port)
-        reqlog =
-          envDef
-            ( argLong "reqlog" .||
-              envVar "REQLOG"
-            )
-            ReqLogVerbose
-    in Config <$> host <*> protocol <*> port <*> reqlog
+instance HasParser a Host where
+  parser = Host <$>
+    optionalVal
+      "Host name to serve"
+      (argLong "host" .|| envVar "HOST")
+      "localhost"
 
-class HasConfig config where
-  config :: config -> Config
+instance HasParser a Protocol where
+  parser = Protocol <$>
+    optionalVal
+      "Protocol to serve"
+      (argLong "protocol" .|| envVar "PROTOCOL")
+      "http"
+
+portParser :: Parser x Port
+portParser =
+  optionalVal
+    "Port to serve"
+    (argLong "port" .|| envVar "PORT")
+    8000
+
+instance HasParser a ReqLog where
+  parser =
+    optionalVal
+      "Log level"
+      (argLong "reqlog" .|| envVar "REQLOG")
+      ReqLogVerbose
+
+instance HasParser a Config where
+  parser = Config
+    <$> parser
+    <*> parser
+    <*> portParser
+    <*> parser

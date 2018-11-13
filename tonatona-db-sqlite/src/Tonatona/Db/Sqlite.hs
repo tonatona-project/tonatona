@@ -6,103 +6,90 @@ module Tonatona.Db.Sqlite
   , Config(..)
   , DbConnStr(..)
   , DbConnNum(..)
-  , HasConfig(..)
-  , Shared
-  , Tonatona.Db.Sqlite.init
-  , HasShared(..)
   , runMigrate
   ) where
 
 import RIO
 
-import Control.Monad.Logger as Logger (Loc, LoggingT(..), LogLevel, LogSource, LogStr)
+import Control.Monad.Logger as Logger (Loc, LoggingT(..), LogLevel, LogSource, LogStr, runStdoutLoggingT)
 import Data.Pool (Pool)
-import Database.Persist.Sqlite (createSqlitePool, wrapConnection)
+import Database.Persist.Sqlite (withSqlitePool, wrapConnection)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
 import Database.Sqlite (open)
 
-import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
-import Tonatona (TonaM, asksShared)
+import Tonatona (HasConfig(..), HasParser(..))
+import TonaParser (Parser(..), (.||), argLong, envVar, optionalVal)
 
-type TonaDbM conf shared
-  = ReaderT SqlBackend (TonaM conf shared)
+type TonaDbM env
+  = ReaderT SqlBackend (RIO env)
 
-genConnectionPool ::
-     Config
-  -> (Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ())
-  -> IO (Pool SqlBackend)
-genConnectionPool (Config (DbConnStr connStr) (DbConnNum connNum)) logger = do
-    let textConnStr = decodeUtf8Lenient connStr
-        LoggingT runConnPool = createSqlitePool textConnStr connNum
-    runConnPool logger
-
--- TODO: Add function for freeing the pool.
-init :: forall config.
-     HasConfig config
-  => config
-  -> (Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ())
-  -> IO Shared
-init conf logger =
-  case dbConnString (config conf) of
-    ":memory:" -> do
-      conn <- open ":memory:"
-      backend <- wrapConnection conn logger
-      pure $ Shared (SqliteConn backend)
-    _ -> do
-      pool <- liftIO $ genConnectionPool (config conf) logger
-      pure $ Shared (SqliteConnPool pool)
-
-runMigrate :: HasShared shared => Migration -> TonaM conf shared ()
+runMigrate :: (HasConfig env Config) => Migration -> RIO env ()
 runMigrate migration = run $ runMigration migration
 
 -- | Main function.
-run :: HasShared shared => TonaDbM conf shared a -> TonaM conf shared a
+run :: (HasConfig env Config) => TonaDbM env a -> RIO env a
 run query = do
-  connType <- asksShared (sqliteConn . shared)
+  connType <- asks (sqliteConn . config)
   case connType of
     SqliteConn sqlBackend -> runReaderT query sqlBackend
     SqliteConnPool pool -> runSqlPool query pool
 
+------------
+-- Config --
+------------
 
 newtype DbConnStr = DbConnStr
   { unDbConnStr :: ByteString
-  } deriving newtype (Eq, IsString, Read, Show, Var)
+  } deriving (Eq, IsString, Read, Show)
+
+instance HasParser a DbConnStr where
+  parser = DbConnStr <$>
+    optionalVal
+      "Formatted string to connect postgreSQL"
+      (argLong "db-conn-string" .|| envVar "DB_CONN_STRING")
+      ":memory:"
 
 newtype DbConnNum = DbConnNum { unDbConnNum :: Int }
-  deriving newtype (Eq, Num, Read, Show, Var)
+  deriving (Eq, Num, Read, Show)
+
+instance HasParser a DbConnNum where
+  parser = DbConnNum <$>
+    optionalVal
+      "Number of connections which connection pool uses"
+      ( argLong "db-conn-num" .|| envVar "DB_CONN_NUM")
+      10
 
 data Config = Config
   { dbConnString :: DbConnStr
   , dbConnNum :: DbConnNum
+  , sqliteConn :: SqliteConn
   }
-  deriving (Show)
 
-instance FromEnv Config where
-  fromEnv =
-    let connStr =
-          envDef
-            ( argLong "db-conn-string" .||
-              envVar "DB_CONN_STRING"
-            )
-            ":memory:"
-        connNum =
-          envDef
-            ( argLong "db-conn-num" .||
-              envVar "DB_CONN_NUM"
-            )
-            10
-    in Config <$> connStr <*> connNum
-
-class HasConfig config where
-  config :: config -> Config
+instance HasParser a Config where
+  parser = do
+    connStr <- parser
+    connNum <- parser
+    let textConnStr = decodeUtf8Lenient $ unDbConnStr connStr
+    Parser $ \_ action -> do
+      case connStr of
+        ":memory:" -> do
+          conn <- open ":memory:"
+          backend <- wrapConnection conn stdoutLogger
+          action $
+            Config connStr connNum (SqliteConn backend)
+        _ ->
+          runLoggingT
+            (withSqlitePool
+               textConnStr
+               (unDbConnNum connNum)
+               (lift . action . Config connStr connNum . SqliteConnPool))
+            stdoutLogger
 
 data SqliteConn
   = SqliteConn SqlBackend
   | SqliteConnPool (Pool SqlBackend)
 
-data Shared = Shared
-  { sqliteConn :: SqliteConn
-  }
-
-class HasShared shared where
-  shared :: shared -> Shared
+stdoutLogger :: Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ()
+stdoutLogger loc source level msg = do
+  func <- runStdoutLoggingT $ LoggingT pure
+  func loc source level msg
