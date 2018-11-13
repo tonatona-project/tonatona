@@ -4,19 +4,16 @@ import RIO
 
 import Say (sayShow)
 import TonaParser
-  ( FromEnv(fromEnv)
-  , Parser
-  , ParserRenames(..)
+  ( Parser
   , ParserMods(..)
   , (.||)
   , argLong
-  , decodeEnvWith
-  , defParserRenames
   , defParserMods
-  , env
-  , envDef
   , envVar
-  , fromEnvWith
+  , modify
+  , optionalVal
+  , requiredVal
+  , withConfig
   )
 
 data Bar = Bar
@@ -31,30 +28,43 @@ data Foo = Foo
 -- If environment variable "BAZ" exist, use the value
 -- else if command line argument "--baz" exist, use the value
 -- else use default value "baz"
-instance FromEnv Bar where
-  fromEnv = Bar
-    <$> envDef (argLong "baz" .|| envVar "BAZ") "baz"
+barParser :: Parser r Bar
+barParser =
+  Bar <$>
+    optionalVal
+      "Configuration for Bar.baz"
+      (argLong "baz" .|| envVar "BAZ")
+      "baz"
 
-barWithPrefix :: Parser Bar
-barWithPrefix =
-  fromEnvWith
-    defParserRenames
+setPrefixBar :: Parser r Bar -> Parser r Bar
+setPrefixBar =
+  modify
     defParserMods
       { cmdLineLongMods = ("bar-" <>)
       , envVarMods = ("BAR_" <>)
       }
 
-instance FromEnv Foo where
-  fromEnv = Foo
-    <$> env (argLong "foo" .|| envVar "FOO")
-    <*> barWithPrefix
+fooParser :: Parser r Foo
+fooParser = Foo
+  <$> requiredVal
+    "Configuration for Foo.foo"
+    (argLong "foo" .|| envVar "FOO")
+  <*> setPrefixBar barParser
+
+modifyFoo :: Parser r Foo -> Parser r Foo
+modifyFoo =
+  modify
+    defParserMods
+      { cmdLineLongMods = longMods
+      , envVarMods = envMods
+      }
+  where
+    longMods "foo" = "new-foo"
+    longMods a = a
+    envMods "BAR_BAZ" = "NEW_BAR_BAZ"
+    envMods a = a
 
 main :: IO ()
-main = do
-  let renames =
-        defParserRenames
-          { cmdLineLongRenames = [("foo", "new-foo")]
-          , envVarRenames = [("BAR_BAZ", "NEW_BAR_BAZ")]
-          }
-  (foo :: Maybe Foo) <- decodeEnvWith renames defParserMods
-  sayShow $ show foo
+main =
+  withConfig (modifyFoo fooParser) $ \config ->
+    sayShow $ config

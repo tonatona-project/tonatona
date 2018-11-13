@@ -1,30 +1,29 @@
 module TonaParser
-  ( module System.Envy
-  , decodeEnv
-  , decodeEnvWith
-  , FromEnv(..)
-  , fromEnvWith
-  , fromEnvWithRenames
-  , fromEnvWithMods
-  , modifyParserWith
-  , modifyParserWithRenames
-  , modifyParserWithMods
-  , env
-  , envDef
-  , Parser
-  , defParserRenames
-  , ParserRenames
-  , cmdLineLongRenames
-  , envVarRenames
+  (
+  -- * Run parser
+    Parser (..)
+  , withConfig
+  -- * Construct primitive parsers
+  , optionalVal
+  , requiredVal
+  , Source
+  , module System.Envy
+  , Description
+  , (.||)
+  , envVar
+  , argLong
+  -- * Modify parsers
+  , modify
   , defParserMods
   , ParserMods
   , cmdLineLongMods
   , envVarMods
-  , Source
-  , (.||)
-  , envVar
-  , argLong
-  )where
+  ) where
+
+{-| Integrated parser library created for tonatona meta application framework.
+ - It can construct system configuration from environment variables, command line arguments, and any IO values depends on them.
+ - See details for @example/Main.hs@.
+-}
 
 import RIO
 import qualified RIO.Map as Map
@@ -33,124 +32,68 @@ import Control.Monad (ap)
 import System.Environment (getArgs, getEnvironment)
 import System.Envy (Var(fromVar, toVar))
 
-{-| Example
-
-  data Foo = Foo
-    { foo :: Int
-    , bar :: Bar
-    }
-
-  data Bar = Bar
-    { baz :: String
-    }
-
-  -- If environment variable "BAZ" exist, use the value
-  -- else if command line argument "--baz" exist, use the value
-  -- else if command line argument "-b" exist, use the value
-  -- else use default value "baz"
-  FromEnv Bar where
-    fromEnv = Bar
-      <$> envMaybe (envVar "BAZ" .|| argLong "baz" .|| argShort 'b') .!= "baz"
-
-  -- If environment variable "BAR_BAZ" exist, use the value
-  -- else if command line argument "--bar-baz" exist, use the value
-  -- else use default value "baz"
-  -- ( short hands argument "-b" was deactivated )
-  barWithPrefix :: Parser a
-  barWithPrefix =
-    modifyConfig $
-      modifyEnvVarKey ("BAR_" <>) .
-      modifyArgLongKey ("bar-" <>) .
-      modifyArgShortKey const Nothing
-
-  FromEnv Foo where
-    fromEnv = Foo
-      <$> env (envVar "FOO" .|| argLong "foo")
-      <*> barWithPrefix
-
-  data Foo = Foo
-    { foo :: Int
-    , bar :: Bar
-    }
-
-  -- If environment variable "BAR_BAZ" exist, use the value
-  -- else if command line argument "--bar-baz" exist, use the value
-  -- else use default value "baz"
-  -- ( short hands argument "-b" was deactivated )
-  barWithPrefix :: Parser a
-  barWithPrefix =
-    modifyConfig $
-      modifyEnvVarKey ("BAR_" <>) .
-      modifyArgLongKey ("bar-" <>) .
-      modifyArgShortKey const Nothing
-
-  FromEnv Foo where
-    fromEnv = Foo
-      <$> env (envVar "FOO" .|| argLong "foo")
-      <*> barWithPrefix
-  -}
 
 
-class FromEnv a where
-  fromEnv :: Parser a
+-- Types
 
-modifyParserWith :: ParserRenames -> ParserMods -> Parser a -> Parser a
-modifyParserWith renames mods (Parser parserFunc) =
+{-| Main type representing how to construct system configuration.
+ -}
+newtype Parser r a = Parser
+  { runParser :: Config -> (a -> IO r) -> IO r }
+
+instance Functor (Parser r) where
+  fmap :: (a -> b) -> Parser r a -> Parser r b
+  fmap f p = Parser $ \conf action ->
+    runParser p conf (action . f)
+
+instance Applicative (Parser r) where
+  pure :: a -> Parser r a
+  pure a = Parser $ \_ -> ($ a)
+
+  (<*>) = ap
+
+instance Monad (Parser r) where
+  (>>=) :: Parser r a -> (a -> Parser r b) -> Parser r b
+  p >>= k = Parser $ \conf action ->
+    runParser p conf (\x -> runParser (k x) conf (action))
+
+instance MonadIO (Parser r) where
+  liftIO :: forall a. IO a -> Parser r a
+  liftIO ma = Parser $ \_ action -> action =<< ma
+
+
+-- Operators
+
+
+modify :: ParserMods -> Parser r a -> Parser r a
+modify mods (Parser parserFunc) =
   Parser $ \oldConfig ->
     let newConfig =
           oldConfig
-            { confParserRenames = renames <> confParserRenames oldConfig
-            , confParserMods = confParserMods oldConfig <> mods
+            { confParserMods = confParserMods oldConfig <> mods
             }
     in parserFunc newConfig
 
-modifyParserWithRenames :: ParserRenames -> Parser a -> Parser a
-modifyParserWithRenames renames = modifyParserWith renames defParserMods
-
-modifyParserWithMods :: ParserMods -> Parser a -> Parser a
-modifyParserWithMods = modifyParserWith defParserRenames
-
-fromEnvWith :: FromEnv a => ParserRenames -> ParserMods -> Parser a
-fromEnvWith renames mods = modifyParserWith renames mods fromEnv
-
-fromEnvWithRenames :: FromEnv a => ParserRenames -> Parser a
-fromEnvWithRenames renames = fromEnvWith renames defParserMods
-
-fromEnvWithMods :: FromEnv a => ParserMods -> Parser a
-fromEnvWithMods = fromEnvWith defParserRenames
-
-decodeEnv :: FromEnv a => IO (Maybe a)
-decodeEnv = decodeEnvWith defParserRenames defParserMods
-
--- | This function is just like 'decodeEnv', but it provides a way to give
--- alternatives for names environment variables and command line arguments.
-decodeEnvWith
-  :: FromEnv a
-  => ParserRenames
-  -> ParserMods
-  -> IO (Maybe a)
-decodeEnvWith parserRenames parserMods = do
+withConfig :: Parser r a -> (a -> IO r) -> IO r
+withConfig parser action = do
   envVars <- getEnvVars
   cmdLineArgs <- getCmdLineArgs
-  pure $ runParser fromEnv envVars cmdLineArgs parserRenames parserMods
+  parse parser envVars cmdLineArgs action
 
-runParser
-  :: Parser a
-  -> Map String String  -- ^ Environment variables.
-  -> [(String, String)]  -- ^ Command line arguments and values.
-  -> ParserRenames
-  -> ParserMods
-  -> Maybe a
-runParser parser envVars cmdLineArgs renames mods =
-  let Parser parserFunc = parser
-      conf =
+parse ::
+     Parser r a
+  -> Map String String -- ^ Environment variables.
+  -> [(String, String)] -- ^ Command line arguments and values.
+  -> (a -> IO r)
+  -> IO r
+parse (Parser parserFunc) envVars cmdLineArgs =
+  let conf =
         Config
           { confCmdLineArgs = cmdLineArgs
           , confEnvVars = envVars
-          , confParserRenames = renames
-          , confParserMods = mods
+          , confParserMods = defParserMods
           }
-  in parserFunc conf
+   in parserFunc conf
 
 getEnvVars :: IO (Map String String)
 getEnvVars = do
@@ -169,12 +112,29 @@ getCmdLineArgs = do
     tupleList (a:b:cs) = (dropWhile (== '-') a, b) : tupleList cs
     tupleList _ = []
 
-env :: Var a => Source -> Parser a
-env (Source srcs) =
-  Parser $ \conf -> do
+requiredVal :: Var a => Description -> Source -> Parser r a
+requiredVal desc srcs = do
+  ma <- fieldMaybe desc srcs
+  case ma of
+    Just a -> pure a
+    Nothing ->
+      Parser $ \_ _ -> error $ "No required configuration for \"" <> unDescription desc <> "\""
+
+optionalVal :: Var a => Description -> Source -> a -> Parser r a
+optionalVal desc srcs df = do
+  ma <- fieldMaybe desc srcs
+  case ma of
+    Nothing -> pure df
+    Just a -> pure a
+
+fieldMaybe :: Var a => Description -> Source -> Parser r (Maybe a)
+fieldMaybe _desc (Source srcs) =
+  Parser $ \conf action -> do
     -- find matching source
-    val <- findValInSrc conf srcs
-    fromVar val
+    let mval = findValInSrc conf srcs
+    action (fromVar =<< mval)
+
+
 
 findValInSrc :: Config -> [InnerSource] -> Maybe String
 findValInSrc conf srcs = listToMaybe $ mapMaybe (findValInSrcs conf) srcs
@@ -183,110 +143,48 @@ findValInSrcs :: Config -> InnerSource -> Maybe String
 findValInSrcs conf innerSource =
   let cmdLineArgs = confCmdLineArgs conf
       envVars = confEnvVars conf
-      renames = confParserRenames conf
       mods = confParserMods conf
-      longRenames = cmdLineLongRenames renames
-      shortRenames = cmdLineShortRenames renames
-      envRenames = envVarRenames renames
       longMods = cmdLineLongMods mods
       shortMods = cmdLineShortMods mods
       envMods = envVarMods mods
   in
   case innerSource of
-    ArgLong str -> findValInCmdLineLong cmdLineArgs longRenames longMods str
-    ArgShort ch -> findValInCmdLineShort cmdLineArgs shortRenames shortMods ch
-    EnvVar var -> findValInEnvVar envVars envRenames envMods var
+    ArgLong str -> findValInCmdLineLong cmdLineArgs longMods str
+    ArgShort ch -> findValInCmdLineShort cmdLineArgs shortMods ch
+    EnvVar var -> findValInEnvVar envVars envMods var
 
 findValInCmdLineLong
   :: [(String, String)]
-  -> [(String, String)]
   -> (String -> String)
   -> String
   -> Maybe String
-findValInCmdLineLong args renames modFunc str =
+findValInCmdLineLong args modFunc str =
   let modifiedVal = modFunc str
-      valToLookup = lookupDef modifiedVal renames modifiedVal
-  in lookup valToLookup args
+  in lookup modifiedVal args
 
 findValInCmdLineShort
   :: [(String, String)]
-  -> [(Char, Char)]
   -> (Char -> Char)
   -> Char
   -> Maybe String
-findValInCmdLineShort args renames modFunc ch =
+findValInCmdLineShort args modFunc ch =
   let modifiedVal = modFunc ch
-      valToLookup = lookupDef modifiedVal renames modifiedVal
-  in lookup [valToLookup] args
+  in lookup [modifiedVal] args
 
 findValInEnvVar
   :: Map String String
-  -> [(String, String)]
   -> (String -> String)
   -> String
   -> Maybe String
-findValInEnvVar args renames modFunc var =
+findValInEnvVar args modFunc var =
   let modifiedVal = modFunc var
-      valToLookup = lookupDef modifiedVal renames modifiedVal
-  in Map.lookup valToLookup args
-
-lookupDef :: Eq a => a -> [(a, b)] -> b -> b
-lookupDef a pairs b = fromMaybe b $ lookup a pairs
-
-envDef :: Var a => Source -> a -> Parser a
-envDef src df = Parser $ \conf ->
-  case (unParser $ env src) conf of
-    Nothing -> Just df
-    Just a -> Just a
-
-newtype Parser a = Parser
-  { unParser :: Config -> Maybe a
-  }
-  deriving (Functor
-             -- , Monad
-             -- , MonadError String
-             -- , MonadIO
-             -- , Alternative
-             -- , MonadPlus
-             )
-
-instance Applicative Parser where
-  pure a = Parser $ \_ -> Just a
-
-  (<*>) = ap
-
-instance Monad Parser where
-  (>>=) :: Parser a -> (a -> Parser b) -> Parser b
-  Parser func >>= f = Parser $ \conf ->
-    let maybeA = func conf
-    in
-    case maybeA of
-      Nothing -> Nothing
-      Just a -> unParser (f a) conf
+  in Map.lookup modifiedVal args
 
 data Config = Config
   { confCmdLineArgs :: [(String, String)]
   , confEnvVars :: Map String String
-  , confParserRenames :: ParserRenames
   , confParserMods :: ParserMods
   }
-
-data ParserRenames = ParserRenames
-  { cmdLineLongRenames :: [(String, String)]
-  , cmdLineShortRenames :: [(Char, Char)]
-  , envVarRenames :: [(String, String)]
-  }
-
-instance Semigroup ParserRenames where
-  ParserRenames a b c <> ParserRenames a' b' c' =
-    ParserRenames (a <> a') (b <> b') (c <> c')
-
-instance Monoid ParserRenames where
-  mappend = (<>)
-  mempty = ParserRenames [] [] []
-
-defParserRenames :: ParserRenames
-defParserRenames = mempty
 
 data ParserMods = ParserMods
   { cmdLineLongMods :: String -> String
@@ -314,6 +212,9 @@ newtype Source = Source { _unSource :: [InnerSource] }
 
 (.||) :: Source -> Source -> Source
 (.||) (Source a) (Source b) = Source (a ++ b)
+
+newtype Description = Description { unDescription :: String }
+  deriving (Show, Eq, Read, IsString)
 
 envVar :: String -> Source
 envVar name =
