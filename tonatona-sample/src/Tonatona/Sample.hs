@@ -24,6 +24,9 @@ import qualified Tonatona.Email.Sendmail as TonaEmail
 import qualified Tonatona.Servant as TonaServant
 
 
+-- DB entity defs
+
+
 $(share
   [ mkPersist sqlSettings {mpsGenerateLenses = False}
   , mkMigrate "migrateAll"
@@ -38,6 +41,28 @@ $(share
     |]
  )
 
+
+
+-- App
+
+
+app :: IO ()
+app =
+  Tona.run $ do
+    -- Logger functions are available only by adding Tonatona.Logger instance in application @Config@ type.
+    logDebug $ display ("About to run migration..." :: Text)
+    sharedDbMigrate migrateAll
+    -- Configurations are accessable by 'asks' as follows.
+    port <- asks (TonaServant.port . config)
+    logDebug $
+      ("About to run web server on port " <> display port <> " ...")
+    TonaServant.run @API server
+
+
+
+-- Servant API defs
+
+
 type TagAPI = "tag" :> (
   Capture "tagname" Text :> Capture "tagvalue" Text :> Post '[JSON] () :<|>
     Capture "tagname" Text :> Get '[JSON] [Text]
@@ -50,19 +75,10 @@ type API =
   "send-email" :> Get '[JSON] Int :<|>
   "error-example" :> Get '[JSON] Int
 
-app :: IO ()
-app =
-  Tona.run $ do
-    logDebug $ display ("About to run migration..." :: Text)
-    sharedDbMigrate migrateAll
-    port <- asks (TonaServant.port . config)
-    logDebug $
-      ("About to run web server on port " <> display port <> " ...")
-    TonaServant.run @API server
-
 server :: ServerT API (RIO Config)
 server = getFoo :<|> tagServer :<|> redirectExample :<|> sendEmailExample :<|> errorExample
 
+-- As you can see the type, any plugins can be used in @TonaServer.run@.
 getFoo :: RIO Config Int
 getFoo = do
   logInfo $ display ("in getFoo, returning 1" :: Text)
@@ -74,6 +90,7 @@ tagServer = postTag :<|> getTag
 postTag :: Text -> Text -> RIO Config ()
 postTag name val = do
   sharedDbRun $ do
+    -- By using 'lift', any plugins are available in @Tonatona.Db.*.run@
     lift $
       logInfo $ display $
         "in postTag, in TonaDb.run, inserting a tag with name = " <>
@@ -106,7 +123,10 @@ errorExample = do
 
 instance ToJSON Void where toJSON = absurd
 
+
+
 -- Config
+
 
 data DbToUse = PostgreSQL | Sqlite deriving Show
 
