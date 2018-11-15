@@ -74,9 +74,10 @@ tagServer = postTag :<|> getTag
 postTag :: Text -> Text -> RIO Config ()
 postTag name val = do
   sharedDbRun $ do
-    -- logInfo $ display $
-    --   "in postTag, in TonaDb.run, inserting a tag with name = " <>
-    --   name <> ", val = " <> val
+    lift $
+      logInfo $ display $
+        "in postTag, in TonaDb.run, inserting a tag with name = " <>
+        name <> ", val = " <> val
     insert_ (Tag name val)
 
 getTag :: Text -> RIO Config [Text]
