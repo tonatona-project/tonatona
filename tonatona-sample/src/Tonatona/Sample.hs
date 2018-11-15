@@ -55,7 +55,9 @@ app =
   Tona.run $ do
     logDebug $ display ("About to run migration..." :: Text)
     sharedDbMigrate migrateAll
-    logDebug $ display ("About to run web server..." :: Text)
+    port <- asks (TonaServant.port . config)
+    logDebug $
+      ("About to run web server on port " <> display port <> " ...")
     TonaServant.run @API server
 
 server :: ServerT API (RIO Config)
