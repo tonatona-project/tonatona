@@ -1,4 +1,4 @@
-module Tonatona.Db.Postgresql
+module Tonatona.Persist.Sqlite
   ( run
   , TonaDbM
   , Config(..)
@@ -11,8 +11,9 @@ import RIO
 
 import Control.Monad.Logger as Logger (Loc, LoggingT(..), LogLevel, LogSource, LogStr, runStdoutLoggingT)
 import Data.Pool (Pool)
-import Database.Persist.Postgresql (withPostgresqlPool)
+import Database.Persist.Sqlite (withSqlitePool, wrapConnection)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
+import Database.Sqlite (open)
 
 import Tonatona (HasConfig(..), HasParser(..))
 import TonaParser (Parser(..), (.||), argLong, envVar, optionalVal)
@@ -26,8 +27,10 @@ runMigrate migration = run $ runMigration migration
 -- | Main function.
 run :: (HasConfig env Config) => TonaDbM env a -> RIO env a
 run query = do
-  pool <- asks (connPool . config)
-  runSqlPool query pool
+  connType <- asks (sqliteConn . config)
+  case connType of
+    SqliteConn sqlBackend -> runReaderT query sqlBackend
+    SqliteConnPool pool -> runSqlPool query pool
 
 ------------
 -- Config --
@@ -42,7 +45,7 @@ instance HasParser a DbConnStr where
     optionalVal
       "Formatted string to connect postgreSQL"
       (argLong "db-conn-string" .|| envVar "DB_CONN_STRING")
-      "postgresql://myuser:mypass@localhost:5432/mydb"
+      ":memory:"
 
 newtype DbConnNum = DbConnNum { unDbConnNum :: Int }
   deriving (Eq, Num, Read, Show)
@@ -55,23 +58,34 @@ instance HasParser a DbConnNum where
       10
 
 data Config = Config
-  { connString :: DbConnStr
-  , connNum :: DbConnNum
-  , connPool :: Pool SqlBackend
+  { dbConnString :: DbConnStr
+  , dbConnNum :: DbConnNum
+  , sqliteConn :: SqliteConn
   }
-  deriving (Show)
 
 instance HasParser a Config where
   parser = do
     connStr <- parser
     connNum <- parser
+    let textConnStr = decodeUtf8Lenient $ unDbConnStr connStr
     Parser $ \_ action -> do
-      runLoggingT
-        (withPostgresqlPool
-           (unDbConnStr connStr)
-           (unDbConnNum connNum)
-           (lift . action . Config connStr connNum))
-        stdoutLogger
+      case connStr of
+        ":memory:" -> do
+          conn <- open ":memory:"
+          backend <- wrapConnection conn stdoutLogger
+          action $
+            Config connStr connNum (SqliteConn backend)
+        _ ->
+          runLoggingT
+            (withSqlitePool
+               textConnStr
+               (unDbConnNum connNum)
+               (lift . action . Config connStr connNum . SqliteConnPool))
+            stdoutLogger
+
+data SqliteConn
+  = SqliteConn SqlBackend
+  | SqliteConnPool (Pool SqlBackend)
 
 stdoutLogger :: Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ()
 stdoutLogger loc source level msg = do

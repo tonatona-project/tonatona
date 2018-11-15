@@ -1,10 +1,10 @@
-name: tonatona-db-sqlite
+name: tonatona-persistent-postgresql
 version: "0.1.0.0"
 category: "Database, Library, Tonatona"
-synopsis: tonatona plugin for accessing Sqlite database.
+synopsis: tonatona plugin for accessing PostgreSQL database.
 description:
-  Tonatona plugin for accessing Sqlite database.
-  This package provides a tonatona plugin for accessing Sqlite database. This plugin uses persistent to actually accessing Sqlite.
+  Tonatona plugin for accessing PostgreSQL database.
+  This package provides a tonatona plugin for accessing PostgreSQL database. This plugin uses persistent to actually accessing PostgreSQL.
 license: "MIT"
 author: "Kadzuya Okamoto, Dennis Gosnell"
 copyright: "ARoW https://arow.info"
@@ -62,7 +62,7 @@ dependencies:
   - rio
   - monad-logger
   - persistent
-  - persistent-sqlite
+  - persistent-postgresql
   - resource-pool
   - tonaparser
   - tonatona
@@ -71,7 +71,7 @@ library:
   source-dirs:
     - src
   exposed-modules:
-    - Tonatona.Db.Sqlite
+    - Tonatona.Persist.Postgresql
 
 tests:
   spec:

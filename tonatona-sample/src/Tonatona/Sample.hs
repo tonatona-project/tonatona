@@ -17,8 +17,8 @@ import TonaParser (Parser(..), Var(..), (.||), argLong, envVar, optionalVal)
 import Tonatona (HasConfig(..), HasParser(..))
 import qualified Tonatona as Tona
 import qualified Tonatona.Logger as TonaLogger
-import qualified Tonatona.Db.Postgresql as TonaDbPostgres
-import qualified Tonatona.Db.Sqlite as TonaDbSqlite
+import qualified Tonatona.Persist.Postgresql as TonaDbPostgres
+import qualified Tonatona.Persist.Sqlite as TonaDbSqlite
 import Tonatona.Email.Sendmail (Address(..), simpleMail')
 import qualified Tonatona.Email.Sendmail as TonaEmail
 import qualified Tonatona.Servant as TonaServant

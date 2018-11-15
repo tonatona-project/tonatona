@@ -68,10 +68,10 @@ dependencies:
   - servant-server
   - tonaparser
   - tonatona
-  - tonatona-db-postgresql
-  - tonatona-db-sqlite
   - tonatona-email-sendmail
   - tonatona-logger
+  - tonatona-persistent-postgresql
+  - tonatona-persistent-sqlite
   - tonatona-servant
 
 library:
