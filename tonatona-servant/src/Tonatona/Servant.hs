@@ -19,22 +19,15 @@ import qualified Network.Wai.Handler.Warp as Warp
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Servant
 
+import TonaParser (Parser, (.||), argLong, envVar, optionalVal)
 import Tonatona (HasConfig(..), HasParser(..))
-import TonaParser (Parser, Var(..), (.||), argLong, envVar, optionalVal)
-
-reqLogMiddleware :: (HasConfig env Config) => RIO env Middleware
-reqLogMiddleware = do
-  logger <- asks (reqLog . config)
-  case logger of
-    ReqLogVerbose -> pure logStdoutDev
-    ReqLogNormal -> pure logStdout
-    ReqLogQuiet -> pure id
+import qualified Tonatona.Logger as TonaLogger
 
 {-| Main function.
  -}
 run ::
      forall (api :: *) env.
-     (HasServer api '[], HasConfig env Config)
+     (HasServer api '[], HasConfig env Config, HasConfig env TonaLogger.Config)
   => ServerT api (RIO env)
   -> RIO env ()
 run servantServer = do
@@ -69,6 +62,14 @@ redirect redirectLocation =
       { errHeaders = [(hLocation, redirectLocation)]
       }
 
+reqLogMiddleware :: (HasConfig env TonaLogger.Config) => RIO env Middleware
+reqLogMiddleware = do
+  TonaLogger.Config {mode, verbose} <- asks config
+  pure $
+    if TonaLogger.defaultVerbosity mode verbose
+      then logStdoutDev
+      else logStdout
+
 -- Config
 
 -- | This defines the host part of a URL.
@@ -87,29 +88,10 @@ newtype Protocol = Protocol
   { unProtocol :: Text
   } deriving (Eq, IsString, Read, Show)
 
-data ReqLog
-  = ReqLogVerbose
-  | ReqLogNormal
-  | ReqLogQuiet
-  deriving (Eq, Read, Show)
-
-instance Var ReqLog where
-  toVar :: ReqLog -> String
-  toVar ReqLogVerbose = "verbose"
-  toVar ReqLogNormal = "normal"
-  toVar ReqLogQuiet = "quiet"
-
-  fromVar :: String -> Maybe ReqLog
-  fromVar "verbose" = Just ReqLogVerbose
-  fromVar "normal" = Just ReqLogNormal
-  fromVar "quiet" = Just ReqLogQuiet
-  fromVar _ = Nothing
-
 data Config = Config
   { host :: Host
   , protocol :: Protocol
   , port :: Port
-  , reqLog :: ReqLog
   }
   deriving (Show)
 
@@ -134,16 +116,8 @@ portParser =
     (argLong "port" .|| envVar "PORT")
     8000
 
-instance HasParser a ReqLog where
-  parser =
-    optionalVal
-      "Log level"
-      (argLong "reqlog" .|| envVar "REQLOG")
-      ReqLogVerbose
-
 instance HasParser a Config where
   parser = Config
     <$> parser
     <*> parser
     <*> portParser
-    <*> parser

@@ -5,6 +5,7 @@ module Tonatona.Logger
   ( Config(..)
   , DeployMode(..)
   , Verbose(..)
+  , defaultVerbosity
   ) where
 
 import RIO

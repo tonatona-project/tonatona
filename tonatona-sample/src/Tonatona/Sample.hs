@@ -47,7 +47,8 @@ type API =
   "foo" :> Get '[JSON] Int :<|>
   TagAPI :<|>
   "redirect-example" :> Get '[JSON] Void :<|>
-  "send-email" :> Get '[JSON] Int
+  "send-email" :> Get '[JSON] Int :<|>
+  "error-example" :> Get '[JSON] Int
 
 app :: IO ()
 app =
@@ -58,7 +59,7 @@ app =
     TonaServant.run @API server
 
 server :: ServerT API (RIO Config)
-server = getFoo :<|> tagServer :<|> redirectExample :<|> sendEmailExample
+server = getFoo :<|> tagServer :<|> redirectExample :<|> sendEmailExample :<|> errorExample
 
 getFoo :: RIO Config Int
 getFoo = do
@@ -95,6 +96,10 @@ sendEmailExample = do
           "This is a test email from foo@example.com to bar@example.com."
   TonaEmail.send mail
   pure 0
+
+errorExample :: RIO Config Int
+errorExample = do
+  throwIO $ err404
 
 instance ToJSON Void where toJSON = absurd
 

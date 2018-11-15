@@ -67,6 +67,7 @@ dependencies:
   - servant-server
   - tonaparser
   - tonatona
+  - tonatona-logger
   - wai
   - wai-extra
   - warp
