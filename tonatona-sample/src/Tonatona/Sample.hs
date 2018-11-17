@@ -10,18 +10,18 @@ import RIO
 
 import Data.Aeson (ToJSON(toJSON))
 import Data.Void (Void, absurd)
-import Database.Persist.Sql (Migration, SqlBackend, (==.), entityVal, insert_, selectList)
+import Database.Persist.Sql ((==.), entityVal, insert_, selectList)
 import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowerCase, share, sqlSettings)
 import Servant
-import TonaParser (Parser(..), Var(..), (.||), argLong, envVar, optionalVal)
 import Tonatona (HasConfig(..), HasParser(..))
 import qualified Tonatona as Tona
+import qualified Tonatona.Db as TonaDb
 import qualified Tonatona.Logger as TonaLogger
-import qualified Tonatona.Persist.Postgresql as TonaDbPostgres
-import qualified Tonatona.Persist.Sqlite as TonaDbSqlite
 import Tonatona.Email.Sendmail (Address(..), simpleMail')
 import qualified Tonatona.Email.Sendmail as TonaEmail
 import qualified Tonatona.Servant as TonaServant
+import qualified Tonatona.Persist.Postgresql as TonaDbPostgres
+import qualified Tonatona.Persist.Sqlite as TonaDbSqlite
 
 
 -- DB entity defs
@@ -51,7 +51,7 @@ app =
   Tona.run $ do
     -- Logger functions are available only by adding Tonatona.Logger instance in application @Config@ type.
     logDebug $ display ("About to run migration..." :: Text)
-    sharedDbMigrate migrateAll
+    TonaDb.runMigrate migrateAll
     -- Configurations are accessable by 'asks' as follows.
     port <- asks (TonaServant.port . config)
     logDebug $
@@ -89,7 +89,7 @@ tagServer = postTag :<|> getTag
 
 postTag :: Text -> Text -> RIO Config ()
 postTag name val = do
-  sharedDbRun $ do
+  TonaDb.run $ do
     -- By using 'lift', any plugins are available in @Tonatona.Db.*.run@
     lift $
       logInfo $ display $
@@ -99,7 +99,7 @@ postTag name val = do
 
 getTag :: Text -> RIO Config [Text]
 getTag name = do
-  tagEnts <- sharedDbRun $
+  tagEnts <- TonaDb.run $
     selectList [TagName ==. name] []
   pure $ tagValue . entityVal <$> tagEnts
 
@@ -128,85 +128,32 @@ instance ToJSON Void where toJSON = absurd
 -- Config
 
 
-data DbToUse = PostgreSQL | Sqlite deriving Show
-
-instance HasParser a DbToUse where
-  parser =
-    optionalVal
-      "Database type to use (postgresql|sqlite)"
-      (argLong "db-to-use" .|| envVar "DB_TO_USE")
-      PostgreSQL
-
-instance Var DbToUse where
-  toVar PostgreSQL = "postgresql"
-  toVar Sqlite = "sqlite"
-
-  fromVar "postgresql" = Just PostgreSQL
-  fromVar "sqlite" = Just Sqlite
-  fromVar _ = Nothing
-
 data Config = Config
   { tonaLogger :: TonaLogger.Config
-  , dbToUse :: DbToUse
-  , tonaDb :: TonaDbConfig
+  , tonaDb :: TonaDb.Config
   , tonaServant :: TonaServant.Config
   }
-
-data TonaDbConfig
-  = TonaDbPostgres TonaDbPostgres.Config
-  | TonaDbSqlite TonaDbSqlite.Config
 
 instance HasConfig Config TonaLogger.Config where
   config = tonaLogger
 
-instance HasConfig Config TonaDbConfig where
+instance HasConfig Config TonaDb.Config where
   config = tonaDb
 
-instance HasConfig Config TonaDbPostgres.Config where
-  config c = case tonaDb c of
-    TonaDbPostgres a -> a
-    _ -> error "This is not an postgres config type."
+instance HasConfig Config TonaDb.DbToUse where
+  config = config . (config :: Config -> TonaDb.Config)
 
 instance HasConfig Config TonaDbSqlite.Config where
-  config c = case tonaDb c of
-    TonaDbSqlite a -> a
-    _ -> error "This is not an sqlite config type."
+  config = config . (config :: Config -> TonaDb.Config)
 
-instance HasConfig Config DbToUse where
-  config = dbToUse
+instance HasConfig Config TonaDbPostgres.Config where
+  config = config . (config :: Config -> TonaDb.Config)
 
 instance HasConfig Config TonaServant.Config where
   config = tonaServant
 
-dbParser :: DbToUse -> Parser a TonaDbConfig
-dbParser PostgreSQL = TonaDbPostgres <$> parser
-dbParser Sqlite = TonaDbSqlite <$> parser
-
 instance HasParser a Config where
-  parser = do
-    dbToUse <- parser
-    Config
+  parser = Config
       <$> parser
-      <*> (pure dbToUse)
-      <*> dbParser dbToUse
       <*> parser
-
-
-
--- DB operators
-
-
-sharedDbRun ::
-     ReaderT SqlBackend (RIO Config) a -> RIO Config a
-sharedDbRun query = do
-  dbToUse <- asks config
-  case dbToUse of
-    Sqlite -> TonaDbSqlite.run query
-    PostgreSQL -> TonaDbPostgres.run query
-
-sharedDbMigrate :: Migration -> RIO Config ()
-sharedDbMigrate migration = do
-  dbToUse <- asks config
-  case dbToUse of
-    Sqlite -> TonaDbSqlite.runMigrate migration
-    PostgreSQL -> TonaDbPostgres.runMigrate migration
+      <*> parser
