@@ -1,0 +1,292 @@
+{-# START_FILE package.yaml #-}
+name: {{name}}
+version: "0.1.0.0"
+category: {{category}}{{^category}}Web{{/category}}
+# synopsis:
+# description:
+license: "MIT"
+author: {{author-name}}{{^author-name}}Author name here{{/author-name}}
+copyright: {{copyright}}{{^copyright}}{{year}}{{^year}}2018{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
+maintainer: {{author-email}}{{^author-email}}example@example.com{{/author-email}}
+
+extra-source-files:
+  - README.md
+
+ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror
+default-extensions:
+  - AutoDeriveTypeable
+  - BangPatterns
+  - BinaryLiterals
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - DoAndIfThenElse
+  - DuplicateRecordFields
+  - EmptyDataDecls
+  - ExistentialQuantification
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - KindSignatures
+  - LambdaCase
+  - MonadFailDesugaring
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - NoImplicitPrelude
+  - OverloadedStrings
+  - PartialTypeSignatures
+  - PatternGuards
+  - PolyKinds
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - Strict
+  - StrictData
+  - TupleSections
+  - TypeFamilies
+  - TypeSynonymInstances
+  - ViewPatterns
+
+dependencies:
+  - base >= 4.7 && < 5
+  - rio
+  - tonatona
+  - tonatona-logger
+
+library:
+  source-dirs:
+    - src
+
+executables:
+  {{name}}:
+    source-dirs:
+      - app
+    main: "Main.hs"
+    dependencies:
+      - {{name}}
+
+tests:
+  spec:
+    main: "Spec.hs"
+    other-modules: []
+    source-dirs:
+      - test
+    dependencies:
+      - {{name}}
+      - hspec
+      - QuickCheck
+  doctest:
+    main: "DocTest.hs"
+    other-modules: []
+    source-dirs:
+      - test
+    dependencies:
+      - {{name}}
+      - doctest
+      - Glob
+
+github: {{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}
+
+{-# START_FILE .gitignore #-}
+*.cabal
+dist
+dist-*
+cabal-dev
+*.o
+*.hi
+*.chi
+*.chs.h
+*.dyn_o
+*.dyn_hi
+.hpc
+.hsenv
+.cabal-sandbox/
+cabal.sandbox.config
+*.prof
+*.aux
+*.hp
+*.eventlog
+.stack-work/
+cabal.project.local
+
+{-# START_FILE Setup.hs #-}
+import Distribution.Simple
+main = defaultMain
+
+{-# START_FILE test/Spec.hs #-}
+{-# LANGUAGE QuasiQuotes #-}
+
+module Main where
+
+main :: IO ()
+main = pure ()
+
+{-# START_FILE test/DocTest.hs #-}
+module Main (main) where
+
+import RIO
+
+import System.FilePath.Glob (glob)
+import Test.DocTest (doctest)
+
+main :: IO ()
+main = glob "src/**/*.hs" >>= doDocTest
+
+doDocTest :: [String] -> IO ()
+doDocTest options =
+  doctest $
+    options <>
+    ghcExtensions
+
+ghcExtensions :: [String]
+ghcExtensions =
+    [ "-XAutoDeriveTypeable"
+    , "-XBangPatterns"
+    , "-XBinaryLiterals"
+    , "-XConstraintKinds"
+    , "-XDataKinds"
+    , "-XDefaultSignatures"
+    , "-XDeriveDataTypeable"
+    , "-XDeriveFoldable"
+    , "-XDeriveFunctor"
+    , "-XDeriveGeneric"
+    , "-XDeriveTraversable"
+    , "-XDoAndIfThenElse"
+    , "-XDuplicateRecordFields"
+    , "-XEmptyDataDecls"
+    , "-XExistentialQuantification"
+    , "-XFlexibleContexts"
+    , "-XFlexibleInstances"
+    , "-XFunctionalDependencies"
+    , "-XGADTs"
+    , "-XGeneralizedNewtypeDeriving"
+    , "-XInstanceSigs"
+    , "-XKindSignatures"
+    , "-XLambdaCase"
+    , "-XMonadFailDesugaring"
+    , "-XMultiParamTypeClasses"
+    , "-XMultiWayIf"
+    , "-XNamedFieldPuns"
+    , "-XNoImplicitPrelude"
+    , "-XOverloadedStrings"
+    , "-XPartialTypeSignatures"
+    , "-XPatternGuards"
+    , "-XPolyKinds"
+    , "-XRankNTypes"
+    , "-XRecordWildCards"
+    , "-XScopedTypeVariables"
+    , "-XStandaloneDeriving"
+    , "-XStrict"
+    , "-XStrictData"
+    , "-XTupleSections"
+    , "-XTypeFamilies"
+    , "-XTypeSynonymInstances"
+    , "-XViewPatterns"
+    ]
+
+{-# START_FILE app/Main.hs #-}
+module Main where
+
+import RIO
+import TonaApp.Main (app)
+
+main :: IO ()
+main = app
+
+{-# START_FILE src/TonaApp/Main.hs #-}
+module TonaApp.Main (app) where
+
+import RIO
+
+import Tonatona (HasConfig(..), HasParser(..))
+import qualified Tonatona as Tona
+import qualified Tonatona.Logger as TonaLogger
+
+
+
+-- App
+
+
+app :: IO ()
+app =
+  Tona.run $ do
+    _ :: Config <- ask
+    -- Logger functions are available by `Tonatona.Logger` plugin.
+    logDebug $ display ("This is a skeleton for tonatona project" :: Text)
+
+
+
+-- Config
+
+
+data Config = Config
+  { tonaLogger :: TonaLogger.Config
+  -- , anotherPlugin :: TonaAnotherPlugin.Config
+  -- , yetAnotherPlugin :: TonaYetAnotherPlugin.Config
+  }
+
+
+instance HasConfig Config TonaLogger.Config where
+  config = tonaLogger
+
+
+instance HasParser a Config where
+  parser = Config
+      <$> parser
+      -- <*> parser
+      -- <*> parser
+
+{-# START_FILE LICENSE #-}
+MIT License
+
+Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2018{{/year}}
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+{-# START_FILE README.md #-}
+# {{name}}
+
+{-# START_FILE stack.yaml #-}
+resolver: lts-11.13
+packages:
+  - '.'
+extra-deps:
+  - git: https://github.com/arow-oss/tonatona
+    commit: c8341435557959457e4657379e763dbf1d9b5890
+    subdirs:
+      - tonaparser
+      - tonatona
+      - tonatona-email-sendmail
+      - tonatona-logger
+      - tonatona-persistent-postgresql
+      - tonatona-persistent-sqlite
+      - tonatona-servant
+
+flags: {}
+extra-package-dbs: []
