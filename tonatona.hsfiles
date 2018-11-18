@@ -198,10 +198,11 @@ ghcExtensions =
 module Main where
 
 import RIO
+import Tonatona (run)
 import TonaApp.Main (app)
 
 main :: IO ()
-main = app
+main = run app
 
 {-# START_FILE src/TonaApp/Main.hs #-}
 module TonaApp.Main (app) where
@@ -209,7 +210,6 @@ module TonaApp.Main (app) where
 import RIO
 
 import Tonatona (HasConfig(..), HasParser(..))
-import qualified Tonatona as Tona
 import qualified Tonatona.Logger as TonaLogger
 
 
@@ -217,12 +217,11 @@ import qualified Tonatona.Logger as TonaLogger
 -- App
 
 
-app :: IO ()
-app =
-  Tona.run $ do
-    _ :: Config <- ask
-    -- Logger functions are available by `Tonatona.Logger` plugin.
-    logDebug $ display ("This is a skeleton for tonatona project" :: Text)
+app :: RIO Config ()
+app = do
+  -- Tonatona.Logger plugin enables to use logger functions without any configurations.
+  logInfo $ display ("This is a skeleton for tonatona project" :: Text)
+  logDebug $ display ("This is a debug message" :: Text)
 
 
 
