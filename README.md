@@ -44,6 +44,8 @@ specify configuration from within your application.
 
 ## How to use Tonatona
 
+**THIS INTRODUCTION IS OUT OF DATED.** We are now updating this document.
+
 Using Tonatona is relatively simple. It requires declaring a few datatypes, as
 well as instances for classes provided by Tonatona.
 
