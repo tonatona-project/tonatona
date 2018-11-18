@@ -44,47 +44,218 @@ specify configuration from within your application.
 
 ## How to use Tonatona
 
-**THIS INTRODUCTION IS OUT OF DATED.** We are now updating this document.
-
 Using Tonatona is relatively simple. It requires declaring a few datatypes, as
 well as instances for classes provided by Tonatona.
 
-This section describes how to do this, using the
-[tonatona-db-sqlite](./tonatona-db-sqlite) plugin as an example.
+This section describes how to do this, using our stack template for tonatona.
 
-First, we need some language pragmas and imports:
+### A quick sample
 
-```haskell
-{-# LANGUAGE EmptyDataDecls #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
+First, let's create a new tonatona project with `stack new` command:
 
-import Control.Monad.IO.Class (liftIO)
-import Data.Text (Text)
-import Database.Persist.Class (insert_)
-import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
-import TonaParser (FromEnv(fromEnv), Parser)
-import Tonatona (Plug(init), TonaM)
-import qualified Tonatona as Tona
-import qualified Tonatona.Db.Sqlite as TonaDb
-import Tonatona.Logger (stdoutLogger)
+```bash
+$ stack new sample-app https://raw.githubusercontent.com/arow-oss/tonatona/master/tonatona.hsfiles
 ```
 
-Next, we need to create a table definition.  The following creates a table to
+This will create a new project named "sample-app".
+
+Let’s start by just looking at all the code in `sample-app/src/TonaApp/Main.hs`.
+
+```haskell
+module TonaApp.Main (app) where
+
+import RIO
+
+import Tonatona (HasConfig(..), HasParser(..))
+import qualified Tonatona.Logger as TonaLogger
+
+
+
+-- App
+
+
+app :: RIO Config ()
+app = do
+  -- Tonatona.Logger plugin enables to use logger functions without any configurations.
+  logInfo $ display ("This is a skeleton for tonatona project" :: Text)
+  logDebug $ display ("This is a debug message" :: Text)
+
+
+
+-- Config
+
+
+data Config = Config
+  { tonaLogger :: TonaLogger.Config
+  -- , anotherPlugin :: TonaAnotherPlugin.Config
+  -- , yetAnotherPlugin :: TonaYetAnotherPlugin.Config
+  }
+
+
+instance HasConfig Config TonaLogger.Config where
+  config = tonaLogger
+
+
+instance HasParser a Config where
+  parser = Config
+      <$> parser
+      -- <*> parser
+      -- <*> parser
+```
+
+As you can see `import` part, tonatona is supposed to be used with [rio](http://hackage.haskell.org/package/rio) as an alternative to Prelude.
+
+```haskell
+import RIO
+
+import Tonatona (HasConfig(..), HasParser(..))
+import qualified Tonatona.Logger as TonaLogger
+```
+
+So, the main function named `app` has type of `RIO Config ()`.
+
+```haskell
+app :: RIO Config ()
+app = do
+  -- Tonatona.Logger plugin enables to use logger functions without any configurations.
+  logInfo $ display ("This is a skeleton for tonatona project" :: Text)
+  logDebug $ display ("This is a debug message" :: Text)
+```
+
+It's just a `RIO` monad, so bunch of convenient functions `rio` provieds are available in it.
+One of the amazing thing here is that there are no configurations about logging behaviour.
+The only thing you have to do is just write a little bit of boilerplate code.
+
+```haskell
+data Config = Config
+  { tonaLogger :: TonaLogger.Config
+  -- , anotherPlugin :: TonaAnotherPlugin.Config
+  -- , yetAnotherPlugin :: TonaYetAnotherPlugin.Config
+  }
+
+
+instance HasConfig Config TonaLogger.Config where
+  config = tonaLogger
+
+
+instance HasParser a Config where
+  parser = Config
+      <$> parser
+      -- <*> parser
+      -- <*> parser
+```
+
+As comment implies, there are no dificulties to use other plugins.
+Just add boilerplate codes. It's all!
+
+OK. It's time to compile it.
+
+```bash
+$ stack install --pedantic
+```
+
+So, let's see how it works.
+
+```bash
+$ stack exec sample-app
+2018-11-18 21:15:09.594168: [info] This is a skeleton for tonatona project
+@(src/TonaApp/Main.hs:16:3)
+2018-11-18 21:15:09.594783: [debug] This is a debug message
+@(src/TonaApp/Main.hs:17:3)
+```
+
+Wow, It actually works!
+But wait, it seems too verbose to run on production servers.
+Let's tell "sample-app" to act as production mode.
+
+```bash
+$ ENV=Production stack exec sample-app
+This is a skeleton for tonatona project
+```
+
+This amazing feature is also provided by `tonatona-logger` plugin.
+It is the power of plugin-based architecture of tonatona.
+
+### Adding new plugin
+
+First, we need to add plugin to use in `dependencies` of `package.yaml`.
+In this example, we use `tonatona-persistent-sqlite` plugin.
+
+```yaml
+dependencies:
+  - base >= 4.7 && < 5
+  # `persistent` and `persistent-template` is also needed to
+  # actually use `tonatona-persistent-sqlite`.
+  - persistent
+  - persistent-template
+  - rio
+  - tonatona
+  - tonatona-logger
+  - tonatona-persistent-sqlite
+```
+
+Next, you need to add new field to `Config`.
+
+```haskell
+import qualified Tonatona.Persist.Sqlite as TonaDb
+
+data Config = Config
+  { tonaLogger :: TonaLogger.Config
+  , tonaDb :: TonaDb.Config
+  }
+```
+
+Note that you have to import `Tonatona.Persist.Sqlite` module that `tonatona-persistent-sqlite` exposes.
+
+Your `Config` data type will contain configuration values that can be read in on
+the command line or through environment variables.  For instance,
+`TonaDb.Config` will contain the connection string for the SQLite database.  By
+default, this can be passed on the command line as `--db-conn-string` or as an
+environment variable as `DB_CONN_STRING`.  We will see this be used later.
+
+Your `Config` data type should generally contain `Tona*.Config` data types, as
+well as any of your own configuration options you would like to pick up from
+the environment.
+
+Tonatona needs to be told how to parse your `Config` data type from the
+available command line flags and environment variables.  The `HasParser` class is
+used for this.  The following is a simple example of this, for when your
+`Config` just contains `Tona*.Config` data types:
+
+```haskell
+instance HasParser a Config where
+  parser = Config
+      <$> parser
+      <*> parser
+```
+
+Tonatona also requires a little bit of boilerplate code.  You must help
+Tonatona figure out how to get the `TonaDb.Config` from your `Config`.  This is
+done with the `TonaDb.HasConfig` class.  This code should be very simple to
+write:
+
+```haskell
+instance HasConfig Config TonaDb.Config where
+  config = tonaDb
+```
+
+Now that we have all the easy code working, it is time to actually write your application!
+
+First, we need to create a table definition.  The following creates a table to
 hold blog posts.  It will have 3 columns: `id`, `author_name`, and `contents`.
 
 Creating a table definition is a requirement for using
 [persistent](http://hackage.haskell.org/package/persistent), which is what
-`tonatona-db-sqlite` is using internally.  This is not a requirement for
-Tonatona in general, just the `tonatona-db-sqlite` package.
+`tonatona-persistent-sqlite` is using internally.  This is not a requirement for
+Tonatona in general, just the `tonatona-persistent-sqlite` package.
 
 ```haskell
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
+
+import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
+
+
 $(share
   [mkPersist sqlSettings, mkMigrate "migrateAll"]
   [persistLowerCase|
@@ -97,153 +268,53 @@ $(share
  )
 ```
 
-Next, you need to create data types called `Config` and `Shared`.  These will be
-used for Tonatona:
+Next, do some DB operations in `app` function:
 
 ```haskell
-data Config = Config
-  { configTonaDb :: TonaDb.Config
-  }
-  deriving (Show)
-
-data Shared = Shared
-  { sharedTonaDb :: TonaDb.Shared
-  }
-```
-
-Your `Config` data type will contain configuration values that can be read in on
-the command line or through environment variables.  For instance,
-`TonaDb.Config` will contain the connection string for the SQLite database.  By
-default, this can be passed on the command line as `--db-conn-string` or as an
-environment variable as `DB_CONN_STRING`.  We will see this be used later.
-
-Your `Config` data type should generally contain `Tona*.Config` data types, as
-well as any of your own configuration options you would like to pick up from
-the environment.
-
-Your `Shared` data type will contain runtime values that will be needed by your
-application.  For instance, `TonaDb.Shared` will contain a connection to the
-SQLite database.  This can only be constructed at runtime and is not a value
-that can be passed in through a command line flag or environment variable.
-
-Your `Shared` data type should generally contain `Tona*.Shared` data types, as
-well as any runtime values your application needs.
-
-There are some plugins that only have either a `Config` or `Shared` data type,
-but not both.
-
-Tonatona needs to be told how to parse your `Config` data type from the
-available command line flags and environment variables.  The `FromEnv` class is
-used for this.  The following is a simple example of this, for when your
-`Config` just contains `Tona*.Config` data types:
-
-```haskell
-instance FromEnv Config where
-  fromEnv :: Parser Config
-  fromEnv = Config <$> fromEnv
-```
-
-Tonatona also requires a little bit of boilerplate code.  You must help
-Tonatona figure out how to get the `TonaDb.Config` from your `Config`.  This is
-done with the `TonaDb.HasConfig` class.  This code should be very simple to
-write:
-
-```haskell
-instance TonaDb.HasConfig Config where
-  config :: Config -> TonaDb.Config
-  config (Config tonaDbConf) = tonaDbConf
-```
-
-The `TonaDb.HasShared` class is similar for `TonaDb.Shared` and your `Shared`:
-
-```haskell
-instance TonaDb.HasShared Shared where
-  shared :: Shared -> TonaDb.Shared
-  shared (Shared tonaDbShared) = tonaDbShared
-```
-
-Now, you have to help Tonatona figure out how to create your `Shared` data type from your `Config` data type.
-
-Most of the Tonatona plugins expose a method called `init` that can be used to
-do this easily.  Generally you just need to pass your `Config` data type to the
-`init` method, along with other options.
-
-In the following code, `TonaDb.init` will return `IO TonaDb.Shared`, which you
-can wrap into your `Shared` data type.
-
-```haskell
-instance Plug Config Shared where
-  init :: Config -> IO Shared
-  init conf = Shared <$> TonaDb.init conf stdoutLogger
-```
-
-Now that we have all the easy code working, it is time to actually write your application!
-
-The following is an example of using the `TonaM` monad.  You can see how
-`TonaDb.runMigrate` as well as `TonaDb.run` are used, both of which return
-values in the `TonaM` monad.
-
-`TonaM` has an instance of `MonadIO`, so you can do any `IO` operation with
-`liftIO` as well.
-
-```haskell
-myApp :: TonaM Config Shared ()
-myApp = do
+app :: RIO Config ()
+app = do
+  -- Tonatona.Logger plugin enables to use logger functions without any configurations.
+  logInfo $ display ("This is a skeleton for tonatona project" :: Text)
+  logDebug $ display ("Migrating DB..." :: Text)
   TonaDb.runMigrate migrateAll
-  TonaDb.run $ insert_ $ BlogPost "Mr. Foo Bar" "This is an example blog post"
-  liftIO $ putStrLn "Successfully inserted a blog post!"
-```
-
-It is often convenient to create a type synonym for `TonaM`.  The following
-uses a type synonym called `Tona`:
-
-```haskell
-type Tona = TonaM Config Shared
-
-myApp' :: Tona ()
-myApp' = myApp
-```
-
-Finally, you can use the `Tona.run` function actually run your application:
-
-```haskell
-main :: IO ()
-main = Tona.run myApp'
+  logDebug $ display ("Running DB query..." :: Text)
+  TonaDb.run $ do
+    -- By using 'lift', any plugins are available in @TonaDb.run@.
+    lift $
+      logInfo $ display $
+        ("This log is called inside of `TonaDb.run`" :: Text)
+    insert_ $ BlogPost "Mr. Foo Bar" "This is an example blog post"
+  logInfo $ display ("Successfully inserted a blog post!" :: Text)
 ```
 
 A summary of the steps you need to take is as follows:
 
-1.  Create a `Config` and `Shared` data type for your application.  If you want
-    to use multiple plugins, just have your data types hold multiple
-    `Tona*.Config` and `Tona*.Shared` types.
+1.  Create a `Config` data type for your application.  If you want
+    to use multiple plugins, just have your data types hold multiple `Tona*.Config`.
 
-1.  Create a `FromEnv` instance for your `Config` data type.
+1.  Create a `HasParser` instance for your `Config` data type.
 
-1.  Create a `Tona*.HasConfig` and `Tona*.HasShared` instance for each of the plugins you are using.
+1.  Create a `Tona*.HasConfig` instance for each of the plugins you are using.
 
-1.  Create a `Plug` instance to show how to create your `Shared` type from your `Config` type.
-
-1.  Actually write your application using the `TonaM` monad.
-
-1.  Run your application with the `Tona.run` function.
+1.  Actually write your application using the `RIO Config ()` monad.
 
 ## Available Plugins
 
 Tonatona has many plugins available.  Here are the plugins provided in this repository.
 
-*   [tonatona-db-postgresql](./tonatona-db-postgresql/README.md)
+*   [tonatona-persistent-postgresql](./tonatona-persistent-postgresql/README.md)
 
-    [![Hackage](https://img.shields.io/hackage/v/tonatona-db-postgresql.svg)](https://hackage.haskell.org/package/tonatona-db-postgresql)
-    [![Stackage LTS](http://stackage.org/package/tonatona-db-postgresql/badge/lts)](http://stackage.org/lts/package/tonatona-db-postgresql)
-    [![Stackage Nightly](http://stackage.org/package/tonatona-db-postgresql/badge/nightly)](http://stackage.org/nightly/package/tonatona-db-postgresql)
+    [![Hackage](https://img.shields.io/hackage/v/tonatona-persistent-postgresql.svg)](https://hackage.haskell.org/package/tonatona-persistent-postgresql)
+    [![Stackage LTS](http://stackage.org/package/tonatona-persistent-postgresql/badge/lts)](http://stackage.org/lts/package/tonatona-persistent-postgresql)
+    [![Stackage Nightly](http://stackage.org/package/tonatona-persistent-postgresql/badge/nightly)](http://stackage.org/nightly/package/tonatona-persistent-postgresql)
 
     Provide access to a PostgreSQL database through the [persistent](http://hackage.haskell.org/package/persistent) library.
 
-*   [tonatona-db-sqlite](./tonatona-db-sqlite/README.md)
+*   [tonatona-persistent-sqlite](./tonatona-persistent-sqlite/README.md)
 
-    [![Hackage](https://img.shields.io/hackage/v/tonatona-db-sqlite.svg)](https://hackage.haskell.org/package/tonatona-db-sqlite)
-    [![Stackage LTS](http://stackage.org/package/tonatona-db-sqlite/badge/lts)](http://stackage.org/lts/package/tonatona-db-sqlite)
-    [![Stackage Nightly](http://stackage.org/package/tonatona-db-sqlite/badge/nightly)](http://stackage.org/nightly/package/tonatona-db-sqlite)
+    [![Hackage](https://img.shields.io/hackage/v/tonatona-persistent-sqlite.svg)](https://hackage.haskell.org/package/tonatona-persistent-sqlite)
+    [![Stackage LTS](http://stackage.org/package/tonatona-persistent-sqlite/badge/lts)](http://stackage.org/lts/package/tonatona-persistent-sqlite)
+    [![Stackage Nightly](http://stackage.org/package/tonatona-persistent-sqlite/badge/nightly)](http://stackage.org/nightly/package/tonatona-persistent-sqlite)
 
     Provide access to a SQLite database through the [persistent](http://hackage.haskell.org/package/persistent) library.
 
@@ -291,17 +362,6 @@ Tonatona has the additional general features that apply to every plugin:
     or setup code.  Plugins should be configured to get configuration options
     from environment variables, command line flags, etc.  Plugins should be
     configured with reasonable defaults.
-
--   It should be possible to switch plugins just by rewriting the import statements.
-
-    For instance, it should be possible to go from using `tonatona-db-sqlite` to
-    `tonatona-db-postgresql` just by changing the import statement
-
-    `import qualified Tonatona.Db.Sqlite as TonaDb`
-
-    to
-
-    `import qualified Tonatona.Db.Postgresql as TonaDb`
 
 ## Contributing
 
