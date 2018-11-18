@@ -1,0 +1,107 @@
+name: tonatona-sample
+version: "0.1.0.0"
+category: "Framework, Library, Tonatona, Web"
+synopsis: meta application framework
+description:
+  Tonatona is a **meta** web application framework. It handles lots of boring tasks that are needed for real-world development such as reading in values defined in environment variables, setting up logging, sending emails, accessing databases, etc.
+license: "MIT"
+author: "Kadzuya Okamoto, Dennis Gosnell"
+copyright: "ARoW https://arow.info"
+maintainer: "arow.okamoto+github@gmail.com"
+
+extra-source-files:
+  - README.md
+
+ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror
+default-extensions:
+  - AutoDeriveTypeable
+  - BangPatterns
+  - BinaryLiterals
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - DoAndIfThenElse
+  - DuplicateRecordFields
+  - EmptyDataDecls
+  - ExistentialQuantification
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - KindSignatures
+  - LambdaCase
+  - MonadFailDesugaring
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - NoImplicitPrelude
+  - OverloadedStrings
+  - PartialTypeSignatures
+  - PatternGuards
+  - PolyKinds
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - Strict
+  - StrictData
+  - TupleSections
+  - TypeFamilies
+  - TypeSynonymInstances
+  - ViewPatterns
+
+dependencies:
+  - base >= 4.7 && < 5
+  - aeson
+  - persistent
+  - persistent-postgresql
+  - persistent-template
+  - rio
+  - servant
+  - servant-server
+  - tonaparser
+  - tonatona
+  - tonatona-email-sendmail
+  - tonatona-logger
+  - tonatona-persistent-postgresql
+  - tonatona-persistent-sqlite
+  - tonatona-servant
+
+library:
+  source-dirs:
+    - src
+  exposed-modules:
+    - Tonatona.Sample
+
+executables:
+  tonatona-sample:
+    source-dirs:
+      - app
+      - src
+    main: "Main.hs"
+
+tests:
+  spec:
+    main: "Spec.hs"
+    other-modules: []
+    source-dirs:
+      - test
+    dependencies:
+      - tonatona
+  doctest:
+    main: "DocTest.hs"
+    other-modules: []
+    source-dirs:
+      - test
+    dependencies:
+      - doctest
+      - Glob
+
+github: arow-oss/tonatona

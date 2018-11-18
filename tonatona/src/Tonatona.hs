@@ -1,60 +1,22 @@
-{-# LANGUAGE FunctionalDependencies #-}
-
 module Tonatona
   ( run
-  , runWithConf
-  , runWithConfAndShared
-  , readerConf
-  , readerShared
-  , askConf
-  , askShared
-  , TonaM
-  , Plug(..)
-  , lift
+  , HasParser(..)
+  , HasConfig(..)
   ) where
 
-import Control.Monad.Reader (ReaderT, runReaderT, reader)
-import Control.Monad.Trans (lift)
+import RIO
 
-import TonaParser (FromEnv, decodeEnv)
-
-{-| Main type
- - TODO make this an opaque type, and appropreate Monad instead of `IO`
- -}
-type TonaM conf shared
-   = ReaderT (conf, shared) IO
+import TonaParser (Parser, withConfig)
 
 {-| Main function.
  -}
-run :: Plug conf shared => TonaM conf shared a -> IO a
+run :: HasParser a env => RIO env a -> IO a
 run action = do
-  mconf <- decodeEnv
-  case mconf of
-    Nothing -> error "Fail to decode env"
-    Just conf -> runWithConf conf action
+  withConfig parser $ \env ->
+    runRIO env action
 
-runWithConf :: Plug conf shared => conf -> TonaM conf shared a -> IO a
-runWithConf conf action = do
-  shared <- Tonatona.init conf
-  runWithConfAndShared conf shared action
+class HasParser r a where
+  parser :: Parser r a
 
-runWithConfAndShared :: conf -> shared -> TonaM conf shared a -> IO a
-runWithConfAndShared conf shared action = runReaderT action (conf, shared)
-
-readerConf :: (conf -> a) -> TonaM conf shared a
-readerConf f = reader (f . fst)
-
-readerShared :: (shared -> a) -> TonaM conf shared a
-readerShared f = reader (f . snd)
-
-askConf :: TonaM conf shared conf
-askConf = readerConf id
-
-askShared :: TonaM conf shared shared
-askShared = readerShared id
-
-{-| A type class for configuration.
- - The 'config' is supposed to be an instance of 'FromEnv'.
- -}
-class (FromEnv conf) => Plug conf share | conf -> share, share -> conf where
-  init :: conf -> IO share
+class HasConfig env config where
+  config :: env -> config

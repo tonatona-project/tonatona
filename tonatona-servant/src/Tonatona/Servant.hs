@@ -1,27 +1,17 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Tonatona.Servant
   ( Tonatona.Servant.run
   , redirect
   , Config(..)
-  , HasConfig(..)
   , Host(..)
   , Port
   , Protocol(..)
   ) where
 
-import Control.Exception (catch)
-import Control.Monad.Catch (throwM)
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Reader (ask, reader, runReaderT)
-import Data.ByteString (ByteString)
-import Data.String (IsString)
-import Data.Text (Text)
+import RIO
+
 import Network.HTTP.Types.Header
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp (Port)
@@ -29,54 +19,56 @@ import qualified Network.Wai.Handler.Warp as Warp
 import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
 import Servant
 
-import TonaParser (FromEnv(..), Var(..), (.||), argLong, envDef, envVar)
-import Tonatona (Plug, TonaM)
-
-reqLogMiddleware :: HasConfig conf => TonaM conf shared Middleware
-reqLogMiddleware = do
-  logger <- reader (reqLog . config . fst)
-  case logger of
-    ReqLogVerbose -> pure logStdoutDev
-    ReqLogNormal -> pure logStdout
-    ReqLogQuiet -> pure id
+import TonaParser (Parser, (.||), argLong, envVar, optionalVal)
+import Tonatona (HasConfig(..), HasParser(..))
+import qualified Tonatona.Logger as TonaLogger
 
 {-| Main function.
  -}
 run ::
-     forall api conf shared.
-     (HasServer api '[], Plug conf shared, HasConfig conf)
-  => ServerT api (TonaM conf shared)
-  -> TonaM conf shared ()
+     forall (api :: *) env.
+     (HasServer api '[], HasConfig env Config, HasConfig env TonaLogger.Config)
+  => ServerT api (RIO env)
+  -> RIO env ()
 run servantServer = do
-  (conf, shared) <- ask
+  env <- ask
+  conf <- asks config
   loggingMiddleware <- reqLogMiddleware
-  let app = runServant @api conf shared servantServer
-  liftIO $ Warp.run (port (config conf)) $ loggingMiddleware app
+  let app = runServant @api env servantServer
+  liftIO $ Warp.run (port conf) $ loggingMiddleware app
 
 runServant ::
-     forall api conf shared. HasServer api '[]
-  => conf
-  -> shared
-  -> ServerT api (TonaM conf shared)
+     forall (api :: *) env. (HasServer api '[])
+  => env
+  -> ServerT api (RIO env)
   -> Application
-runServant conf shared servantServer =
+runServant env servantServer =
   serve (Proxy @api) $ hoistServer (Proxy @api) transformation servantServer
   where
     transformation
-      :: forall a. TonaM conf shared a -> Handler a
+      :: forall a. RIO env a -> Servant.Handler a
     transformation action = do
-      let ioAction = Right <$> runReaderT action (conf, shared)
+      let
+        ioAction = Right <$> runRIO env action
       eitherRes <- liftIO $ ioAction `catch` \(e :: ServantErr) -> pure $ Left e
       case eitherRes of
         Right res -> pure res
         Left servantErr -> throwError servantErr
 
-redirect :: ByteString -> TonaM conf shared a
+redirect :: ByteString -> RIO env a
 redirect redirectLocation =
   throwM $
     err302
       { errHeaders = [(hLocation, redirectLocation)]
       }
+
+reqLogMiddleware :: (HasConfig env TonaLogger.Config) => RIO env Middleware
+reqLogMiddleware = do
+  TonaLogger.Config {mode, verbose} <- asks config
+  pure $
+    if TonaLogger.defaultVerbosity mode verbose
+      then logStdoutDev
+      else logStdout
 
 -- Config
 
@@ -86,7 +78,7 @@ redirect redirectLocation =
 -- @some.url.com@.
 newtype Host = Host
   { unHost :: Text
-  } deriving (Eq, IsString, Read, Show, Var)
+  } deriving (Eq, IsString, Read, Show)
 
 -- | This defines the protocol part of a URL.
 --
@@ -94,61 +86,38 @@ newtype Host = Host
 -- @https@.
 newtype Protocol = Protocol
   { unProtocol :: Text
-  } deriving (Eq, IsString, Read, Show, Var)
-
-data ReqLog
-  = ReqLogVerbose
-  | ReqLogNormal
-  | ReqLogQuiet
-  deriving (Eq, Read, Show)
-
-instance Var ReqLog where
-  toVar :: ReqLog -> String
-  toVar ReqLogVerbose = "verbose"
-  toVar ReqLogNormal = "normal"
-  toVar ReqLogQuiet = "quiet"
-
-  fromVar :: String -> Maybe ReqLog
-  fromVar "verbose" = Just ReqLogVerbose
-  fromVar "normal" = Just ReqLogNormal
-  fromVar "quiet" = Just ReqLogQuiet
-  fromVar _ = Nothing
+  } deriving (Eq, IsString, Read, Show)
 
 data Config = Config
   { host :: Host
   , protocol :: Protocol
   , port :: Port
-  , reqLog :: ReqLog
   }
   deriving (Show)
 
-instance FromEnv Config where
-  fromEnv =
-    let host =
-          envDef
-            ( argLong "host" .||
-              envVar "HOST"
-            )
-            ("localhost" :: Host)
-        protocol =
-          envDef
-            ( argLong "protocol" .||
-              envVar "PROTOCOL"
-            )
-            ("http" :: Protocol)
-        port =
-          envDef
-            ( argLong "port" .||
-              envVar "PORT"
-            )
-            (8000 :: Port)
-        reqlog =
-          envDef
-            ( argLong "reqlog" .||
-              envVar "REQLOG"
-            )
-            ReqLogVerbose
-    in Config <$> host <*> protocol <*> port <*> reqlog
+instance HasParser a Host where
+  parser = Host <$>
+    optionalVal
+      "Host name to serve"
+      (argLong "host" .|| envVar "HOST")
+      "localhost"
 
-class HasConfig config where
-  config :: config -> Config
+instance HasParser a Protocol where
+  parser = Protocol <$>
+    optionalVal
+      "Protocol to serve"
+      (argLong "protocol" .|| envVar "PROTOCOL")
+      "http"
+
+portParser :: Parser x Port
+portParser =
+  optionalVal
+    "Port to serve"
+    (argLong "port" .|| envVar "PORT")
+    8000
+
+instance HasParser a Config where
+  parser = Config
+    <$> parser
+    <*> parser
+    <*> portParser
