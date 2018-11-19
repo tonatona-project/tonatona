@@ -277,7 +277,7 @@ packages:
   - '.'
 extra-deps:
   - git: https://github.com/arow-oss/tonatona
-    commit: c8341435557959457e4657379e763dbf1d9b5890
+    commit: 4e2d9dd9ffbd0d21218f93cbc7c0b04bad9fa7c5
     subdirs:
       - tonaparser
       - tonatona
