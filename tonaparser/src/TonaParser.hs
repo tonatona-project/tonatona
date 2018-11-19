@@ -1,3 +1,8 @@
+{-| Integrated parser library created for tonatona meta application framework.
+  It can construct system configuration from environment variables, command line arguments, and any IO values depends on them.
+  See details for @example/Main.hs@.
+-}
+
 module TonaParser
   (
   -- * Run parser
@@ -19,11 +24,6 @@ module TonaParser
   , cmdLineLongMods
   , envVarMods
   ) where
-
-{-| Integrated parser library created for tonatona meta application framework.
- - It can construct system configuration from environment variables, command line arguments, and any IO values depends on them.
- - See details for @example/Main.hs@.
--}
 
 import RIO
 import qualified RIO.Map as Map
