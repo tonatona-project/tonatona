@@ -96,7 +96,7 @@ instance HasConfig Config TonaLogger.Config where
   config = tonaLogger
 
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = Config
       <$> parser
       -- <*> parser
@@ -138,7 +138,7 @@ instance HasConfig Config TonaLogger.Config where
   config = tonaLogger
 
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = Config
       <$> parser
       -- <*> parser
@@ -223,7 +223,7 @@ used for this.  The following is a simple example of this, for when your
 `Config` just contains `Tona*.Config` data types:
 
 ```haskell
-instance HasParser a Config where
+instance HasParser Config where
   parser = Config
       <$> parser
       <*> parser

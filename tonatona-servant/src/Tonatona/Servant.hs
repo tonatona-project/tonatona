@@ -95,28 +95,28 @@ data Config = Config
   }
   deriving (Show)
 
-instance HasParser a Host where
+instance HasParser Host where
   parser = Host <$>
     optionalVal
       "Host name to serve"
       (argLong "host" .|| envVar "HOST")
       "localhost"
 
-instance HasParser a Protocol where
+instance HasParser Protocol where
   parser = Protocol <$>
     optionalVal
       "Protocol to serve"
       (argLong "protocol" .|| envVar "PROTOCOL")
       "http"
 
-portParser :: Parser x Port
+portParser :: Parser Port
 portParser =
   optionalVal
     "Port to serve"
     (argLong "port" .|| envVar "PORT")
     8000
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = Config
     <$> parser
     <*> parser

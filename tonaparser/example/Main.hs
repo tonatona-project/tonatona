@@ -28,7 +28,7 @@ data Foo = Foo
 -- If environment variable "BAZ" exist, use the value
 -- else if command line argument "--baz" exist, use the value
 -- else use default value "baz"
-barParser :: Parser r Bar
+barParser :: Parser Bar
 barParser =
   Bar <$>
     optionalVal
@@ -36,7 +36,7 @@ barParser =
       (argLong "baz" .|| envVar "BAZ")
       "baz"
 
-setPrefixBar :: Parser r Bar -> Parser r Bar
+setPrefixBar :: Parser Bar -> Parser Bar
 setPrefixBar =
   modify
     defParserMods
@@ -44,14 +44,14 @@ setPrefixBar =
       , envVarMods = ("BAR_" <>)
       }
 
-fooParser :: Parser r Foo
+fooParser :: Parser Foo
 fooParser = Foo
   <$> requiredVal
     "Configuration for Foo.foo"
     (argLong "foo" .|| envVar "FOO")
   <*> setPrefixBar barParser
 
-modifyFoo :: Parser r Foo -> Parser r Foo
+modifyFoo :: Parser Foo -> Parser Foo
 modifyFoo =
   modify
     defParserMods
