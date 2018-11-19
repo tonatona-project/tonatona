@@ -152,7 +152,7 @@ instance HasConfig Config TonaDbPostgres.Config where
 instance HasConfig Config TonaServant.Config where
   config = tonaServant
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = Config
       <$> parser
       <*> parser

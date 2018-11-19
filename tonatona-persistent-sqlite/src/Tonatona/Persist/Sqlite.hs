@@ -40,7 +40,7 @@ newtype DbConnStr = DbConnStr
   { unDbConnStr :: ByteString
   } deriving (Eq, IsString, Read, Show)
 
-instance HasParser a DbConnStr where
+instance HasParser DbConnStr where
   parser = DbConnStr <$>
     optionalVal
       "Formatted string to connect postgreSQL"
@@ -50,7 +50,7 @@ instance HasParser a DbConnStr where
 newtype DbConnNum = DbConnNum { unDbConnNum :: Int }
   deriving (Eq, Num, Read, Show)
 
-instance HasParser a DbConnNum where
+instance HasParser DbConnNum where
   parser = DbConnNum <$>
     optionalVal
       "Number of connections which connection pool uses"
@@ -63,24 +63,24 @@ data Config = Config
   , sqliteConn :: SqliteConn
   }
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = do
     connStr <- parser
     connNum <- parser
     let textConnStr = decodeUtf8Lenient $ unDbConnStr connStr
-    Parser $ \_ action -> do
+    Parser $ \b _ action -> do
       case connStr of
         ":memory:" -> do
           conn <- open ":memory:"
           backend <- wrapConnection conn stdoutLogger
-          action $
+          action b $
             Config connStr connNum (SqliteConn backend)
         _ ->
           runLoggingT
             (withSqlitePool
                textConnStr
                (unDbConnNum connNum)
-               (lift . action . Config connStr connNum . SqliteConnPool))
+               (lift . action b . Config connStr connNum . SqliteConnPool))
             stdoutLogger
 
 data SqliteConn

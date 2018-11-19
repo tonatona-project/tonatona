@@ -37,7 +37,7 @@ newtype DbConnStr = DbConnStr
   { unDbConnStr :: ByteString
   } deriving (Eq, IsString, Read, Show)
 
-instance HasParser a DbConnStr where
+instance HasParser DbConnStr where
   parser = DbConnStr <$>
     optionalVal
       "Formatted string to connect postgreSQL"
@@ -47,7 +47,7 @@ instance HasParser a DbConnStr where
 newtype DbConnNum = DbConnNum { unDbConnNum :: Int }
   deriving (Eq, Num, Read, Show)
 
-instance HasParser a DbConnNum where
+instance HasParser DbConnNum where
   parser = DbConnNum <$>
     optionalVal
       "Number of connections which connection pool uses"
@@ -61,16 +61,16 @@ data Config = Config
   }
   deriving (Show)
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = do
     connStr <- parser
     connNum <- parser
-    Parser $ \_ action -> do
+    Parser $ \b _ action -> do
       runLoggingT
         (withPostgresqlPool
            (unDbConnStr connStr)
            (unDbConnNum connNum)
-           (lift . action . Config connStr connNum))
+           (lift . action b . Config connStr connNum))
         stdoutLogger
 
 stdoutLogger :: Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ()

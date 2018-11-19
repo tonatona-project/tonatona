@@ -59,15 +59,17 @@ dependencies:
   - markdown-unlit
   - persistent
   - persistent-template
-  - text
+  - rio
   - tonaparser
   - tonatona
-  - tonatona-db-sqlite
+  - tonatona-persistent-sqlite
   - tonatona-logger
 
 tests:
   readme:
-    main: "README.lhs"
+    main: "Main.hs"
+    other-modules:
+      - README
     ghc-options: -pgmL markdown-unlit
 
 github: arow-oss/tonatona

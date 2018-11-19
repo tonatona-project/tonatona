@@ -96,7 +96,7 @@ instance HasConfig Config TonaLogger.Config where
   config = tonaLogger
 
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = Config
       <$> parser
       -- <*> parser
@@ -105,7 +105,7 @@ instance HasParser a Config where
 
 As you can see `import` part, tonatona is supposed to be used with [rio](http://hackage.haskell.org/package/rio) as an alternative to Prelude.
 
-```haskell
+```haskell ignore
 import RIO
 
 import Tonatona (HasConfig(..), HasParser(..))
@@ -114,7 +114,7 @@ import qualified Tonatona.Logger as TonaLogger
 
 So, the main function named `app` has type of `RIO Config ()`.
 
-```haskell
+```haskell ignore
 app :: RIO Config ()
 app = do
   -- Tonatona.Logger plugin enables to use logger functions without any configurations.
@@ -126,7 +126,7 @@ It's just a `RIO` monad, so bunch of convenient functions `rio` provieds are ava
 One of the amazing thing here is that there are no configurations about logging behaviour.
 The only thing you have to do is just write a little bit of boilerplate code.
 
-```haskell
+```haskell ignore
 data Config = Config
   { tonaLogger :: TonaLogger.Config
   -- , anotherPlugin :: TonaAnotherPlugin.Config
@@ -138,7 +138,7 @@ instance HasConfig Config TonaLogger.Config where
   config = tonaLogger
 
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = Config
       <$> parser
       -- <*> parser
@@ -173,8 +173,27 @@ $ ENV=Production stack exec sample-app
 This is a skeleton for tonatona project
 ```
 
+Of course, all available environment variables and command line options can be displayed:
+
+```bash
+$ stack exec sample-app -- --help
+Application deployment mode to run
+    Default: Development
+    Type: DeployMode
+    Command line option: --env
+    Environment variable: ENV
+
+Make the operation more talkative
+    Default: False
+    Type: Bool
+    Command line option: --verbose
+    Environment variable: VERBOSE
+...
+...
+```
+
 This amazing feature is also provided by `tonatona-logger` plugin.
-It is the power of plugin-based architecture of tonatona.
+It is the power of plugin-based architecture tonatona provides.
 
 ### Adding new plugin
 
@@ -196,7 +215,7 @@ dependencies:
 
 Next, you need to add new field to `Config`.
 
-```haskell
+```haskell ignore
 import qualified Tonatona.Persist.Sqlite as TonaDb
 
 data Config = Config
@@ -222,8 +241,8 @@ available command line flags and environment variables.  The `HasParser` class i
 used for this.  The following is a simple example of this, for when your
 `Config` just contains `Tona*.Config` data types:
 
-```haskell
-instance HasParser a Config where
+```haskell ignore
+instance HasParser Config where
   parser = Config
       <$> parser
       <*> parser
@@ -234,7 +253,7 @@ Tonatona figure out how to get the `TonaDb.Config` from your `Config`.  This is
 done with the `TonaDb.HasConfig` class.  This code should be very simple to
 write:
 
-```haskell
+```haskell ignore
 instance HasConfig Config TonaDb.Config where
   config = tonaDb
 ```
@@ -249,7 +268,7 @@ Creating a table definition is a requirement for using
 `tonatona-persistent-sqlite` is using internally.  This is not a requirement for
 Tonatona in general, just the `tonatona-persistent-sqlite` package.
 
-```haskell
+```haskell ignore
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
@@ -270,7 +289,7 @@ $(share
 
 Next, do some DB operations in `app` function:
 
-```haskell
+```haskell ignore
 app :: RIO Config ()
 app = do
   -- Tonatona.Logger plugin enables to use logger functions without any configurations.

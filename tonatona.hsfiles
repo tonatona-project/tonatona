@@ -239,7 +239,7 @@ instance HasConfig Config TonaLogger.Config where
   config = tonaLogger
 
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = Config
       <$> parser
       -- <*> parser

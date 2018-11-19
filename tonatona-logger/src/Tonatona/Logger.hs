@@ -32,14 +32,14 @@ data Config = Config
   , logFunc :: LogFunc
   }
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = do
     mode <- parser
     verbose <- parser
-    Parser $ \_ action -> do
+    Parser $ \b _ action -> do
       options <- defaultLogOptions mode verbose
       withLogFunc options $ \lf ->
-        action $ Config mode verbose options lf
+        action b $ Config mode verbose options lf
 
 instance (HasConfig env Config) => HasLogFunc env where
   logFuncL = lens (logFunc . config) $
@@ -52,7 +52,7 @@ instance (HasConfig env Config) => HasLogFunc env where
 newtype Verbose = Verbose { unVerbose :: Bool }
   deriving (Show, Read, Eq)
 
-instance HasParser a Verbose where
+instance HasParser Verbose where
   parser = Verbose <$>
     optionalVal
       "Make the operation more talkative"
@@ -74,7 +74,7 @@ instance Var DeployMode where
   toVar = show
   fromVar = readMaybe
 
-instance HasParser a DeployMode where
+instance HasParser DeployMode where
   parser =
     optionalVal
       "Application deployment mode to run"

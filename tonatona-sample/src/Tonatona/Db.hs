@@ -73,7 +73,7 @@ instance HasConfig Config TonaDbSqlite.Config where
       DbSqlite a -> a
       _ -> error "This is not an sqlite config type."
 
-instance HasParser a Config where
+instance HasParser Config where
   parser = do
     dbToUse <- parser
     Config
@@ -86,7 +86,7 @@ data DbConfig
 
 data DbToUse = PostgreSQL | Sqlite deriving Show
 
-instance HasParser a DbToUse where
+instance HasParser DbToUse where
   parser =
     optionalVal
       "Database type to use (postgresql|sqlite)"
@@ -102,6 +102,6 @@ instance Var DbToUse where
   fromVar _ = Nothing
 
 
-dbParser :: DbToUse -> Parser a DbConfig
+dbParser :: DbToUse -> Parser DbConfig
 dbParser PostgreSQL = DbPostgres <$> parser
 dbParser Sqlite = DbSqlite <$> parser
