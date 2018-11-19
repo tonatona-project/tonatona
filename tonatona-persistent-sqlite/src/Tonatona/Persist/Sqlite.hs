@@ -16,7 +16,7 @@ import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
 import Database.Sqlite (open)
 
 import Tonatona (HasConfig(..), HasParser(..))
-import TonaParser (Parser(..), (.||), argLong, envVar, optionalVal)
+import TonaParser ((.||), argLong, envVar, liftWith, optionalVal)
 
 type TonaDbM env
   = ReaderT SqlBackend (RIO env)
@@ -68,19 +68,19 @@ instance HasParser Config where
     connStr <- parser
     connNum <- parser
     let textConnStr = decodeUtf8Lenient $ unDbConnStr connStr
-    Parser $ \b _ action -> do
+    liftWith $ \action -> do
       case connStr of
         ":memory:" -> do
           conn <- open ":memory:"
           backend <- wrapConnection conn stdoutLogger
-          action b $
+          action $
             Config connStr connNum (SqliteConn backend)
         _ ->
           runLoggingT
             (withSqlitePool
                textConnStr
                (unDbConnNum connNum)
-               (lift . action b . Config connStr connNum . SqliteConnPool))
+               (lift . action . Config connStr connNum . SqliteConnPool))
             stdoutLogger
 
 data SqliteConn

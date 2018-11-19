@@ -13,12 +13,12 @@ import RIO
 import GHC.Generics (Generic)
 import Tonatona (HasConfig(..), HasParser(..))
 import TonaParser
-  ( Parser(..)
-  , Var(..)
+  ( Var(..)
   , (.||)
   , argLong
   , envVar
-  , optionalVal
+  , liftWith
+  , optionalEnum
   )
 
 
@@ -36,10 +36,10 @@ instance HasParser Config where
   parser = do
     mode <- parser
     verbose <- parser
-    Parser $ \b _ action -> do
+    liftWith $ \action -> do
       options <- defaultLogOptions mode verbose
       withLogFunc options $ \lf ->
-        action b $ Config mode verbose options lf
+        action $ Config mode verbose options lf
 
 instance (HasConfig env Config) => HasLogFunc env where
   logFuncL = lens (logFunc . config) $
@@ -54,7 +54,7 @@ newtype Verbose = Verbose { unVerbose :: Bool }
 
 instance HasParser Verbose where
   parser = Verbose <$>
-    optionalVal
+    optionalEnum
       "Make the operation more talkative"
       (argLong "verbose" .|| envVar "VERBOSE")
       False
@@ -68,7 +68,7 @@ data DeployMode
   | Production
   | Staging
   | Test
-  deriving (Eq, Generic, Show, Read)
+  deriving (Eq, Generic, Show, Read, Bounded, Enum)
 
 instance Var DeployMode where
   toVar = show
@@ -76,7 +76,7 @@ instance Var DeployMode where
 
 instance HasParser DeployMode where
   parser =
-    optionalVal
+    optionalEnum
       "Application deployment mode to run"
       (argLong "env" .|| envVar "ENV")
       Development
