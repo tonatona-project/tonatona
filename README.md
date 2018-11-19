@@ -173,8 +173,27 @@ $ ENV=Production stack exec sample-app
 This is a skeleton for tonatona project
 ```
 
+Of course, all available environment variables and command line options can be displayed:
+
+```bash
+$ stack exec sample-app -- --help
+Application deployment mode to run
+    Default: Development
+    Type: DeployMode
+    Command line option: --env
+    Environment variable: ENV
+
+Make the operation more talkative
+    Default: False
+    Type: Bool
+    Command line option: --verbose
+    Environment variable: VERBOSE
+...
+...
+```
+
 This amazing feature is also provided by `tonatona-logger` plugin.
-It is the power of plugin-based architecture of tonatona.
+It is the power of plugin-based architecture tonatona provides.
 
 ### Adding new plugin
 
