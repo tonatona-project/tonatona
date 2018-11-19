@@ -61,7 +61,6 @@ dependencies:
   - base >= 4.7 && < 5
   - aeson
   - persistent
-  - persistent-postgresql
   - persistent-template
   - rio
   - servant
@@ -70,7 +69,6 @@ dependencies:
   - tonatona
   - tonatona-email-sendmail
   - tonatona-logger
-  - tonatona-persistent-postgresql
   - tonatona-persistent-sqlite
   - tonatona-servant
 

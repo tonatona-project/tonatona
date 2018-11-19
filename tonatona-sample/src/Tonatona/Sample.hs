@@ -15,13 +15,11 @@ import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowe
 import Servant
 import Tonatona (HasConfig(..), HasParser(..))
 import qualified Tonatona as Tona
-import qualified Tonatona.Db as TonaDb
 import qualified Tonatona.Logger as TonaLogger
 import Tonatona.Email.Sendmail (Address(..), simpleMail')
 import qualified Tonatona.Email.Sendmail as TonaEmail
 import qualified Tonatona.Servant as TonaServant
-import qualified Tonatona.Persist.Postgresql as TonaDbPostgres
-import qualified Tonatona.Persist.Sqlite as TonaDbSqlite
+import qualified Tonatona.Persist.Sqlite as TonaDb
 
 
 -- DB entity defs
@@ -139,15 +137,6 @@ instance HasConfig Config TonaLogger.Config where
 
 instance HasConfig Config TonaDb.Config where
   config = tonaDb
-
-instance HasConfig Config TonaDb.DbToUse where
-  config = config . (config :: Config -> TonaDb.Config)
-
-instance HasConfig Config TonaDbSqlite.Config where
-  config = config . (config :: Config -> TonaDb.Config)
-
-instance HasConfig Config TonaDbPostgres.Config where
-  config = config . (config :: Config -> TonaDb.Config)
 
 instance HasConfig Config TonaServant.Config where
   config = tonaServant
