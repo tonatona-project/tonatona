@@ -13,11 +13,11 @@ import RIO
 import GHC.Generics (Generic)
 import Tonatona (HasConfig(..), HasParser(..))
 import TonaParser
-  ( Parser(..)
-  , Var(..)
+  ( Var(..)
   , (.||)
   , argLong
   , envVar
+  , liftWith
   , optionalVal
   )
 
@@ -36,10 +36,10 @@ instance HasParser Config where
   parser = do
     mode <- parser
     verbose <- parser
-    Parser $ \b _ action -> do
+    liftWith $ \action -> do
       options <- defaultLogOptions mode verbose
       withLogFunc options $ \lf ->
-        action b $ Config mode verbose options lf
+        action $ Config mode verbose options lf
 
 instance (HasConfig env Config) => HasLogFunc env where
   logFuncL = lens (logFunc . config) $

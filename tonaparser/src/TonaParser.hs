@@ -6,11 +6,12 @@
 module TonaParser
   (
   -- * Run parser
-    Parser (..)
+    Parser
   , withConfig
   -- * Construct primitive parsers
   , optionalVal
   , requiredVal
+  , liftWith
   , Source
   , module System.Envy
   , Description
@@ -130,6 +131,8 @@ getCmdLineArgs = do
     tupleList (a:b:cs) = (dropWhile (== '-') a, b) : tupleList cs
     tupleList _ = []
 
+{-| A 'Parser' constructor for required values.
+-}
 requiredVal :: Var a => Description -> Source -> Parser a
 requiredVal desc srcs = do
   ma <- fieldMaybe Nothing desc srcs
@@ -138,12 +141,19 @@ requiredVal desc srcs = do
     Nothing ->
       Parser $ \_ _ -> error $ "No required configuration for \"" <> unDescription desc <> "\""
 
+{-| A 'Parser' constructor for optional values.
+-}
 optionalVal :: Var a => Description -> Source -> a -> Parser a
 optionalVal desc srcs df = do
   ma <- fieldMaybe (Just df) desc srcs
   case ma of
     Nothing -> pure df
     Just a -> pure a
+
+{-| A `Parser` constructor from @cont@.
+-}
+liftWith :: ((a -> IO ()) -> IO ()) -> Parser a
+liftWith cont = Parser $ \b _ action -> cont (action b)
 
 fieldMaybe :: (Var a) => Maybe a -> Description -> Source -> Parser (Maybe a)
 fieldMaybe mdef desc (Source srcs) =

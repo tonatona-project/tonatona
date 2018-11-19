@@ -19,7 +19,7 @@ flags:
     default: False
     manual: False
 
-ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints # -Werror
+ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror
 default-extensions:
   - AutoDeriveTypeable
   - BangPatterns

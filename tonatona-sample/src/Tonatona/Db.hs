@@ -11,7 +11,7 @@ import RIO
 import Database.Persist.Sql (Migration, SqlBackend)
 
 import Tonatona (HasConfig(..), HasParser(..))
-import TonaParser (Parser(..), Var(..), (.||), argLong, envVar, optionalVal)
+import TonaParser (Parser, Var(..), (.||), argLong, envVar, optionalVal)
 import qualified Tonatona.Persist.Postgresql as TonaDbPostgres
 import qualified Tonatona.Persist.Sqlite as TonaDbSqlite
 

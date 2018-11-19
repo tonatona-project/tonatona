@@ -15,7 +15,7 @@ import Database.Persist.Postgresql (withPostgresqlPool)
 import Database.Persist.Sql (Migration, SqlBackend, runMigration, runSqlPool)
 
 import Tonatona (HasConfig(..), HasParser(..))
-import TonaParser (Parser(..), (.||), argLong, envVar, optionalVal)
+import TonaParser ((.||), argLong, envVar, liftWith, optionalVal)
 
 type TonaDbM env
   = ReaderT SqlBackend (RIO env)
@@ -65,12 +65,12 @@ instance HasParser Config where
   parser = do
     connStr <- parser
     connNum <- parser
-    Parser $ \b _ action -> do
+    liftWith $ \action -> do
       runLoggingT
         (withPostgresqlPool
            (unDbConnStr connStr)
            (unDbConnNum connNum)
-           (lift . action b . Config connStr connNum))
+           (lift . action . Config connStr connNum))
         stdoutLogger
 
 stdoutLogger :: Loc -> Logger.LogSource -> Logger.LogLevel -> LogStr -> IO ()
