@@ -11,6 +11,8 @@ module TonaParser
   -- * Construct primitive parsers
   , optionalVal
   , requiredVal
+  , optionalEnum
+  , requiredEnum
   , liftWith
   , Source
   , module System.Envy
@@ -27,6 +29,7 @@ module TonaParser
   ) where
 
 import RIO
+import qualified RIO.List as List
 import qualified RIO.Map as Map
 
 import Control.Monad (ap)
@@ -150,6 +153,25 @@ optionalVal desc srcs df = do
     Nothing -> pure df
     Just a -> pure a
 
+{-| A 'Parser' constructor for required values.
+-}
+requiredEnum :: (Var a, Enum a, Bounded a) => Description -> Source -> Parser a
+requiredEnum desc srcs = do
+  ma <- fieldMaybeEnum Nothing desc srcs
+  case ma of
+    Just a -> pure a
+    Nothing ->
+      Parser $ \_ _ -> error $ "No required configuration for \"" <> unDescription desc <> "\""
+
+{-| A 'Parser' constructor for optional values.
+-}
+optionalEnum :: (Var a, Enum a, Bounded a) => Description -> Source -> a -> Parser a
+optionalEnum desc srcs df = do
+  ma <- fieldMaybeEnum (Just df) desc srcs
+  case ma of
+    Nothing -> pure df
+    Just a -> pure a
+
 {-| A `Parser` constructor from @cont@.
 -}
 liftWith :: ((a -> IO ()) -> IO ()) -> Parser a
@@ -193,6 +215,27 @@ helpSource ParserMods {cmdLineLongMods} (ArgLong str) =
   "Command line option: --" <> cmdLineLongMods str
 helpSource ParserMods {cmdLineShortMods} (ArgShort c) =
   "Command line option: -" <> [cmdLineShortMods c]
+
+fieldMaybeEnum :: (Var a, Enum a, Bounded a) => Maybe a -> Description -> Source -> Parser (Maybe a)
+fieldMaybeEnum mdef desc (Source srcs) =
+  Parser $ \isHelp conf action -> do
+    when isHelp $
+      sayString $ helpLineEnum mdef (confParserMods conf) desc (Source srcs)
+    let mval = findValInSrc conf srcs
+    action isHelp (fromVar =<< mval)
+
+helpLineEnum :: forall a. (Var a, Enum a, Bounded a) => Maybe a -> ParserMods -> Description -> Source -> String
+helpLineEnum mdef mods (Description desc) (Source srcs) =
+  unlines $
+    desc : map (indent 4)
+      (helpDefault mdef : helpType (Proxy :: Proxy a) <> helpEnum (Proxy :: Proxy a) : map (helpSource mods) srcs)
+
+helpEnum :: forall a. (Var a, Enum a, Bounded a) => Proxy a -> String
+helpEnum _ = if (length enums <= 8)
+  then " (" <> (List.intercalate "|" . map toVar) enums <> ")"
+  else ""
+  where
+    enums = [(minBound :: a)..maxBound]
 
 findValInSrc :: Config -> [InnerSource] -> Maybe String
 findValInSrc conf srcs = listToMaybe $ mapMaybe (findValInSrcs conf) srcs

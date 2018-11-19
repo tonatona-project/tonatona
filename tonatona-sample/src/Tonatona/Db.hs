@@ -11,7 +11,7 @@ import RIO
 import Database.Persist.Sql (Migration, SqlBackend)
 
 import Tonatona (HasConfig(..), HasParser(..))
-import TonaParser (Parser, Var(..), (.||), argLong, envVar, optionalVal)
+import TonaParser (Parser, Var(..), (.||), argLong, envVar, optionalEnum)
 import qualified Tonatona.Persist.Postgresql as TonaDbPostgres
 import qualified Tonatona.Persist.Sqlite as TonaDbSqlite
 
@@ -84,12 +84,13 @@ data DbConfig
   = DbPostgres TonaDbPostgres.Config
   | DbSqlite TonaDbSqlite.Config
 
-data DbToUse = PostgreSQL | Sqlite deriving Show
+data DbToUse = PostgreSQL | Sqlite
+  deriving (Show, Eq, Bounded, Enum)
 
 instance HasParser DbToUse where
   parser =
-    optionalVal
-      "Database type to use (postgresql|sqlite)"
+    optionalEnum
+      "Database type to use"
       (argLong "db-to-use" .|| envVar "DB_TO_USE")
       PostgreSQL
 
