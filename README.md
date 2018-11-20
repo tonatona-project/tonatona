@@ -197,19 +197,20 @@ It is the power of plugin-based architecture tonatona provides.
 
 ### Adding new plugin
 
-First, we need to add plugin to use in `dependencies` of `package.yaml`.
+First, we need to add new plugin to use in `dependencies` of `package.yaml`.
 In this example, we use `tonatona-persistent-sqlite` plugin.
 
 ```yaml
 dependencies:
   - base >= 4.7 && < 5
-  # `persistent` and `persistent-template` is also needed to
+  # `persistent` and `persistent-template` are also needed to
   # actually use `tonatona-persistent-sqlite`.
   - persistent
   - persistent-template
   - rio
   - tonatona
   - tonatona-logger
+  # new plugin to add
   - tonatona-persistent-sqlite
 ```
 
