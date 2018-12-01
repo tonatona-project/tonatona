@@ -130,7 +130,7 @@ getCmdLineArgs = do
 
 {-|
   >>> parseArgs ["--bool", "--foo", "bar", "-v"]
-  [ ("bool", ""), ("foo", "bar") ]
+  [("bool",""),("foo","bar")]
 -}
 parseArgs :: [String] -> [(String, String)]
 parseArgs [] = []
