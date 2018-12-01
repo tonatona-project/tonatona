@@ -50,8 +50,6 @@ default-extensions:
   - RecordWildCards
   - ScopedTypeVariables
   - StandaloneDeriving
-  - Strict
-  - StrictData
   - TupleSections
   - TypeFamilies
   - TypeSynonymInstances
@@ -186,8 +184,6 @@ ghcExtensions =
     , "-XRecordWildCards"
     , "-XScopedTypeVariables"
     , "-XStandaloneDeriving"
-    , "-XStrict"
-    , "-XStrictData"
     , "-XTupleSections"
     , "-XTypeFamilies"
     , "-XTypeSynonymInstances"
@@ -272,12 +268,12 @@ SOFTWARE.
 # {{name}}
 
 {-# START_FILE stack.yaml #-}
-resolver: lts-11.13
+resolver: lts-12.20
 packages:
   - '.'
 extra-deps:
   - git: https://github.com/arow-oss/tonatona
-    commit: 4e2d9dd9ffbd0d21218f93cbc7c0b04bad9fa7c5
+    commit: 8c2b172bad49d3d8907695ba2f892ae275c1338a
     subdirs:
       - tonaparser
       - tonatona
