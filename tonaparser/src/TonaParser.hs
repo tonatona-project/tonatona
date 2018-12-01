@@ -54,7 +54,7 @@ instance Functor Parser where
 
 instance Applicative Parser where
   pure :: a -> Parser a
-  pure a = Parser $ \b _ -> (\action -> action b a)
+  pure a = Parser $ \b _ action -> action b a
 
   (<*>) = ap
 
@@ -122,68 +122,98 @@ getEnvVars = do
   environment <- getEnvironment
   pure $ Map.fromList environment
 
--- TODO: Does not properly handle command line arguments.
--- Probably should use parsing code from something like optparse-applicative.
+-- TODO: Handle short-hands options.
 getCmdLineArgs :: IO [(String, String)]
 getCmdLineArgs = do
   args <- getArgs
-  pure $ tupleList args
-  where
-    -- This throws away the last time if the input list is not even.
-    tupleList :: [String] -> [(String,String)]
-    tupleList (a:b:cs) = (dropWhile (== '-') a, b) : tupleList cs
-    tupleList _ = []
+  pure $ parseArgs args
+
+{-|
+  >>> parseArgs ["--bool", "--foo", "bar", "-v"]
+  [ ("bool", ""), ("foo", "bar") ]
+-}
+parseArgs :: [String] -> [(String, String)]
+parseArgs [] = []
+parseArgs [('-':'-':key)] = [(key, "")]
+parseArgs (('-':'-':key):ls@(('-':_):_)) = (key, "") : parseArgs ls
+parseArgs (('-':'-':key):val:ls) = (key, val) : parseArgs ls
+parseArgs (('-':_):ls) = parseArgs ls
+parseArgs (_:ls) = parseArgs ls
 
 {-| A 'Parser' constructor for required values.
 -}
 requiredVal :: Var a => Description -> Source -> Parser a
 requiredVal desc srcs = do
   ma <- fieldMaybe Nothing desc srcs
-  case ma of
-    Just a -> pure a
-    Nothing ->
-      Parser $ \_ _ -> error $ "No required configuration for \"" <> unDescription desc <> "\""
+  handleRequired desc ma
 
 {-| A 'Parser' constructor for optional values.
 -}
 optionalVal :: Var a => Description -> Source -> a -> Parser a
 optionalVal desc srcs df = do
   ma <- fieldMaybe (Just df) desc srcs
-  case ma of
-    Nothing -> pure df
-    Just a -> pure a
+  maybe (pure df) pure ma
 
 {-| A 'Parser' constructor for required values.
 -}
 requiredEnum :: (Var a, Enum a, Bounded a) => Description -> Source -> Parser a
 requiredEnum desc srcs = do
   ma <- fieldMaybeEnum Nothing desc srcs
-  case ma of
-    Just a -> pure a
-    Nothing ->
-      Parser $ \_ _ -> error $ "No required configuration for \"" <> unDescription desc <> "\""
+  handleRequired desc ma
 
 {-| A 'Parser' constructor for optional values.
 -}
 optionalEnum :: (Var a, Enum a, Bounded a) => Description -> Source -> a -> Parser a
 optionalEnum desc srcs df = do
   ma <- fieldMaybeEnum (Just df) desc srcs
-  case ma of
-    Nothing -> pure df
-    Just a -> pure a
+  maybe (pure df) pure ma
+
+handleRequired :: Description -> Maybe a -> Parser a
+handleRequired _ (Just a) = pure a
+handleRequired desc Nothing =
+  Parser $ \isHelp _ action ->
+    if isHelp
+      then action isHelp $ error "unreachable"
+      else error $
+           "No required configuration for \"" <> unDescription desc <> "\"\n" <>
+           "Try with '--help' option for more information."
 
 {-| A `Parser` constructor from @cont@.
 -}
 liftWith :: ((a -> IO ()) -> IO ()) -> Parser a
 liftWith cont = Parser $ \b _ action -> cont (action b)
 
-fieldMaybe :: (Var a) => Maybe a -> Description -> Source -> Parser (Maybe a)
-fieldMaybe mdef desc (Source srcs) =
+fieldMaybe :: forall a. (Var a) => Maybe a -> Description -> Source -> Parser (Maybe a)
+fieldMaybe mdef desc source =
   Parser $ \isHelp conf action -> do
     when isHelp $
-      sayString $ helpLine mdef (confParserMods conf) desc (Source srcs)
-    let mval = findValInSrc conf srcs
-    action isHelp (fromVar =<< mval)
+      sayString $ helpLine mdef (confParserMods conf) desc source
+    action isHelp $ fieldMaybeVal isHelp conf desc source
+
+
+fieldMaybeVal ::
+     forall a. (Var a)
+  => Bool
+  -> Config
+  -> Description
+  -> Source
+  -> Maybe a
+fieldMaybeVal isHelp conf desc (Source srcs) = do
+  val <- findValInSrc conf srcs
+  let v =
+        case (show (typeRep (Proxy :: Proxy a)), val) of
+          ("Bool", "") -> "True"
+          ("Bool", "true") -> "True"
+          ("Bool", "false") -> "False"
+          _ -> val
+  case fromVar v of
+    Nothing ->
+      if isHelp
+        then Nothing
+        else error $
+             "Invalid type of value for \"" <> unDescription desc <> "\".\n" <>
+             "Try with '--help' option for more information."
+    a -> a
 
 helpLine :: forall a. (Var a) => Maybe a -> ParserMods -> Description -> Source -> String
 helpLine mdef mods (Description desc) (Source srcs) =
@@ -217,12 +247,11 @@ helpSource ParserMods {cmdLineShortMods} (ArgShort c) =
   "Command line option: -" <> [cmdLineShortMods c]
 
 fieldMaybeEnum :: (Var a, Enum a, Bounded a) => Maybe a -> Description -> Source -> Parser (Maybe a)
-fieldMaybeEnum mdef desc (Source srcs) =
+fieldMaybeEnum mdef desc source =
   Parser $ \isHelp conf action -> do
     when isHelp $
-      sayString $ helpLineEnum mdef (confParserMods conf) desc (Source srcs)
-    let mval = findValInSrc conf srcs
-    action isHelp (fromVar =<< mval)
+      sayString $ helpLineEnum mdef (confParserMods conf) desc source
+    action isHelp $ fieldMaybeVal isHelp conf desc source
 
 helpLineEnum :: forall a. (Var a, Enum a, Bounded a) => Maybe a -> ParserMods -> Description -> Source -> String
 helpLineEnum mdef mods (Description desc) (Source srcs) =
