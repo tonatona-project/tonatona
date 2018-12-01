@@ -59,9 +59,9 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - mime-mail
-  - rio
-  - tonatona
+  - mime-mail >= 0.4
+  - rio >= 0.1
+  - tonatona >= 0.1
 
 library:
   source-dirs:

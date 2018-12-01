@@ -59,18 +59,18 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - exceptions
-  - http-types
-  - monad-logger
-  - rio
-  - servant
-  - servant-server
-  - tonaparser
-  - tonatona
-  - tonatona-logger
-  - wai
-  - wai-extra
-  - warp
+  - exceptions >= 0.8
+  - http-types >= 0.12
+  - monad-logger >= 0.3
+  - rio >= 0.1
+  - servant >= 0.13
+  - servant-server >= 0.13
+  - tonaparser >= 0.1
+  - tonatona >= 0.1
+  - tonatona-logger >= 0.1
+  - wai >= 3.2
+  - wai-extra >= 3.0
+  - warp >= 3.2
 
 library:
   source-dirs:
