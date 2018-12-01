@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
@@ -8,8 +9,12 @@ module Tonatona.Sample where
 
 import RIO
 
-import Data.Aeson (ToJSON(toJSON))
+#if MIN_VERSION_aeson(1,3,0)
+import Data.Void (Void)
+#else
 import Data.Void (Void, absurd)
+import Data.Aeson (ToJSON(toJSON))
+#endif
 import Database.Persist.Sql ((==.), entityVal, insert_, selectList)
 import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowerCase, share, sqlSettings)
 import Servant
@@ -119,7 +124,10 @@ errorExample :: RIO Config Int
 errorExample = do
   throwIO $ err404
 
+#if MIN_VERSION_aeson(1,3,0)
+#else
 instance ToJSON Void where toJSON = absurd
+#endif
 
 
 
