@@ -122,9 +122,9 @@ import Distribution.Simple
 main = defaultMain
 
 {-# START_FILE test/Spec.hs #-}
-{-# LANGUAGE QuasiQuotes #-}
-
 module Main where
+
+import RIO
 
 main :: IO ()
 main = pure ()
