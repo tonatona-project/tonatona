@@ -340,23 +340,6 @@ Tonatona has many plugins available.  Here are the plugins provided in this repo
 
     Provide access to a SQLite database through the [persistent](http://hackage.haskell.org/package/persistent) library.
 
-*   [tonatona-email-sendmail](./tonatona-email-sendmail/README.md)
-
-    [![Hackage](https://img.shields.io/hackage/v/tonatona-email-sendmail.svg)](https://hackage.haskell.org/package/tonatona-email-sendmail)
-    [![Stackage LTS](http://stackage.org/package/tonatona-email-sendmail/badge/lts)](http://stackage.org/lts/package/tonatona-email-sendmail)
-    [![Stackage Nightly](http://stackage.org/package/tonatona-email-sendmail/badge/nightly)](http://stackage.org/nightly/package/tonatona-email-sendmail)
-
-    Provide a way to easily send email directly by using `sendmail`.
-
-*   [tonatona-environment](./tonatona-environment/README.md)
-
-    [![Hackage](https://img.shields.io/hackage/v/tonatona-environment.svg)](https://hackage.haskell.org/package/tonatona-environment)
-    [![Stackage LTS](http://stackage.org/package/tonatona-environment/badge/lts)](http://stackage.org/lts/package/tonatona-environment)
-    [![Stackage Nightly](http://stackage.org/package/tonatona-environment/badge/nightly)](http://stackage.org/nightly/package/tonatona-environment)
-
-    Provide a way to figure out at runtime whether we are in a `development`
-    environment, `prodution` environment, or `testing` environment.
-
 *   [tonatona-logger](./tonatona-logger/README.md)
 
     [![Hackage](https://img.shields.io/hackage/v/tonatona-logger.svg)](https://hackage.haskell.org/package/tonatona-logger)
