@@ -201,7 +201,7 @@ main :: IO ()
 main = run app
 
 {-# START_FILE src/TonaApp/Main.hs #-}
-module TonaApp.Main (app) where
+module TonaApp.Main where
 
 import RIO
 

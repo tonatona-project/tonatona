@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 
-module TonaApp.Main (app) where
+module TonaApp.Main where
 
 import RIO
 
