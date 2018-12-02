@@ -85,4 +85,4 @@ tests:
       - doctest
       - Glob
 
-github: arow-oss/tonatona
+github: tonatona-project/tonatona

@@ -1,6 +1,6 @@
 # Tonatona
 
-[![Build Status](https://secure.travis-ci.org/arow-oss/tonatona.svg)](http://travis-ci.org/arow-oss/tonatona)
+[![Build Status](https://secure.travis-ci.org/tonatona-project/tonatona.svg)](http://travis-ci.org/tonatona-project/tonatona)
 [![Hackage](https://img.shields.io/hackage/v/tonatona.svg)](https://hackage.haskell.org/package/tonatona)
 [![Stackage LTS](http://stackage.org/package/tonatona/badge/lts)](http://stackage.org/lts/package/tonatona)
 [![Stackage Nightly](http://stackage.org/package/tonatona/badge/nightly)](http://stackage.org/nightly/package/tonatona)
@@ -54,7 +54,7 @@ This section describes how to do this, using our stack template for tonatona.
 First, let's create a new tonatona project with `stack new` command:
 
 ```bash
-$ stack new sample-app https://raw.githubusercontent.com/arow-oss/tonatona/master/tonatona.hsfiles
+$ stack new sample-app https://raw.githubusercontent.com/tonatona-project/tonatona/master/tonatona.hsfiles
 ```
 
 This will create a new project named "sample-app".
@@ -397,8 +397,3 @@ If your plugin is not accepted into this repository, you are free to support it
 as a third-party repository, release it on Hackage, etc.  If you are using
 Tonatona in a larger project, you will probably end up creating a few of your
 own plugins!
-
-## Maintainers
-
-- [Kadzuya OKAMOTO](https://github.com/arowM)
-- [Dennis Gosnell](https://github.com/cdepillabout)
