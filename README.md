@@ -291,6 +291,8 @@ $(share
 Next, do some DB operations in `app` function:
 
 ```haskell ignore
+import Database.Persist (insert_)
+
 app :: RIO Config ()
 app = do
   -- Tonatona.Logger plugin enables to use logger functions without any configurations.
