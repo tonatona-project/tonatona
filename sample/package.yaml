@@ -1,13 +1,12 @@
-name: tonatona
+name: sample
 version: "0.1.0.0"
-category: "Framework, Library, Tonatona, Web"
-synopsis: meta application framework
-description:
-  Tonatona is a **meta** application framework. It handles lots of boring tasks that are needed for real-world development such as reading in values defined in environment variables, setting up logging, sending emails, accessing databases, etc.
+category: Web
+# synopsis:
+# description:
 license: "MIT"
-author: "Kadzuya Okamoto, Dennis Gosnell"
-copyright: "2018 Kadzuya Okamoto"
-maintainer: "arow.okamoto+github@gmail.com"
+author: Kadzuya Okamoto
+copyright: 2018 Kadzuya Okamoto
+maintainer: arow.okamoto+github@gmail.com
 
 extra-source-files:
   - README.md
@@ -50,8 +49,6 @@ default-extensions:
   - RecordWildCards
   - ScopedTypeVariables
   - StandaloneDeriving
-  - Strict
-  - StrictData
   - TupleSections
   - TypeFamilies
   - TypeSynonymInstances
@@ -59,14 +56,30 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - rio >= 0.1
-  - tonaparser >= 0.1
+  - aeson
+  - mime-mail
+  - persistent
+  - persistent-template
+  - rio
+  - servant
+  - servant-server
+  - tonaparser
+  - tonatona
+  - tonatona-logger
+  - tonatona-persistent-sqlite
+  - tonatona-servant
 
 library:
   source-dirs:
     - src
-  exposed-modules:
-    - Tonatona
+
+executables:
+  sample:
+    source-dirs:
+      - app
+    main: "Main.hs"
+    dependencies:
+      - sample
 
 tests:
   spec:
@@ -75,14 +88,17 @@ tests:
     source-dirs:
       - test
     dependencies:
-      - tonatona
+      - sample
+      - hspec
+      - QuickCheck
   doctest:
     main: "DocTest.hs"
     other-modules: []
     source-dirs:
       - test
     dependencies:
+      - sample
       - doctest
       - Glob
 
-github: tonatona-project/tonatona
+github: githubuser/sample

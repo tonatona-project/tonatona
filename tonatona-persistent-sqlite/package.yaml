@@ -7,7 +7,7 @@ description:
   This package provides a tonatona plugin for accessing Sqlite database. This plugin uses persistent to actually accessing Sqlite.
 license: "MIT"
 author: "Kadzuya Okamoto, Dennis Gosnell"
-copyright: "ARoW https://arow.info"
+copyright: "2018 Kadzuya Okamoto"
 maintainer: "arow.okamoto+github@gmail.com"
 
 extra-source-files:

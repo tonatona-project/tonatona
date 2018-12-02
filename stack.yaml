@@ -15,7 +15,7 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-11.13
+resolver: lts-12.20
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -42,7 +42,6 @@ packages:
     - 'tonatona-persistent-postgresql'
     - 'tonatona-persistent-sqlite'
     - 'tonatona-logger'
-    - 'tonatona-sample'
     - 'tonatona-servant'
 
 # Dependency packages to be pulled from upstream that are not in the resolver

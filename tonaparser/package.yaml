@@ -7,7 +7,7 @@ description:
   This library is supposed to be used with @tonatona@.
 license: "MIT"
 author: "Kadzuya Okamoto, Dennis Gosnell"
-copyright: "ARoW https://arow.info"
+copyright: "2018 Kadzuya Okamoto"
 maintainer: "arow.okamoto+github@gmail.com"
 
 extra-source-files:

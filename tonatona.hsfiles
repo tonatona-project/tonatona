@@ -122,9 +122,9 @@ import Distribution.Simple
 main = defaultMain
 
 {-# START_FILE test/Spec.hs #-}
-{-# LANGUAGE QuasiQuotes #-}
-
 module Main where
+
+import RIO
 
 main :: IO ()
 main = pure ()
@@ -273,7 +273,7 @@ packages:
   - '.'
 extra-deps:
   - git: https://github.com/tonatona-project/tonatona
-    commit: 9ea55cf8eec22faf37c72fdc31d5d9ca3d0286b1
+    commit: 0b6dcc9b4a816db8458b0a3b122e50b215685bb0
     subdirs:
       - tonaparser
       - tonatona
