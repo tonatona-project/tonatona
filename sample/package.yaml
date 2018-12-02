@@ -1,0 +1,104 @@
+name: sample
+version: "0.1.0.0"
+category: Web
+# synopsis:
+# description:
+license: "MIT"
+author: Kadzuya Okamoto
+copyright: 2018 Kadzuya Okamoto
+maintainer: arow.okamoto+github@gmail.com
+
+extra-source-files:
+  - README.md
+
+ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror
+default-extensions:
+  - AutoDeriveTypeable
+  - BangPatterns
+  - BinaryLiterals
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - DoAndIfThenElse
+  - DuplicateRecordFields
+  - EmptyDataDecls
+  - ExistentialQuantification
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - KindSignatures
+  - LambdaCase
+  - MonadFailDesugaring
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - NoImplicitPrelude
+  - OverloadedStrings
+  - PartialTypeSignatures
+  - PatternGuards
+  - PolyKinds
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - TupleSections
+  - TypeFamilies
+  - TypeSynonymInstances
+  - ViewPatterns
+
+dependencies:
+  - base >= 4.7 && < 5
+  - aeson
+  - mime-mail
+  - persistent
+  - persistent-template
+  - rio
+  - servant
+  - servant-server
+  - tonaparser
+  - tonatona
+  - tonatona-logger
+  - tonatona-persistent-sqlite
+  - tonatona-servant
+
+library:
+  source-dirs:
+    - src
+
+executables:
+  sample:
+    source-dirs:
+      - app
+    main: "Main.hs"
+    dependencies:
+      - sample
+
+tests:
+  spec:
+    main: "Spec.hs"
+    other-modules: []
+    source-dirs:
+      - test
+    dependencies:
+      - sample
+      - hspec
+      - QuickCheck
+  doctest:
+    main: "DocTest.hs"
+    other-modules: []
+    source-dirs:
+      - test
+    dependencies:
+      - sample
+      - doctest
+      - Glob
+
+github: githubuser/sample

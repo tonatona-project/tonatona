@@ -42,7 +42,6 @@ packages:
     - 'tonatona-persistent-postgresql'
     - 'tonatona-persistent-sqlite'
     - 'tonatona-logger'
-    - 'tonatona-sample'
     - 'tonatona-servant'
 
 # Dependency packages to be pulled from upstream that are not in the resolver
