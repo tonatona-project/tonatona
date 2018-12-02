@@ -277,7 +277,6 @@ extra-deps:
     subdirs:
       - tonaparser
       - tonatona
-      - tonatona-email-sendmail
       - tonatona-logger
       - tonatona-persistent-postgresql
       - tonatona-persistent-sqlite
