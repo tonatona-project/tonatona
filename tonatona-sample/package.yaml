@@ -6,7 +6,7 @@ description:
   Tonatona is a **meta** web application framework. It handles lots of boring tasks that are needed for real-world development such as reading in values defined in environment variables, setting up logging, sending emails, accessing databases, etc.
 license: "MIT"
 author: "Kadzuya Okamoto, Dennis Gosnell"
-copyright: "ARoW https://arow.info"
+copyright: "2018 Kadzuya Okamoto"
 maintainer: "arow.okamoto+github@gmail.com"
 
 extra-source-files:
