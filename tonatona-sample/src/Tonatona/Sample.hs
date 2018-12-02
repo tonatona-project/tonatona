@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
@@ -8,16 +9,19 @@ module Tonatona.Sample where
 
 import RIO
 
-import Data.Aeson (ToJSON(toJSON))
+#if MIN_VERSION_aeson(1,3,0)
+import Data.Void (Void)
+#else
 import Data.Void (Void, absurd)
+import Data.Aeson (ToJSON(toJSON))
+#endif
 import Database.Persist.Sql ((==.), entityVal, insert_, selectList)
 import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowerCase, share, sqlSettings)
+import Network.Mail.Mime (Address(..), renderSendMail, simpleMail')
 import Servant
 import Tonatona (HasConfig(..), HasParser(..))
 import qualified Tonatona as Tona
 import qualified Tonatona.Logger as TonaLogger
-import Tonatona.Email.Sendmail (Address(..), simpleMail')
-import qualified Tonatona.Email.Sendmail as TonaEmail
 import qualified Tonatona.Servant as TonaServant
 import qualified Tonatona.Persist.Sqlite as TonaDb
 
@@ -112,14 +116,17 @@ sendEmailExample = do
           (Address Nothing "bar@example.com")
           "test email subject from foo to bar"
           "This is a test email from foo@example.com to bar@example.com."
-  TonaEmail.send mail
+  liftIO $ renderSendMail mail
   pure 0
 
 errorExample :: RIO Config Int
 errorExample = do
   throwIO $ err404
 
+#if MIN_VERSION_aeson(1,3,0)
+#else
 instance ToJSON Void where toJSON = absurd
+#endif
 
 
 

@@ -59,13 +59,13 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - rio
-  - monad-logger
-  - persistent
-  - persistent-sqlite
-  - resource-pool
-  - tonaparser
-  - tonatona
+  - rio >= 0.1
+  - monad-logger >= 0.3
+  - persistent >= 2.8
+  - persistent-sqlite >= 2.8
+  - resource-pool >= 0.2
+  - tonaparser >= 0.1
+  - tonatona >= 0.1
 
 library:
   source-dirs:

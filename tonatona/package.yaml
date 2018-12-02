@@ -59,8 +59,8 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - rio
-  - tonaparser
+  - rio >= 0.1
+  - tonaparser >= 0.1
 
 library:
   source-dirs:

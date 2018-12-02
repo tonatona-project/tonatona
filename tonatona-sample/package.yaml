@@ -50,8 +50,6 @@ default-extensions:
   - RecordWildCards
   - ScopedTypeVariables
   - StandaloneDeriving
-  - Strict
-  - StrictData
   - TupleSections
   - TypeFamilies
   - TypeSynonymInstances
@@ -59,18 +57,18 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - aeson
-  - persistent
-  - persistent-template
-  - rio
-  - servant
-  - servant-server
-  - tonaparser
-  - tonatona
-  - tonatona-email-sendmail
-  - tonatona-logger
-  - tonatona-persistent-sqlite
-  - tonatona-servant
+  - aeson >= 1.2
+  - mime-mail >= 0.4
+  - persistent >= 2.8
+  - persistent-template >= 2.5
+  - rio >= 0.1
+  - servant >= 0.13
+  - servant-server >= 0.13
+  - tonaparser >= 0.1
+  - tonatona >= 0.1
+  - tonatona-logger >= 0.1
+  - tonatona-persistent-sqlite >= 0.1
+  - tonatona-servant >= 0.1
 
 library:
   source-dirs:

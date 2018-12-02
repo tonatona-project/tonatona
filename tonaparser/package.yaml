@@ -63,9 +63,9 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - envy
-  - rio
-  - say
+  - envy >= 1.5
+  - rio >= 0.1
+  - say >= 0.1
 
 library:
   source-dirs:
