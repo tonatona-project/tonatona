@@ -7,6 +7,8 @@
 
 ![tonatona](https://user-images.githubusercontent.com/1481749/38623497-c455af60-3de0-11e8-8683-a215d074e7e0.jpg)
 
+Any PRs are welcome, even for documentation fixes. (The main author of this library is not an English native.)
+
 ## What is Tonatona?
 
 Tonatona is a **meta** application framework. It handles lots of boring tasks
