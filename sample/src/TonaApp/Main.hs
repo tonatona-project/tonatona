@@ -23,11 +23,11 @@ import qualified Tonatona.Persist.Sqlite as TonaDb
 app :: RIO Config ()
 app = do
   -- Tonatona.Logger plugin enables to use logger functions without any configurations.
-  logDebug $ display ("About to run migration..." :: Text)
+  TonaLogger.logDebug $ display ("About to run migration..." :: Text)
   TonaDb.runMigrate migrateAll
   -- Configurations are accessable by 'asks' as follows.
   port <- asks (TonaServant.port . config)
-  logDebug $
+  TonaLogger.logDebug $
     ("About to run web server on port " <> display port <> " ...")
   TonaServant.run @API server
 
@@ -64,7 +64,7 @@ server =
 -- As you can see the type, any plugins can be used in @TonaServer.run@.
 loggerExample :: RIO Config Int
 loggerExample = do
-  logInfo $ display ("in loggerExample, returning 1" :: Text)
+  TonaLogger.logInfo $ display ("in loggerExample, returning 1" :: Text)
   pure 1
 
 tagServer :: ServerT TagAPI (RIO Config)
@@ -75,7 +75,7 @@ postTag name val = do
   TonaDb.run $ do
     -- By using 'lift', any plugins are available in @Tonatona.Db.*.run@
     lift $
-      logInfo $ display $
+      TonaLogger.logInfo $ display $
         "in postTag, in TonaDb.run, inserting a tag with name = " <>
         name <> ", val = " <> val
     insert_ (Tag name val)
