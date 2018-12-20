@@ -216,8 +216,8 @@ import qualified Tonatona.Logger as TonaLogger
 app :: RIO Config ()
 app = do
   -- Tonatona.Logger plugin enables to use logger functions without any configurations.
-  logInfo $ display ("This is a skeleton for tonatona project" :: Text)
-  logDebug $ display ("This is a debug message" :: Text)
+  TonaLogger.logInfo $ display ("This is a skeleton for tonatona project" :: Text)
+  TonaLogger.logDebug $ display ("This is a debug message" :: Text)
 
 
 
@@ -268,12 +268,12 @@ SOFTWARE.
 # {{name}}
 
 {-# START_FILE stack.yaml #-}
-resolver: lts-12.20
+resolver: lts-12.24
 packages:
   - '.'
 extra-deps:
   - git: https://github.com/tonatona-project/tonatona
-    commit: 0b6dcc9b4a816db8458b0a3b122e50b215685bb0
+    commit: 5ab0706e9cc59697feaaacb7ac8142a2fff7ce0b
     subdirs:
       - tonaparser
       - tonatona

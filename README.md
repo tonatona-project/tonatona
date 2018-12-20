@@ -79,8 +79,8 @@ import qualified Tonatona.Logger as TonaLogger
 app :: RIO Config ()
 app = do
   -- Tonatona.Logger plugin enables to use logger functions without any configurations.
-  logInfo $ display ("This is a skeleton for tonatona project" :: Text)
-  logDebug $ display ("This is a debug message" :: Text)
+  TonaLogger.logInfo $ display ("This is a skeleton for tonatona project" :: Text)
+  TonaLogger.logDebug $ display ("This is a debug message" :: Text)
 
 
 
@@ -120,8 +120,8 @@ So, the main function named `app` has type of `RIO Config ()`.
 app :: RIO Config ()
 app = do
   -- Tonatona.Logger plugin enables to use logger functions without any configurations.
-  logInfo $ display ("This is a skeleton for tonatona project" :: Text)
-  logDebug $ display ("This is a debug message" :: Text)
+  TonaLogger.logInfo $ display ("This is a skeleton for tonatona project" :: Text)
+  TonaLogger.logDebug $ display ("This is a debug message" :: Text)
 ```
 
 It's just a `RIO` monad, so bunch of convenient functions `rio` provieds are available in it.
@@ -298,17 +298,17 @@ import Database.Persist (insert_)
 app :: RIO Config ()
 app = do
   -- Tonatona.Logger plugin enables to use logger functions without any configurations.
-  logInfo $ display ("This is a skeleton for tonatona project" :: Text)
-  logDebug $ display ("Migrating DB..." :: Text)
+  TonaLogger.logInfo $ display ("This is a skeleton for tonatona project" :: Text)
+  TonaLogger.logDebug $ display ("Migrating DB..." :: Text)
   TonaDb.runMigrate migrateAll
-  logDebug $ display ("Running DB query..." :: Text)
+  TonaLogger.logDebug $ display ("Running DB query..." :: Text)
   TonaDb.run $ do
     -- By using 'lift', any plugins are available in @TonaDb.run@.
     lift $
-      logInfo $ display $
+      TonaLogger.logInfo $ display $
         ("This log is called inside of `TonaDb.run`" :: Text)
     insert_ $ BlogPost "Mr. Foo Bar" "This is an example blog post"
-  logInfo $ display ("Successfully inserted a blog post!" :: Text)
+  TonaLogger.logInfo $ display ("Successfully inserted a blog post!" :: Text)
 ```
 
 A summary of the steps you need to take is as follows:
