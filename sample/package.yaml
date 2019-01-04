@@ -60,9 +60,9 @@ dependencies:
   - mime-mail
   - persistent
   - persistent-template
-  - rio
   - servant
   - servant-server
+  - tonalude
   - tonaparser
   - tonatona
   - tonatona-logger

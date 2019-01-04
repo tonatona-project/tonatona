@@ -1,6 +1,6 @@
 module Main where
 
-import RIO
+import Tonalude
 import Tonatona (run)
 import TonaApp.Main (app)
 
