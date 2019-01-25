@@ -1,6 +1,6 @@
 module Main (main) where
 
-import RIO
+import Tonalude
 
 import System.FilePath.Glob (glob)
 import Test.DocTest (doctest)
