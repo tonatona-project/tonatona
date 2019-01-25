@@ -1,6 +1,6 @@
 module Main where
 
-import RIO
+import Tonalude
 
 main :: IO ()
 main = pure ()

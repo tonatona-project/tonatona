@@ -268,12 +268,12 @@ SOFTWARE.
 # {{name}}
 
 {-# START_FILE stack.yaml #-}
-resolver: lts-12.24
+resolver: lts-13.4
 packages:
   - '.'
 extra-deps:
   - git: https://github.com/tonatona-project/tonatona
-    commit: 4dbc0c3a72e5d7688cf74172a070171933befcd2
+    commit: 1cbe20844645d71592339cf591724b3fa7c1ea9c
     subdirs:
       - tonalude
       - tonaparser
