@@ -13,7 +13,7 @@ maintainer: "arow.okamoto+github@gmail.com"
 extra-source-files:
   - README.md
 
-ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror
+ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
 default-extensions:
   - AutoDeriveTypeable
   - BangPatterns
