@@ -37,6 +37,7 @@ resolver: lts-12.20
 # will not be run. This is useful for tweaking upstream packages.
 packages:
     - 'test/readme'
+    - 'tonalude'
     - 'tonaparser'
     - 'tonatona'
     - 'tonatona-persistent-postgresql'

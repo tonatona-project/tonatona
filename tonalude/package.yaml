@@ -1,17 +1,20 @@
-name: sample
+name: tonalude
 version: "0.1.0.0"
-category: Web
-# synopsis:
-# description:
+category: "Control, Library, Tonatona"
+synopsis: A standard library for Tonatona framework.
+description:
+  Tonaparser provides a way to pass runtime configurations.
+  This library is supposed to be used with @tonatona@.
+  The Tonalude module works as a prelude replacement for Tonatona framework, providing more functionality and types out of the box than the standard prelude (such as common data types like ByteString and Text), as well as removing common "gotchas", like partial functions and lazy I/O.
 license: "MIT"
-author: Kadzuya Okamoto
-copyright: 2018 Kadzuya Okamoto
-maintainer: arow.okamoto+github@gmail.com
+author: "Kadzuya Okamoto"
+copyright: "2018 Kadzuya Okamoto"
+maintainer: "arow.okamoto+github@gmail.com"
 
 extra-source-files:
   - README.md
 
-ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror
+ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
 default-extensions:
   - AutoDeriveTypeable
   - BangPatterns
@@ -25,7 +28,6 @@ default-extensions:
   - DeriveGeneric
   - DeriveTraversable
   - DoAndIfThenElse
-  - DuplicateRecordFields
   - EmptyDataDecls
   - ExistentialQuantification
   - FlexibleContexts
@@ -56,30 +58,20 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - aeson
-  - mime-mail
-  - persistent
-  - persistent-template
-  - servant
-  - servant-server
-  - tonalude
-  - tonaparser
-  - tonatona
-  - tonatona-logger
-  - tonatona-persistent-sqlite
-  - tonatona-servant
+  - bytestring >= 0.10 && < 0.11
+  - rio >= 0.1.5
 
 library:
   source-dirs:
     - src
-
-executables:
-  sample:
-    source-dirs:
-      - app
-    main: "Main.hs"
-    dependencies:
-      - sample
+  other-modules:
+    - Tonalude.Prelude.Display
+    - Tonalude.Prelude.IO
+    - Tonalude.Prelude.Reexports
+    - Tonalude.Prelude.Renames
+    - Tonalude.Prelude.RIO
+    - Tonalude.Prelude.Text
+    - Tonalude.Prelude.Trace
 
 tests:
   spec:
@@ -88,17 +80,14 @@ tests:
     source-dirs:
       - test
     dependencies:
-      - sample
-      - hspec
-      - QuickCheck
+      - tonatona
   doctest:
     main: "DocTest.hs"
     other-modules: []
     source-dirs:
       - test
     dependencies:
-      - sample
       - doctest
       - Glob
 
-github: githubuser/sample
+github: tonatona-project/tonatona

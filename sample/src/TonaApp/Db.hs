@@ -3,7 +3,7 @@
 
 module TonaApp.Db where
 
-import RIO
+import Tonalude
 
 import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowerCase, share, sqlSettings)
 

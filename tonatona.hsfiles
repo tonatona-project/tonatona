@@ -57,7 +57,7 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - rio
+  - tonalude
   - tonatona
   - tonatona-logger
 
@@ -124,7 +124,7 @@ main = defaultMain
 {-# START_FILE test/Spec.hs #-}
 module Main where
 
-import RIO
+import Tonalude
 
 main :: IO ()
 main = pure ()
@@ -132,7 +132,7 @@ main = pure ()
 {-# START_FILE test/DocTest.hs #-}
 module Main (main) where
 
-import RIO
+import Tonalude
 
 import System.FilePath.Glob (glob)
 import Test.DocTest (doctest)
@@ -193,7 +193,7 @@ ghcExtensions =
 {-# START_FILE app/Main.hs #-}
 module Main where
 
-import RIO
+import Tonalude
 import Tonatona (run)
 import TonaApp.Main (app)
 
@@ -203,7 +203,7 @@ main = run app
 {-# START_FILE src/TonaApp/Main.hs #-}
 module TonaApp.Main where
 
-import RIO
+import Tonalude
 
 import Tonatona (HasConfig(..), HasParser(..))
 import qualified Tonatona.Logger as TonaLogger
@@ -273,8 +273,9 @@ packages:
   - '.'
 extra-deps:
   - git: https://github.com/tonatona-project/tonatona
-    commit: 5ab0706e9cc59697feaaacb7ac8142a2fff7ce0b
+    commit: 4dbc0c3a72e5d7688cf74172a070171933befcd2
     subdirs:
+      - tonalude
       - tonaparser
       - tonatona
       - tonatona-logger

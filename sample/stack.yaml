@@ -1,10 +1,11 @@
-resolver: lts-12.20
+resolver: lts-12.24
 packages:
   - '.'
 extra-deps:
   - git: https://github.com/tonatona-project/tonatona
-    commit: 5ab0706e9cc59697feaaacb7ac8142a2fff7ce0b
+    commit: e3d63a792c9654f92251e0fea1b32e5b670c853e
     subdirs:
+      - tonalude
       - tonaparser
       - tonatona
       - tonatona-logger

@@ -66,7 +66,7 @@ Let’s start by just looking at all the code in `sample-app/src/TonaApp/Main.hs
 ```haskell
 module TonaApp.Main (app) where
 
-import RIO
+import Tonalude
 
 import Tonatona (HasConfig(..), HasParser(..))
 import qualified Tonatona.Logger as TonaLogger
@@ -105,16 +105,18 @@ instance HasParser Config where
       -- <*> parser
 ```
 
-As you can see `import` part, tonatona is supposed to be used with [rio](http://hackage.haskell.org/package/rio) as an alternative to Prelude.
+As you can see `import` part, tonatona is supposed to be used with `Tonalude` as an alternative to Prelude.
 
 ```haskell ignore
-import RIO
+import Tonalude
 
 import Tonatona (HasConfig(..), HasParser(..))
 import qualified Tonatona.Logger as TonaLogger
 ```
 
-So, the main function named `app` has type of `RIO Config ()`.
+The main function named `app` has type of `RIO Config ()`, instead of just `IO ()`.
+The `Tonalude` module and plugin modules (e.g., Tonatona.Logger) provides
+bunch of convenient functions to be used in `RIO Config` monad.
 
 ```haskell ignore
 app :: RIO Config ()
@@ -124,7 +126,6 @@ app = do
   TonaLogger.logDebug $ display ("This is a debug message" :: Text)
 ```
 
-It's just a `RIO` monad, so bunch of convenient functions `rio` provieds are available in it.
 One of the amazing thing here is that there are no configurations about logging behaviour.
 The only thing you have to do is just write a little bit of boilerplate code.
 
@@ -209,7 +210,7 @@ dependencies:
   # actually use `tonatona-persistent-sqlite`.
   - persistent
   - persistent-template
-  - rio
+  - tonalude
   - tonatona
   - tonatona-logger
   # new plugin to add

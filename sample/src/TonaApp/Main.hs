@@ -3,7 +3,7 @@
 
 module TonaApp.Main where
 
-import RIO
+import Tonalude
 
 import Database.Persist.Sql ((==.), entityVal, insert_, selectList)
 import Network.Mail.Mime (Address(..), renderSendMail, simpleMail')
@@ -102,7 +102,7 @@ sendEmailExample = do
 
 errorExample :: RIO Config Int
 errorExample = do
-  throwIO $ err404
+  throwM $ err404
 -- Config
 
 
