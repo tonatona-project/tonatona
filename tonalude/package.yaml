@@ -60,6 +60,7 @@ dependencies:
   - base >= 4.7 && < 5
   - bytestring >= 0.10
   - rio >= 0.1.5
+  - unliftio >= 0.2.4
 
 library:
   source-dirs:

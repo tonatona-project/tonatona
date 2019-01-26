@@ -1,7 +1,8 @@
 {-# LANGUAGE CPP #-}
 
 module Tonalude.Prelude.Reexports
-  ( Alternative
+  ( module UnliftIO.Exception
+  , Alternative
   , Applicative (..)
   , liftA
 #if !MIN_VERSION_base(4, 10, 0)
@@ -225,3 +226,4 @@ module Tonalude.Prelude.Reexports
   ) where
 
 import RIO
+import UnliftIO.Exception
