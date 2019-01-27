@@ -1,0 +1,10 @@
+resolver: lts-13.4
+packages:
+  - '.'
+extra-deps:
+  - tonaparser-0.1.0.0
+  - tonatona-0.1.0.0
+  - tonatona-logger-0.2.0.0
+
+flags: {}
+extra-package-dbs: []
