@@ -11,14 +11,13 @@ Any PRs are welcome, even for documentation fixes. (The main author of this libr
 
 ## What is Tonatona?
 
-Tonatona is a **meta** application framework. It handles lots of boring tasks
+Tonatona is a framework for any type of applications. It handles lots of boring tasks
 that are needed for real-world development such as reading in values
 defined in environment variables, setting up logging, sending emails, accessing
 databases, etc.
 
-Tonatona can also be used with your favorite web framework as a meta web
-application framework.  Tonatona **does not** provide the core functionalities
-of web applications, such as routing, request parsing, response building, etc.
+Tonatona can also be used with your favorite web framework as a glue.  Tonatona **does not** provide the core functionalities
+of web applicationsわかってないかもしれません）, such as routing, request parsing, response building, etc.
 Instead, you can use plugins like `tonatona-servant`, `tonatona-spock`, or
 `tonatona-yesod` to work with your favorite web framework.
 
