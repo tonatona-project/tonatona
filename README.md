@@ -17,7 +17,7 @@ defined in environment variables, setting up logging, sending emails, accessing
 databases, etc.
 
 Tonatona can also be used with your favorite web framework as a glue.  Tonatona **does not** provide the core functionalities
-of web applicationsわかってないかもしれません）, such as routing, request parsing, response building, etc.
+of web applications, such as routing, request parsing, response building, etc.
 Instead, you can use plugins like `tonatona-servant`, `tonatona-spock`, or
 `tonatona-yesod` to work with your favorite web framework.
 
