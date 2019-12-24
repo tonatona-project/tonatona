@@ -1,5 +1,6 @@
 module Tonatona
   ( run
+  , liftIOCont
   , HasParser(..)
   , HasConfig(..)
   ) where
@@ -14,6 +15,12 @@ run :: HasParser env => RIO env () -> IO ()
 run action = do
   withConfig parser $ \env ->
     runRIO env action
+
+{-| Lift Continuation-passing style IO function into RIO.
+ -}
+liftIOCont :: ((a -> IO b) -> IO b) -> (a -> RIO env b) -> RIO env b
+liftIOCont f action =
+  RIO $ ReaderT $ \env -> f (\a -> runReaderT (unRIO (action a)) env)
 
 class HasParser a where
   parser :: Parser a
