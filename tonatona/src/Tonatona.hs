@@ -18,7 +18,7 @@ run action = do
 
 {-| Lift Continuation-passing style IO function into RIO.
  -}
-liftIOCont :: ((a -> IO b) -> IO b) -> (a -> RIO env b) -> RIO env b
+liftIOCont :: ((a -> IO b) -> IO c) -> (a -> RIO env b) -> RIO env c
 liftIOCont f action =
   RIO $ ReaderT $ \env -> f (\a -> runReaderT (unRIO (action a)) env)
 
