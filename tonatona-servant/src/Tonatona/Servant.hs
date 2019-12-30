@@ -13,11 +13,13 @@ module Tonatona.Servant
 
 import RIO
 
+import Data.Default (def)
 import Network.HTTP.Types.Header
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp (Port)
 import qualified Network.Wai.Handler.Warp as Warp
-import Network.Wai.Middleware.RequestLogger (logStdout, logStdoutDev)
+import Network.Wai.Middleware.RequestLogger (OutputFormat(..), logStdout, logStdoutDev, mkRequestLogger, outputFormat)
+import Network.Wai.Middleware.RequestLogger.JSON (formatAsJSONWithHeaders)
 import Servant
 
 import TonaParser (Parser, (.||), argLong, envVar, optionalVal)
@@ -70,10 +72,21 @@ redirect redirectLocation =
 reqLogMiddleware :: (HasConfig env TonaLogger.Config) => RIO env Middleware
 reqLogMiddleware = do
   TonaLogger.Config {mode, verbose} <- asks config
-  pure $
-    if TonaLogger.defaultVerbosity mode verbose
-      then logStdoutDev
-      else logStdout
+  case (mode, verbose) of
+    (TonaLogger.Development, TonaLogger.Verbose True) ->
+      liftIO mkLogStdoutVerbose
+    (TonaLogger.Development, TonaLogger.Verbose False) ->
+      pure logStdoutDev
+    (_, TonaLogger.Verbose True) ->
+      pure logStdoutDev
+    (_, TonaLogger.Verbose False) ->
+      pure logStdout
+
+mkLogStdoutVerbose :: IO Middleware
+mkLogStdoutVerbose = do
+  mkRequestLogger def
+    { outputFormat = CustomOutputFormatWithDetailsAndHeaders formatAsJSONWithHeaders
+    }
 
 -- Config
 
