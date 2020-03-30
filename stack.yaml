@@ -46,7 +46,8 @@ packages:
 
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-extra-deps: []
+extra-deps:
+    - wai-extra-3.0.29.1@sha256:72c29434fe20a0d2bc6f5f292c9c9694c0d106dd2abf755d394d158593524d3f,7046
 
 # Override default flag values for local packages and extra-deps
 flags: {}

@@ -273,7 +273,7 @@ packages:
   - '.'
 extra-deps:
   - git: https://github.com/tonatona-project/tonatona
-    commit: bc916ac3bd633075950ac8976282aa7b5c02da4e
+    commit: 90fa2abcfcc7077c2bb3bdf04a85752aab19725e
     subdirs:
       - tonalude
       - tonaparser
