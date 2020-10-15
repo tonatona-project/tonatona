@@ -14,6 +14,7 @@ module Tonatona.Servant
 import RIO
 
 import Data.Default (def)
+import Data.Kind (Type)
 import Network.HTTP.Types.Header
 import Network.Wai (Middleware)
 import Network.Wai.Handler.Warp (Port)
@@ -29,7 +30,7 @@ import qualified Tonatona.Logger as TonaLogger
 {-| Main function.
  -}
 run ::
-     forall (api :: *) env.
+     forall (api :: Type) env.
      (HasServer api '[], HasConfig env Config, HasConfig env TonaLogger.Config)
   => ServerT api (RIO env)
   -> RIO env ()
@@ -41,7 +42,7 @@ run servantServer = do
   liftIO $ Warp.run (port conf) $ loggingMiddleware app
 
 runServant ::
-     forall (api :: *) env. (HasServer api '[])
+     forall (api :: Type) env. (HasServer api '[])
   => env
   -> ServerT api (RIO env)
   -> Application

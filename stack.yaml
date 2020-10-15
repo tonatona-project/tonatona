@@ -15,7 +15,7 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-13.4
+resolver: lts-16.18
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -47,7 +47,7 @@ packages:
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps:
-    - wai-extra-3.0.29.1@sha256:72c29434fe20a0d2bc6f5f292c9c9694c0d106dd2abf755d394d158593524d3f,7046
+    - wai-extra-3.0.32@sha256:7a9e65c4555e1b937dc788b8ba249dbacd4f36840c60581bc27115a5c4a48079,7044
     - streaming-commons-0.2.1.2@sha256:7830ce8a437bbe8b6546b03308d86e2f6c96bc1b62c2d0c007c44b27f3849a20,4990
 
 # Override default flag values for local packages and extra-deps

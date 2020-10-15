@@ -33,7 +33,7 @@ import qualified RIO.List as List
 import qualified RIO.Map as Map
 
 import Control.Monad (ap)
-import Data.Typeable (Proxy(..), typeOf, typeRep)
+import Data.Typeable (typeOf, typeRep)
 import Say (sayString)
 import System.Environment (getArgs, getEnvironment)
 import System.Envy (Var(fromVar, toVar))
