@@ -16,8 +16,7 @@ doDocTest options =
 
 ghcExtensions :: [String]
 ghcExtensions =
-    [ "-XAutoDeriveTypeable"
-    , "-XBangPatterns"
+    [ "-XBangPatterns"
     , "-XBinaryLiterals"
     , "-XConstraintKinds"
     , "-XDataKinds"
@@ -39,7 +38,6 @@ ghcExtensions =
     , "-XInstanceSigs"
     , "-XKindSignatures"
     , "-XLambdaCase"
-    , "-XMonadFailDesugaring"
     , "-XMultiParamTypeClasses"
     , "-XMultiWayIf"
     , "-XNamedFieldPuns"
