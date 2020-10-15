@@ -1,0 +1,85 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 53541ad676f54ffb678e4104d6839f041058c3c8e95a3bcd9eaf3fa020951ea8
+
+name:           tonatona-persistent-postgresql
+version:        0.1.0.1
+synopsis:       tonatona plugin for accessing PostgreSQL database.
+description:    Tonatona plugin for accessing PostgreSQL database. This package provides a tonatona plugin for accessing PostgreSQL database. This plugin uses persistent to actually accessing PostgreSQL.
+category:       Database, Library, Tonatona
+homepage:       https://github.com/tonatona-project/tonatona#readme
+bug-reports:    https://github.com/tonatona-project/tonatona/issues
+author:         Kadzuya Okamoto, Dennis Gosnell
+maintainer:     arow.okamoto+github@gmail.com
+copyright:      2018 Kadzuya Okamoto
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/tonatona-project/tonatona
+
+library
+  exposed-modules:
+      Tonatona.Persist.Postgresql
+  other-modules:
+      Paths_tonatona_persistent_postgresql
+  hs-source-dirs:
+      src
+  default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
+  ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+    , monad-logger >=0.3
+    , persistent >=2.8
+    , persistent-postgresql >=2.8
+    , resource-pool >=0.2
+    , rio >=0.1
+    , tonaparser >=0.1
+    , tonatona >=0.1
+  default-language: Haskell2010
+
+test-suite doctest
+  type: exitcode-stdio-1.0
+  main-is: DocTest.hs
+  hs-source-dirs:
+      test
+  default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
+  ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
+  build-depends:
+      Glob
+    , base >=4.7 && <5
+    , doctest
+    , monad-logger >=0.3
+    , persistent >=2.8
+    , persistent-postgresql >=2.8
+    , resource-pool >=0.2
+    , rio >=0.1
+    , tonaparser >=0.1
+    , tonatona >=0.1
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+  default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
+  ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+    , monad-logger >=0.3
+    , persistent >=2.8
+    , persistent-postgresql >=2.8
+    , resource-pool >=0.2
+    , rio >=0.1
+    , tonaparser >=0.1
+    , tonatona
+  default-language: Haskell2010
