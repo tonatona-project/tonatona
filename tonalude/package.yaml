@@ -16,7 +16,6 @@ extra-source-files:
 
 ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
 default-extensions:
-  - AutoDeriveTypeable
   - BangPatterns
   - BinaryLiterals
   - ConstraintKinds
@@ -38,7 +37,6 @@ default-extensions:
   - InstanceSigs
   - KindSignatures
   - LambdaCase
-  - MonadFailDesugaring
   - MultiParamTypeClasses
   - MultiWayIf
   - NamedFieldPuns

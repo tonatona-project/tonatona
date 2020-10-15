@@ -31,7 +31,6 @@ module Tonatona.Logger
 
 import RIO
 
-import GHC.Generics (Generic)
 import Tonatona (HasConfig(..), HasParser(..))
 import TonaParser
   ( Var(..)

@@ -111,6 +111,18 @@ matrix:
     compiler: ": #stack 8.6.3"
     addons: {apt: {packages: [libgmp-dev]}}
 
+  - env: BUILD=stack ARGS="--resolver lts-14"
+    compiler: ": #stack 8.6.5"
+    addons: {apt: {packages: [libgmp-dev]}}
+
+  - env: BUILD=stack ARGS="--resolver lts-15"
+    compiler: ": #stack 8.8.2"
+    addons: {apt: {packages: [libgmp-dev]}}
+
+  - env: BUILD=stack ARGS="--resolver lts-16"
+    compiler: ": #stack 8.8.3"
+    addons: {apt: {packages: [libgmp-dev]}}
+
   # Nightly builds are allowed to fail
   - env: BUILD=stack ARGS="--resolver nightly"
     compiler: ": #stack nightly"
@@ -152,6 +164,18 @@ matrix:
 
   - env: BUILD=stack ARGS="--resolver lts-13"
     compiler: ": #stack 8.6.3 osx"
+    os: osx
+
+  - env: BUILD=stack ARGS="--resolver lts-14"
+    compiler: ": #stack 8.6.5 osx"
+    os: osx
+
+  - env: BUILD=stack ARGS="--resolver lts-15"
+    compiler: ": #stack 8.8.2 osx"
+    os: osx
+
+  - env: BUILD=stack ARGS="--resolver lts-16"
+    compiler: ": #stack 8.8.3 osx"
     os: osx
 
   - env: BUILD=stack ARGS="--resolver nightly"
