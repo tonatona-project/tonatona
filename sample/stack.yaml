@@ -1,9 +1,9 @@
-resolver: lts-13.4
+resolver: lts-16.18
 packages:
   - '.'
 extra-deps:
   - git: https://github.com/tonatona-project/tonatona
-    commit: 1cbe20844645d71592339cf591724b3fa7c1ea9c
+    commit: cf8c12c73a993346a0f682000ec04f71158247cc
     subdirs:
       - tonalude
       - tonaparser
