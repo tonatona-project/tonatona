@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a0925efbad5ad6a7b0ed9a92b5ae579512c6f7d78460ab638bc509274efa86ba
+-- hash: d94fe10c45c604846b91f8e1fa2ea78244eb6a8da66828f53c8c4e0bb6f29378
 
 name:           tonatona-servant
 version:        0.1.0.3
@@ -36,20 +36,20 @@ library
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , data-default >=0.7
-    , exceptions >=0.8
-    , http-types >=0.12
-    , monad-logger >=0.3
-    , rio >=0.1
-    , servant >=0.13
-    , servant-server >=0.13
-    , tonaparser >=0.1
-    , tonatona >=0.1
-    , tonatona-logger >=0.1
-    , wai >=3.2
-    , wai-extra >=3.0.27
-    , warp >=3.2
+      base >=4.7 && <4.15
+    , data-default >=0.7 && <0.8
+    , exceptions >=0.8 && <0.11
+    , http-types >=0.12 && <0.13
+    , monad-logger >=0.3 && <0.4
+    , rio >=0.1 && <0.2
+    , servant >=0.13 && <0.17
+    , servant-server >=0.13 && <0.17
+    , tonaparser >=0.1 && <0.2
+    , tonatona >=0.1 && <0.2
+    , tonatona-logger >=0.1 && <0.3
+    , wai >=3.2 && <3.3
+    , wai-extra >=3.0.27 && <3.1
+    , warp >=3.2 && <3.4
   default-language: Haskell2010
 
 test-suite doctest
@@ -61,21 +61,21 @@ test-suite doctest
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       Glob
-    , base >=4.7 && <5
-    , data-default >=0.7
+    , base >=4.7 && <4.15
+    , data-default >=0.7 && <0.8
     , doctest
-    , exceptions >=0.8
-    , http-types >=0.12
-    , monad-logger >=0.3
-    , rio >=0.1
-    , servant >=0.13
-    , servant-server >=0.13
-    , tonaparser >=0.1
-    , tonatona >=0.1
-    , tonatona-logger >=0.1
-    , wai >=3.2
-    , wai-extra >=3.0.27
-    , warp >=3.2
+    , exceptions >=0.8 && <0.11
+    , http-types >=0.12 && <0.13
+    , monad-logger >=0.3 && <0.4
+    , rio >=0.1 && <0.2
+    , servant >=0.13 && <0.17
+    , servant-server >=0.13 && <0.17
+    , tonaparser >=0.1 && <0.2
+    , tonatona >=0.1 && <0.2
+    , tonatona-logger >=0.1 && <0.3
+    , wai >=3.2 && <3.3
+    , wai-extra >=3.0.27 && <3.1
+    , warp >=3.2 && <3.4
   default-language: Haskell2010
 
 test-suite spec
@@ -86,18 +86,18 @@ test-suite spec
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , data-default >=0.7
-    , exceptions >=0.8
-    , http-types >=0.12
-    , monad-logger >=0.3
-    , rio >=0.1
-    , servant >=0.13
-    , servant-server >=0.13
-    , tonaparser >=0.1
+      base >=4.7 && <4.15
+    , data-default >=0.7 && <0.8
+    , exceptions >=0.8 && <0.11
+    , http-types >=0.12 && <0.13
+    , monad-logger >=0.3 && <0.4
+    , rio >=0.1 && <0.2
+    , servant >=0.13 && <0.17
+    , servant-server >=0.13 && <0.17
+    , tonaparser >=0.1 && <0.2
     , tonatona
-    , tonatona-logger >=0.1
-    , wai >=3.2
-    , wai-extra >=3.0.27
-    , warp >=3.2
+    , tonatona-logger >=0.1 && <0.3
+    , wai >=3.2 && <3.3
+    , wai-extra >=3.0.27 && <3.1
+    , warp >=3.2 && <3.4
   default-language: Haskell2010

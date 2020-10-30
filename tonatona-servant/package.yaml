@@ -56,20 +56,20 @@ default-extensions:
   - ViewPatterns
 
 dependencies:
-  - base >= 4.7 && < 5
-  - data-default >= 0.7
-  - exceptions >= 0.8
-  - http-types >= 0.12
-  - monad-logger >= 0.3
-  - rio >= 0.1
-  - servant >= 0.13
-  - servant-server >= 0.13
-  - tonaparser >= 0.1
-  - tonatona >= 0.1
-  - tonatona-logger >= 0.1
-  - wai >= 3.2
-  - wai-extra >= 3.0.27
-  - warp >= 3.2
+  - base >= 4.7 && < 4.15
+  - data-default >= 0.7 && < 0.8
+  - exceptions >= 0.8 && < 0.11
+  - http-types >= 0.12 && < 0.13
+  - monad-logger >= 0.3 && < 0.4
+  - rio >= 0.1 && < 0.2
+  - servant >= 0.13 && < 0.17
+  - servant-server >= 0.13 && < 0.17
+  - tonaparser >= 0.1 && < 0.2
+  - tonatona >= 0.1 && < 0.2
+  - tonatona-logger >= 0.1 && < 0.3
+  - wai >= 3.2 && < 3.3
+  - wai-extra >= 3.0.27 && < 3.1
+  - warp >= 3.2 && < 3.4
 
 library:
   source-dirs:

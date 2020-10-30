@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5c05cda4f38db66434311b13a23264e445cd52af7cb40ff5e5bdc7ed051ef2ca
+-- hash: ebdd0c764c62e70ea91575848ea7b32fb7b328b2f70739fc24419838847d4d46
 
 name:           tonatona-logger
 version:        0.2.0.1
@@ -36,10 +36,10 @@ library
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , rio >=0.1
-    , tonaparser >=0.1
-    , tonatona >=0.1
+      base >=4.7 && <4.15
+    , rio >=0.1 && <0.2
+    , tonaparser >=0.1 && <0.2
+    , tonatona >=0.1 && <0.2
   default-language: Haskell2010
 
 test-suite doctest
@@ -51,11 +51,11 @@ test-suite doctest
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       Glob
-    , base >=4.7 && <5
+    , base >=4.7 && <4.15
     , doctest
-    , rio >=0.1
-    , tonaparser >=0.1
-    , tonatona >=0.1
+    , rio >=0.1 && <0.2
+    , tonaparser >=0.1 && <0.2
+    , tonatona >=0.1 && <0.2
   default-language: Haskell2010
 
 test-suite spec
@@ -66,8 +66,8 @@ test-suite spec
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , rio >=0.1
-    , tonaparser >=0.1
+      base >=4.7 && <4.15
+    , rio >=0.1 && <0.2
+    , tonaparser >=0.1 && <0.2
     , tonatona
   default-language: Haskell2010

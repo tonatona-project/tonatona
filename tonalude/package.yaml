@@ -55,10 +55,10 @@ default-extensions:
   - ViewPatterns
 
 dependencies:
-  - base >= 4.7 && < 5
-  - bytestring >= 0.10
-  - rio >= 0.1.5
-  - unliftio >= 0.2.4
+  - base >= 4.7 && < 4.15
+  - bytestring >= 0.10 && < 0.11
+  - rio >= 0.1.5 && < 0.2
+  - unliftio >= 0.2.4 && < 0.3
 
 library:
   source-dirs:

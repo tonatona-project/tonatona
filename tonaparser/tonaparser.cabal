@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a0b15935d3132dc03f24b425059f4919b1d834a226e46bed5325ec2c5950ce4d
+-- hash: b03f00ca24faea018f62b9cf225b411c81f5ccd800d99bccb2893cb5f779c826
 
 name:           tonaparser
 version:        0.1.0.0
@@ -41,10 +41,10 @@ library
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , envy >=1.5
-    , rio >=0.1
-    , say >=0.1
+      base >=4.7 && <4.15
+    , envy >=1.5 && <2.2
+    , rio >=0.1 && <0.2
+    , say >=0.1 && <0.2
   default-language: Haskell2010
 
 executable tonaparser-example
@@ -56,9 +56,9 @@ executable tonaparser-example
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , envy >=1.5
-    , rio >=0.1
+      base >=4.7 && <4.15
+    , envy >=1.5 && <2.2
+    , rio >=0.1 && <0.2
     , say
     , tonaparser
   if flag(buildexample)
@@ -76,11 +76,11 @@ test-suite doctest
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       Glob
-    , base >=4.7 && <5
+    , base >=4.7 && <4.15
     , doctest
-    , envy >=1.5
-    , rio >=0.1
-    , say >=0.1
+    , envy >=1.5 && <2.2
+    , rio >=0.1 && <0.2
+    , say >=0.1 && <0.2
   default-language: Haskell2010
 
 test-suite spec
@@ -91,9 +91,9 @@ test-suite spec
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , envy >=1.5
-    , rio >=0.1
-    , say >=0.1
+      base >=4.7 && <4.15
+    , envy >=1.5 && <2.2
+    , rio >=0.1 && <0.2
+    , say >=0.1 && <0.2
     , tonatona
   default-language: Haskell2010

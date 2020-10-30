@@ -53,7 +53,7 @@ default-extensions:
   - ViewPatterns
 
 dependencies:
-  - base >= 4.7 && < 5
+  - base >= 4.7 && < 4.15
   - aeson
   - mime-mail
   - persistent

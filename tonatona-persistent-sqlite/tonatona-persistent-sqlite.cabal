@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 72c152956659cb1ca2b57c255796ae620d5a69cb18bd9691e64960b74c2bf9bc
+-- hash: 6fac76f2fa03ba43728839f21786df3a78c2c917f35b1b9e986f1d5a7ba87a68
 
 name:           tonatona-persistent-sqlite
 version:        0.1.0.1
@@ -36,14 +36,14 @@ library
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , monad-logger >=0.3
-    , persistent >=2.8
-    , persistent-sqlite >=2.8
-    , resource-pool >=0.2
-    , rio >=0.1
-    , tonaparser >=0.1
-    , tonatona >=0.1
+      base >=4.7 && <4.15
+    , monad-logger >=0.3 && <0.4
+    , persistent >=2.8 && <2.11
+    , persistent-sqlite >=2.8 && <2.11
+    , resource-pool >=0.2 && <0.3
+    , rio >=0.1 && <0.2
+    , tonaparser >=0.1 && <0.2
+    , tonatona >=0.1 && <0.2
   default-language: Haskell2010
 
 test-suite doctest
@@ -55,15 +55,15 @@ test-suite doctest
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       Glob
-    , base >=4.7 && <5
+    , base >=4.7 && <4.15
     , doctest
-    , monad-logger >=0.3
-    , persistent >=2.8
-    , persistent-sqlite >=2.8
-    , resource-pool >=0.2
-    , rio >=0.1
-    , tonaparser >=0.1
-    , tonatona >=0.1
+    , monad-logger >=0.3 && <0.4
+    , persistent >=2.8 && <2.11
+    , persistent-sqlite >=2.8 && <2.11
+    , resource-pool >=0.2 && <0.3
+    , rio >=0.1 && <0.2
+    , tonaparser >=0.1 && <0.2
+    , tonatona >=0.1 && <0.2
   default-language: Haskell2010
 
 test-suite spec
@@ -74,12 +74,12 @@ test-suite spec
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , monad-logger >=0.3
-    , persistent >=2.8
-    , persistent-sqlite >=2.8
-    , resource-pool >=0.2
-    , rio >=0.1
-    , tonaparser >=0.1
+      base >=4.7 && <4.15
+    , monad-logger >=0.3 && <0.4
+    , persistent >=2.8 && <2.11
+    , persistent-sqlite >=2.8 && <2.11
+    , resource-pool >=0.2 && <0.3
+    , rio >=0.1 && <0.2
+    , tonaparser >=0.1 && <0.2
     , tonatona
   default-language: Haskell2010
