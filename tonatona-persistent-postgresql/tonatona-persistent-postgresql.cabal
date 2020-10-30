@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 53541ad676f54ffb678e4104d6839f041058c3c8e95a3bcd9eaf3fa020951ea8
+-- hash: 1d922bd59a6c8fc95f4880f82f48f5870359e01415d65773ee40889ded142c71
 
 name:           tonatona-persistent-postgresql
 version:        0.1.0.1
@@ -36,14 +36,14 @@ library
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , monad-logger >=0.3
-    , persistent >=2.8
-    , persistent-postgresql >=2.8
-    , resource-pool >=0.2
-    , rio >=0.1
-    , tonaparser >=0.1
-    , tonatona >=0.1
+      base >=4.7 && <4.15
+    , monad-logger >=0.3 && <0.4
+    , persistent >=2.8 && <2.11
+    , persistent-postgresql >=2.8 && <2.11
+    , resource-pool >=0.2 && <0.3
+    , rio >=0.1 && <0.2
+    , tonaparser >=0.1 && <0.2
+    , tonatona >=0.1 && <0.2
   default-language: Haskell2010
 
 test-suite doctest
@@ -55,15 +55,15 @@ test-suite doctest
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       Glob
-    , base >=4.7 && <5
+    , base >=4.7 && <4.15
     , doctest
-    , monad-logger >=0.3
-    , persistent >=2.8
-    , persistent-postgresql >=2.8
-    , resource-pool >=0.2
-    , rio >=0.1
-    , tonaparser >=0.1
-    , tonatona >=0.1
+    , monad-logger >=0.3 && <0.4
+    , persistent >=2.8 && <2.11
+    , persistent-postgresql >=2.8 && <2.11
+    , resource-pool >=0.2 && <0.3
+    , rio >=0.1 && <0.2
+    , tonaparser >=0.1 && <0.2
+    , tonatona >=0.1 && <0.2
   default-language: Haskell2010
 
 test-suite spec
@@ -74,12 +74,12 @@ test-suite spec
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
-    , monad-logger >=0.3
-    , persistent >=2.8
-    , persistent-postgresql >=2.8
-    , resource-pool >=0.2
-    , rio >=0.1
-    , tonaparser >=0.1
+      base >=4.7 && <4.15
+    , monad-logger >=0.3 && <0.4
+    , persistent >=2.8 && <2.11
+    , persistent-postgresql >=2.8 && <2.11
+    , resource-pool >=0.2 && <0.3
+    , rio >=0.1 && <0.2
+    , tonaparser >=0.1 && <0.2
     , tonatona
   default-language: Haskell2010

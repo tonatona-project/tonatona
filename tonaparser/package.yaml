@@ -60,10 +60,10 @@ default-extensions:
   - ViewPatterns
 
 dependencies:
-  - base >= 4.7 && < 5
-  - envy >= 1.5
-  - rio >= 0.1
-  - say >= 0.1
+  - base >= 4.7 && < 4.15
+  - envy >= 1.5 && < 2.2
+  - rio >= 0.1 && < 0.2
+  - say >= 0.1 && < 0.2
 
 library:
   source-dirs:
