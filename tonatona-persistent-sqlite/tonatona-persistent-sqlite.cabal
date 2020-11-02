@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6fac76f2fa03ba43728839f21786df3a78c2c917f35b1b9e986f1d5a7ba87a68
+-- hash: ebb5e57a8752a0827eb062b0698a6b994e6e8b11be28578eb98ae88bc507e85c
 
 name:           tonatona-persistent-sqlite
-version:        0.1.0.1
+version:        0.1.0.2
 synopsis:       tonatona plugin for accessing Sqlite database.
 description:    Tonatona plugin for accessing Sqlite database. This package provides a tonatona plugin for accessing Sqlite database. This plugin uses persistent to actually accessing Sqlite.
 category:       Database, Library, Tonatona
