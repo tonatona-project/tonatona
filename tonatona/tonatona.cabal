@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e3989619c19a125dae22d7f8dd5894f279e4bc8039e5f7353870c01a2cf7f7be
+-- hash: 088714bca8045d3e611299345f0c66b18e2c14a8df11f7e0b039ecd5d1aa872f
 
 name:           tonatona
-version:        0.1.2.0
+version:        0.1.2.1
 synopsis:       meta application framework
 description:    Tonatona is a **meta** application framework. It handles lots of boring tasks that are needed for real-world development such as reading in values defined in environment variables, setting up logging, sending emails, accessing databases, etc.
 category:       Framework, Library, Tonatona, Web
