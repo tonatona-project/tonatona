@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b03f00ca24faea018f62b9cf225b411c81f5ccd800d99bccb2893cb5f779c826
+-- hash: b60de14901080b258b151fca27f254cf725c5a3fb6f07cb84374e88c4a432882
 
 name:           tonaparser
-version:        0.1.0.0
+version:        0.1.0.1
 synopsis:       Scalable way to pass runtime configurations for tonatona
 description:    Tonaparser provides a way to pass runtime configurations. This library is supposed to be used with @tonatona@.
 category:       Library, System, Tonatona

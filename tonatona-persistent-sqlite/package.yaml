@@ -1,5 +1,5 @@
 name: tonatona-persistent-sqlite
-version: "0.1.0.1"
+version: "0.1.0.2"
 category: "Database, Library, Tonatona"
 synopsis: tonatona plugin for accessing Sqlite database.
 description:

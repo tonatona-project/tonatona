@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1d922bd59a6c8fc95f4880f82f48f5870359e01415d65773ee40889ded142c71
+-- hash: 6b21127161ffe2a460df786cef8ca84293784909b59252bb684fa2a4bfa13ca4
 
 name:           tonatona-persistent-postgresql
-version:        0.1.0.1
+version:        0.1.0.2
 synopsis:       tonatona plugin for accessing PostgreSQL database.
 description:    Tonatona plugin for accessing PostgreSQL database. This package provides a tonatona plugin for accessing PostgreSQL database. This plugin uses persistent to actually accessing PostgreSQL.
 category:       Database, Library, Tonatona

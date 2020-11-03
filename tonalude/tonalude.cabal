@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ecc30bad33ae6eff22236d01842f38a95d8140273323b0b6903f3c8284430e48
+-- hash: fa68c2b3443518c8b8a8aa0fbd398c47fe2fef2bf724f722b1d813c5ab65b666
 
 name:           tonalude
-version:        0.1.1.0
+version:        0.1.1.1
 synopsis:       A standard library for Tonatona framework.
 description:    Tonaparser provides a way to pass runtime configurations. This library is supposed to be used with @tonatona@. The Tonalude module works as a prelude replacement for Tonatona framework, providing more functionality and types out of the box than the standard prelude (such as common data types like ByteString and Text), as well as removing common "gotchas", like partial functions and lazy I/O.
 category:       Control, Library, Tonatona

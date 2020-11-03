@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ebdd0c764c62e70ea91575848ea7b32fb7b328b2f70739fc24419838847d4d46
+-- hash: afa2c7fa49aa9bc4da75f9d7cce41f3df6f25770d96708c2d1599cdb2585a59a
 
 name:           tonatona-logger
-version:        0.2.0.1
+version:        0.2.0.2
 synopsis:       tonatona plugin for logging.
 description:    Tonatona plugin for logging. This package provides a tonatona plugin for logging.
 category:       System, Library, Tonatona

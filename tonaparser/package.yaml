@@ -1,5 +1,5 @@
 name: tonaparser
-version: "0.1.0.0"
+version: "0.1.0.1"
 category: "Library, System, Tonatona"
 synopsis: Scalable way to pass runtime configurations for tonatona
 description:
