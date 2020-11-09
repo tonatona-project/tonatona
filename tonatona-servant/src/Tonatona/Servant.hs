@@ -4,6 +4,7 @@
 
 module Tonatona.Servant
   ( Tonatona.Servant.run
+  , runWithHandlers
   , redirect
   , Config(..)
   , Host(..)
@@ -34,21 +35,35 @@ run ::
      (HasServer api '[], HasConfig env Config, HasConfig env TonaLogger.Config)
   => ServerT api (RIO env)
   -> RIO env ()
-run servantServer = do
+run =
+  runWithHandlers @api []
+
+{-| Main function which allows you to pass error handlers.
+ -}
+runWithHandlers ::
+     forall (api :: Type) env.
+     (HasServer api '[], HasConfig env Config, HasConfig env TonaLogger.Config)
+  => (forall a. [RIO.Handler (RIO env) a])
+  -> ServerT api (RIO env)
+  -> RIO env ()
+runWithHandlers handlers servantServer = do
   env <- ask
   conf <- asks config
   loggingMiddleware <- reqLogMiddleware
-  let app = runServant @api env servantServer
+  let app = runServant @api env handlers servantServer
   liftIO $ Warp.run (port conf) $ loggingMiddleware app
 
 runServant ::
      forall (api :: Type) env. (HasServer api '[])
   => env
+  -> (forall a. [RIO.Handler (RIO env) a])
   -> ServerT api (RIO env)
   -> Application
-runServant env servantServer =
-  serve (Proxy @api) $ hoistServer (Proxy @api) transformation servantServer
+runServant env handlers servantServer =
+  serve (Proxy @api) $ hoistServer (Proxy @api) (transformation . t) servantServer
   where
+    t :: forall a. RIO env a -> RIO env a
+    t = flip catches handlers
     transformation
       :: forall a. RIO env a -> Servant.Handler a
     transformation action = do
