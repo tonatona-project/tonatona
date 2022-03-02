@@ -1,6 +1,6 @@
 # Tonatona
 
-[![Build Status](https://secure.travis-ci.org/tonatona-project/tonatona.svg)](http://travis-ci.org/tonatona-project/tonatona)
+[![Build Status](https://github.com/tonatona-project/tonatona/actions/workflows/test.yaml/badge.svg)](https://github.com/tonatona-project/tonatona/actions/workflows/test.yaml)
 [![Hackage](https://img.shields.io/hackage/v/tonatona.svg)](https://hackage.haskell.org/package/tonatona)
 [![Stackage LTS](http://stackage.org/package/tonatona/badge/lts)](http://stackage.org/lts/package/tonatona)
 [![Stackage Nightly](http://stackage.org/package/tonatona/badge/nightly)](http://stackage.org/nightly/package/tonatona)
