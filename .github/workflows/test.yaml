@@ -5,6 +5,7 @@ jobs:
   stack:
     name: stack - ${{ matrix.os }} - ghc ${{ matrix.plan.resolver }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.plan.allow-failure == true }}
     strategy:
       matrix:
         plan:
@@ -20,6 +21,9 @@ jobs:
             resolver: lts-12
           - ghc: 8.2.2
             resolver: lts-11
+          - ghc: latest
+            resolver: nightly
+            allow-failure: true
         os: [ubuntu-latest, macOS-latest]
 
     steps:
