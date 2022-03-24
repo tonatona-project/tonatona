@@ -1,0 +1,8 @@
+packages:
+  tonalude
+  tonaparser
+  tonatona
+  tonatona-logger
+  tonatona-persistent-postgresql
+  tonatona-persistent-sqlite
+  tonatona-servant
