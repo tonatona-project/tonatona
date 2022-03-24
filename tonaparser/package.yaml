@@ -95,7 +95,7 @@ tests:
     source-dirs:
       - test
     dependencies:
-      - tonatona
+      - tonaparser
   doctest:
     main: "DocTest.hs"
     other-modules: []
