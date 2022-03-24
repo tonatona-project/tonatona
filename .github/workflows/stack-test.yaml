@@ -1,23 +1,23 @@
-name: test
+name: Stack test
 on: [push, pull_request]
 
 jobs:
   stack:
-    name: stack - ${{ matrix.os }} - ghc ${{ matrix.plan.resolver }}
+    name: stack - ${{ matrix.os }} - ${{ matrix.plan.resolver }}
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.plan.allow-failure == true }}
     strategy:
       matrix:
         plan:
-          - ghc: 8.8.3
+          - ghc: 8.8.4
             resolver: lts-16
-          - ghc: 8.8.2
+          - ghc: 8.8.3
             resolver: lts-15
           - ghc: 8.6.5
             resolver: lts-14
-          - ghc: 8.6.3
+          - ghc: 8.6.5
             resolver: lts-13
-          - ghc: 8.4.3
+          - ghc: 8.4.4
             resolver: lts-12
           - ghc: 8.2.2
             resolver: lts-11
@@ -31,7 +31,7 @@ jobs:
 
       - uses: haskell/actions/setup@v1
         with:
-          ghc-version: ${{ matrix.ghc }}
+          ghc-version: ${{ matrix.plan.ghc }}
           enable-stack: true
           stack-version: 'latest'
 
