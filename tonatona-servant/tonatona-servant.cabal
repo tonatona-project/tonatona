@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7c3045f6422f00689d6132b94cb59fdd4a68b02d1a4a5c4d657cda7a9629f167
+-- hash: 220d6c53a59f92acf2e1bf8d40ee49e4959704c950a4cddfe6c3fc6710d044ba
 
 name:           tonatona-servant
 version:        0.1.0.4
@@ -19,6 +19,8 @@ copyright:      2018 Kadzuya Okamoto
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
+tested-with:
+    GHC==8.8.3, GHC==8.8.2, GHC==8.6.5, GHC==8.6.3, GHC==8.4.3, GHC==8.2.2
 extra-source-files:
     README.md
 
@@ -33,21 +35,60 @@ library
       Paths_tonatona_servant
   hs-source-dirs:
       src
-  default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
+  default-extensions:
+      BangPatterns
+      BinaryLiterals
+      ConstraintKinds
+      DataKinds
+      DefaultSignatures
+      DeriveDataTypeable
+      DeriveFoldable
+      DeriveFunctor
+      DeriveGeneric
+      DeriveTraversable
+      DoAndIfThenElse
+      EmptyDataDecls
+      ExistentialQuantification
+      FlexibleContexts
+      FlexibleInstances
+      FunctionalDependencies
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      KindSignatures
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      NoImplicitPrelude
+      OverloadedStrings
+      PartialTypeSignatures
+      PatternGuards
+      PolyKinds
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      Strict
+      StrictData
+      TupleSections
+      TypeFamilies
+      TypeSynonymInstances
+      ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       base >=4.7 && <4.15
-    , data-default >=0.7 && <0.8
+    , data-default ==0.7.*
     , exceptions >=0.8 && <0.11
-    , http-types >=0.12 && <0.13
-    , monad-logger >=0.3 && <0.4
-    , rio >=0.1 && <0.2
+    , http-types ==0.12.*
+    , monad-logger ==0.3.*
+    , rio ==0.1.*
     , servant >=0.13 && <0.17
     , servant-server >=0.13 && <0.17
-    , tonaparser >=0.1 && <0.2
-    , tonatona >=0.1 && <0.2
+    , tonaparser ==0.1.*
+    , tonatona ==0.1.*
     , tonatona-logger >=0.1 && <0.3
-    , wai >=3.2 && <3.3
+    , wai ==3.2.*
     , wai-extra >=3.0.27 && <3.1
     , warp >=3.2 && <3.4
   default-language: Haskell2010
@@ -57,23 +98,62 @@ test-suite doctest
   main-is: DocTest.hs
   hs-source-dirs:
       test
-  default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
+  default-extensions:
+      BangPatterns
+      BinaryLiterals
+      ConstraintKinds
+      DataKinds
+      DefaultSignatures
+      DeriveDataTypeable
+      DeriveFoldable
+      DeriveFunctor
+      DeriveGeneric
+      DeriveTraversable
+      DoAndIfThenElse
+      EmptyDataDecls
+      ExistentialQuantification
+      FlexibleContexts
+      FlexibleInstances
+      FunctionalDependencies
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      KindSignatures
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      NoImplicitPrelude
+      OverloadedStrings
+      PartialTypeSignatures
+      PatternGuards
+      PolyKinds
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      Strict
+      StrictData
+      TupleSections
+      TypeFamilies
+      TypeSynonymInstances
+      ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       Glob
     , base >=4.7 && <4.15
-    , data-default >=0.7 && <0.8
+    , data-default ==0.7.*
     , doctest
     , exceptions >=0.8 && <0.11
-    , http-types >=0.12 && <0.13
-    , monad-logger >=0.3 && <0.4
-    , rio >=0.1 && <0.2
+    , http-types ==0.12.*
+    , monad-logger ==0.3.*
+    , rio ==0.1.*
     , servant >=0.13 && <0.17
     , servant-server >=0.13 && <0.17
-    , tonaparser >=0.1 && <0.2
-    , tonatona >=0.1 && <0.2
+    , tonaparser ==0.1.*
+    , tonatona ==0.1.*
     , tonatona-logger >=0.1 && <0.3
-    , wai >=3.2 && <3.3
+    , wai ==3.2.*
     , wai-extra >=3.0.27 && <3.1
     , warp >=3.2 && <3.4
   default-language: Haskell2010
@@ -83,21 +163,60 @@ test-suite spec
   main-is: Spec.hs
   hs-source-dirs:
       test
-  default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards ScopedTypeVariables StandaloneDeriving Strict StrictData TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
+  default-extensions:
+      BangPatterns
+      BinaryLiterals
+      ConstraintKinds
+      DataKinds
+      DefaultSignatures
+      DeriveDataTypeable
+      DeriveFoldable
+      DeriveFunctor
+      DeriveGeneric
+      DeriveTraversable
+      DoAndIfThenElse
+      EmptyDataDecls
+      ExistentialQuantification
+      FlexibleContexts
+      FlexibleInstances
+      FunctionalDependencies
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      KindSignatures
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      NoImplicitPrelude
+      OverloadedStrings
+      PartialTypeSignatures
+      PatternGuards
+      PolyKinds
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      Strict
+      StrictData
+      TupleSections
+      TypeFamilies
+      TypeSynonymInstances
+      ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       base >=4.7 && <4.15
-    , data-default >=0.7 && <0.8
+    , data-default ==0.7.*
     , exceptions >=0.8 && <0.11
-    , http-types >=0.12 && <0.13
-    , monad-logger >=0.3 && <0.4
-    , rio >=0.1 && <0.2
+    , http-types ==0.12.*
+    , monad-logger ==0.3.*
+    , rio ==0.1.*
     , servant >=0.13 && <0.17
     , servant-server >=0.13 && <0.17
-    , tonaparser >=0.1 && <0.2
+    , tonaparser ==0.1.*
     , tonatona
     , tonatona-logger >=0.1 && <0.3
-    , wai >=3.2 && <3.3
+    , wai ==3.2.*
     , wai-extra >=3.0.27 && <3.1
     , warp >=3.2 && <3.4
   default-language: Haskell2010
