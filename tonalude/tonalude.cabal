@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 53e6beadd3bc27f1323b3824993c2f822a098bb760b41047efba56c1b8a8330e
+-- hash: 82247a7f8ed08edcf336ce7e794584a304f59900f034136646c40658cec749fd
 
 name:           tonalude
-version:        0.1.1.1
+version:        0.2.0.0
 synopsis:       A standard library for Tonatona framework.
 description:    Tonaparser provides a way to pass runtime configurations. This library is supposed to be used with @tonatona@. The Tonalude module works as a prelude replacement for Tonatona framework, providing more functionality and types out of the box than the standard prelude (such as common data types like ByteString and Text), as well as removing common "gotchas", like partial functions and lazy I/O.
 category:       Control, Library, Tonatona
@@ -20,7 +20,7 @@ license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 tested-with:
-    GHC==8.8.3, GHC==8.8.2, GHC==8.6.5, GHC==8.6.3, GHC==8.4.3, GHC==8.2.2
+    GHC==9.4.6, GHC==9.2.8, GHC==9.0.2, GHC==8.10.7
 extra-source-files:
     README.md
 
@@ -82,8 +82,8 @@ library
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <4.15
-    , bytestring ==0.10.*
+      base >=4.14 && <4.18
+    , bytestring >=0.10 && <0.12
     , rio >=0.1.5 && <0.2
     , unliftio >=0.2.4 && <0.3
   default-language: Haskell2010
@@ -134,8 +134,8 @@ test-suite doctest
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       Glob
-    , base >=4.7 && <4.15
-    , bytestring ==0.10.*
+    , base >=4.14 && <4.18
+    , bytestring >=0.10 && <0.12
     , doctest
     , rio >=0.1.5 && <0.2
     , unliftio >=0.2.4 && <0.3
@@ -186,8 +186,8 @@ test-suite spec
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <4.15
-    , bytestring ==0.10.*
+      base >=4.14 && <4.18
+    , bytestring >=0.10 && <0.12
     , rio >=0.1.5 && <0.2
     , unliftio >=0.2.4 && <0.3
   default-language: Haskell2010

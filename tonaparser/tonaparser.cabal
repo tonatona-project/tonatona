@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5e2ea05250718f88b6e2c048dc7fdead588f93dbe8823bd059e1140330f82566
+-- hash: 52e1e8acfe9cc66925dc7fa1ceb67e6245ff39862559f252abbc5b7e944ca414
 
 name:           tonaparser
-version:        0.1.0.1
+version:        0.2.0.0
 synopsis:       Scalable way to pass runtime configurations for tonatona
 description:    Tonaparser provides a way to pass runtime configurations. This library is supposed to be used with @tonatona@.
 category:       Library, System, Tonatona
@@ -20,7 +20,7 @@ license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 tested-with:
-    GHC==8.8.3, GHC==8.8.2, GHC==8.6.5, GHC==8.6.3, GHC==8.4.3, GHC==8.2.2
+    GHC==9.4.6, GHC==9.2.8, GHC==9.0.2, GHC==8.10.7
 extra-source-files:
     README.md
 
@@ -80,8 +80,8 @@ library
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <4.15
-    , envy >=1.5 && <2.2
+      base >=4.14 && <4.18
+    , envy ==2.1.*
     , rio ==0.1.*
     , say ==0.1.*
   default-language: Haskell2010
@@ -132,16 +132,16 @@ executable tonaparser-example
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <4.15
-    , envy >=1.5 && <2.2
+      base >=4.14 && <4.18
+    , envy ==2.1.*
     , rio ==0.1.*
     , say
     , tonaparser
+  default-language: Haskell2010
   if flag(buildexample)
     buildable: True
   else
     buildable: False
-  default-language: Haskell2010
 
 test-suite doctest
   type: exitcode-stdio-1.0
@@ -189,9 +189,9 @@ test-suite doctest
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       Glob
-    , base >=4.7 && <4.15
+    , base >=4.14 && <4.18
     , doctest
-    , envy >=1.5 && <2.2
+    , envy ==2.1.*
     , rio ==0.1.*
     , say ==0.1.*
   default-language: Haskell2010
@@ -241,8 +241,8 @@ test-suite spec
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <4.15
-    , envy >=1.5 && <2.2
+      base >=4.14 && <4.18
+    , envy ==2.1.*
     , rio ==0.1.*
     , say ==0.1.*
     , tonaparser

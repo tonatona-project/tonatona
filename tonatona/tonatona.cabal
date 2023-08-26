@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1e9d2941a592e1f8665fd6dcbbb0d8f3630143b9432d020c33e2ba49aa0f2be3
+-- hash: 5f66f2ba62118f8f8fae268ca1b22327d3808252676bc67a0adee2a9b5ed5d1b
 
 name:           tonatona
-version:        0.1.2.1
+version:        0.2.0.0
 synopsis:       meta application framework
 description:    Tonatona is a **meta** application framework. It handles lots of boring tasks that are needed for real-world development such as reading in values defined in environment variables, setting up logging, sending emails, accessing databases, etc.
 category:       Framework, Library, Tonatona, Web
@@ -20,7 +20,7 @@ license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 tested-with:
-    GHC==8.8.3, GHC==8.8.2, GHC==8.6.5, GHC==8.6.3, GHC==8.4.3, GHC==8.2.2
+    GHC==9.4.6, GHC==9.2.8, GHC==9.0.2, GHC==8.10.7
 extra-source-files:
     README.md
 
@@ -78,9 +78,9 @@ library
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <4.15
+      base >=4.14 && <4.18
     , rio ==0.1.*
-    , tonaparser ==0.1.*
+    , tonaparser ==0.2.*
   default-language: Haskell2010
 
 test-suite doctest
@@ -132,10 +132,10 @@ test-suite doctest
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
       Glob
-    , base >=4.7 && <4.15
+    , base >=4.14 && <4.18
     , doctest
     , rio ==0.1.*
-    , tonaparser ==0.1.*
+    , tonaparser ==0.2.*
   default-language: Haskell2010
 
 test-suite spec
@@ -186,8 +186,8 @@ test-suite spec
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <4.15
+      base >=4.14 && <4.18
     , rio ==0.1.*
-    , tonaparser ==0.1.*
+    , tonaparser ==0.2.*
     , tonatona
   default-language: Haskell2010

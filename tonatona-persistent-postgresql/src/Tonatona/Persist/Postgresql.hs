@@ -59,7 +59,6 @@ data Config = Config
   , connNum :: DbConnNum
   , connPool :: Pool SqlBackend
   }
-  deriving (Show)
 
 instance HasParser Config where
   parser = do
