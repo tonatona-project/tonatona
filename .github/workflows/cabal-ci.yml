@@ -32,9 +32,6 @@ jobs:
             cabal: 3.8
           - ghc: 9.4.6
             cabal: latest
-          - ghc: latest
-            cabal: latest
-            allow-failure: true
         os: [ubuntu-latest, macOS-latest]
 
     steps:

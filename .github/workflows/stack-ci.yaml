@@ -18,9 +18,6 @@ jobs:
             resolver: lts-20.26
           - ghc: 9.4.6
             resolver: lts-21.8
-          - ghc: latest
-            resolver: nightly
-            allow-failure: true
         os: [ubuntu-latest, macOS-latest]
 
     steps:
