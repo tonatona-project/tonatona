@@ -204,7 +204,7 @@ In this example, we use `tonatona-persistent-sqlite` plugin.
 
 ```yaml
 dependencies:
-  - base >= 4.7 && < 5
+  - base >= 4.14 && < 4.18
   # `persistent` and `persistent-template` are also needed to
   # actually use `tonatona-persistent-sqlite`.
   - persistent

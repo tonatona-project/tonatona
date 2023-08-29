@@ -6,11 +6,18 @@ category: {{category}}{{^category}}Web{{/category}}
 # description:
 license: "MIT"
 author: {{author-name}}{{^author-name}}Author name here{{/author-name}}
-copyright: {{copyright}}{{^copyright}}{{year}}{{^year}}2018{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
+copyright: {{copyright}}{{^copyright}}{{year}}{{^year}}2023{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
 maintainer: {{author-email}}{{^author-email}}example@example.com{{/author-email}}
 
 extra-source-files:
   - README.md
+
+custom-setup:
+  dependencies:
+    - base >= 4.14 && < 4.18
+    - Cabal
+    - cabal-doctest >= 1 && <1.1
+    - rio >= 0.1 && < 0.2
 
 ghc-options: -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror
 default-extensions:
@@ -54,7 +61,8 @@ default-extensions:
   - ViewPatterns
 
 dependencies:
-  - base >= 4.7 && < 5
+  - base >= 4.14 && < 4.18
+  - rio >= 0.1 && < 0.2
   - tonalude
   - tonatona
   - tonatona-logger
@@ -78,18 +86,14 @@ tests:
     source-dirs:
       - test
     dependencies:
-      - {{name}}
-      - hspec
-      - QuickCheck
-  doctest:
-    main: "DocTest.hs"
+      - tonatona
+  doctests:
+    main: "doctests.hs"
     other-modules: []
     source-dirs:
       - test
     dependencies:
-      - {{name}}
       - doctest
-      - Glob
 
 github: {{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}
 
@@ -116,75 +120,32 @@ cabal.sandbox.config
 cabal.project.local
 
 {-# START_FILE Setup.hs #-}
-import Distribution.Simple
-main = defaultMain
+module Main (main) where
+
+import RIO
+import Distribution.Extra.Doctest ( defaultMainWithDoctests )
+
+main :: IO ()
+main = defaultMainWithDoctests "doctests"
 
 {-# START_FILE test/Spec.hs #-}
 module Main where
 
-import Tonalude
+import RIO
 
 main :: IO ()
 main = pure ()
 
-{-# START_FILE test/DocTest.hs #-}
-module Main (main) where
+{-# START_FILE test/doctests.hs #-}
+module Main where
 
-import Tonalude
-
-import System.FilePath.Glob (glob)
-import Test.DocTest (doctest)
+import RIO
+import Build_doctests (flags, pkgs, module_sources)
+import Test.DocTest
 
 main :: IO ()
-main = glob "src/**/*.hs" >>= doDocTest
-
-doDocTest :: [String] -> IO ()
-doDocTest options =
-  doctest $
-    options <>
-    ghcExtensions
-
-ghcExtensions :: [String]
-ghcExtensions =
-    [ "-XBangPatterns"
-    , "-XBinaryLiterals"
-    , "-XConstraintKinds"
-    , "-XDataKinds"
-    , "-XDefaultSignatures"
-    , "-XDeriveDataTypeable"
-    , "-XDeriveFoldable"
-    , "-XDeriveFunctor"
-    , "-XDeriveGeneric"
-    , "-XDeriveTraversable"
-    , "-XDoAndIfThenElse"
-    , "-XDuplicateRecordFields"
-    , "-XEmptyDataDecls"
-    , "-XExistentialQuantification"
-    , "-XFlexibleContexts"
-    , "-XFlexibleInstances"
-    , "-XFunctionalDependencies"
-    , "-XGADTs"
-    , "-XGeneralizedNewtypeDeriving"
-    , "-XInstanceSigs"
-    , "-XKindSignatures"
-    , "-XLambdaCase"
-    , "-XMultiParamTypeClasses"
-    , "-XMultiWayIf"
-    , "-XNamedFieldPuns"
-    , "-XNoImplicitPrelude"
-    , "-XOverloadedStrings"
-    , "-XPartialTypeSignatures"
-    , "-XPatternGuards"
-    , "-XPolyKinds"
-    , "-XRankNTypes"
-    , "-XRecordWildCards"
-    , "-XScopedTypeVariables"
-    , "-XStandaloneDeriving"
-    , "-XTupleSections"
-    , "-XTypeFamilies"
-    , "-XTypeSynonymInstances"
-    , "-XViewPatterns"
-    ]
+main = do
+  doctest $ flags ++ pkgs ++ module_sources
 
 {-# START_FILE app/Main.hs #-}
 module Main where
@@ -197,6 +158,15 @@ main :: IO ()
 main = run app
 
 {-# START_FILE src/TonaApp/Main.hs #-}
+{-|
+Description : Main module for your app.
+
+Doctest Example:
+
+>>> even 2
+True
+
+-}
 module TonaApp.Main where
 
 import Tonalude
@@ -240,7 +210,7 @@ instance HasParser Config where
 {-# START_FILE LICENSE #-}
 MIT License
 
-Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2018{{/year}}
+Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2023{{/year}}
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -264,12 +234,12 @@ SOFTWARE.
 # {{name}}
 
 {-# START_FILE stack.yaml #-}
-resolver: lts-16.18
+resolver: lts-21.8
 packages:
   - '.'
 extra-deps:
   - git: https://github.com/tonatona-project/tonatona
-    commit: cf8c12c73a993346a0f682000ec04f71158247cc
+    commit: 6f087ca64677fd6673bcef57c224f6915fd35371
     subdirs:
       - tonalude
       - tonaparser
