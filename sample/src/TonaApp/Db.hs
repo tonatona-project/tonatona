@@ -1,6 +1,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module TonaApp.Db where
@@ -14,16 +15,15 @@ import Database.Persist.TH (mkMigrate, mkPersist, mpsGenerateLenses, persistLowe
 -- DB entity defs
 
 
-$(share
+share
   [ mkPersist sqlSettings {mpsGenerateLenses = False}
   , mkMigrate "migrateAll"
   ]
   [persistLowerCase|
   Tag
     name      Text
-    value      Text
+    value     Text
 
     deriving Eq
     deriving Show
-    |]
- )
+  |]

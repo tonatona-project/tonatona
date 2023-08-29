@@ -57,8 +57,8 @@ server =
   errorExample
 
 
--- Handlers
 
+-- Handlers
 
 
 -- As you can see the type, any plugins can be used in @TonaServer.run@.
@@ -103,6 +103,9 @@ sendEmailExample = do
 errorExample :: RIO Config Int
 errorExample = do
   throwM $ err404
+
+
+
 -- Config
 
 
@@ -123,6 +126,6 @@ instance HasConfig Config TonaServant.Config where
 
 instance HasParser Config where
   parser = Config
-      <$> parser
-      <*> parser
-      <*> parser
+    <$> parser
+    <*> parser
+    <*> parser

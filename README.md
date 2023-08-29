@@ -272,13 +272,16 @@ Creating a table definition is a requirement for using
 Tonatona in general, just the `tonatona-persistent-sqlite` package.
 
 ```haskell ignore
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 
 
-$(share
+share
   [mkPersist sqlSettings, mkMigrate "migrateAll"]
   [persistLowerCase|
     BlogPost
@@ -286,8 +289,7 @@ $(share
       contents   Text
 
       deriving Show
-    |]
- )
+  |]
 ```
 
 Next, do some DB operations in `app` function:

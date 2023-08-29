@@ -5,9 +5,6 @@ module Tonalude.Prelude.Reexports
   , Alternative
   , Applicative (..)
   , liftA
-#if !MIN_VERSION_base(4, 10, 0)
-  , liftA2
-#endif
   , liftA3
   , many
   , optional

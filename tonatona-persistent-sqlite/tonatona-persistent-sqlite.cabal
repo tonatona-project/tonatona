@@ -1,13 +1,11 @@
-cabal-version: 1.12
+cabal-version: 1.24
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 11caebf897b815f904f019f5016b01f789f4e930f9724b1290378dc663368d1d
 
 name:           tonatona-persistent-sqlite
-version:        0.1.0.2
+version:        0.2.0.0
 synopsis:       tonatona plugin for accessing Sqlite database.
 description:    Tonatona plugin for accessing Sqlite database. This package provides a tonatona plugin for accessing Sqlite database. This plugin uses persistent to actually accessing Sqlite.
 category:       Database, Library, Tonatona
@@ -18,15 +16,22 @@ maintainer:     arow.okamoto+github@gmail.com
 copyright:      2018 Kadzuya Okamoto
 license:        MIT
 license-file:   LICENSE
-build-type:     Simple
+build-type:     Custom
 tested-with:
-    GHC==8.8.3, GHC==8.8.2, GHC==8.6.5, GHC==8.6.3, GHC==8.4.3, GHC==8.2.2
+    GHC==9.4.6, GHC==9.2.8, GHC==9.0.2, GHC==8.10.7
 extra-source-files:
     README.md
 
 source-repository head
   type: git
   location: https://github.com/tonatona-project/tonatona
+
+custom-setup
+  setup-depends:
+      Cabal
+    , base >=4.14 && <4.18
+    , cabal-doctest >=1 && <1.1
+    , rio ==0.1.*
 
 library
   exposed-modules:
@@ -77,19 +82,19 @@ library
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <4.15
+      base >=4.14 && <4.18
     , monad-logger ==0.3.*
-    , persistent >=2.8 && <2.11
-    , persistent-sqlite >=2.8 && <2.11
-    , resource-pool ==0.2.*
+    , persistent >=2.13 && <2.15
+    , persistent-sqlite ==2.13.*
+    , resource-pool >=0.2 && <0.5
     , rio ==0.1.*
-    , tonaparser ==0.1.*
-    , tonatona ==0.1.*
+    , tonaparser ==0.2.*
+    , tonatona ==0.2.*
   default-language: Haskell2010
 
-test-suite doctest
+test-suite doctests
   type: exitcode-stdio-1.0
-  main-is: DocTest.hs
+  main-is: doctests.hs
   hs-source-dirs:
       test
   default-extensions:
@@ -134,16 +139,15 @@ test-suite doctest
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      Glob
-    , base >=4.7 && <4.15
+      base >=4.14 && <4.18
     , doctest
     , monad-logger ==0.3.*
-    , persistent >=2.8 && <2.11
-    , persistent-sqlite >=2.8 && <2.11
-    , resource-pool ==0.2.*
+    , persistent >=2.13 && <2.15
+    , persistent-sqlite ==2.13.*
+    , resource-pool >=0.2 && <0.5
     , rio ==0.1.*
-    , tonaparser ==0.1.*
-    , tonatona ==0.1.*
+    , tonaparser ==0.2.*
+    , tonatona ==0.2.*
   default-language: Haskell2010
 
 test-suite spec
@@ -193,12 +197,12 @@ test-suite spec
       ViewPatterns
   ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
   build-depends:
-      base >=4.7 && <4.15
+      base >=4.14 && <4.18
     , monad-logger ==0.3.*
-    , persistent >=2.8 && <2.11
-    , persistent-sqlite >=2.8 && <2.11
-    , resource-pool ==0.2.*
+    , persistent >=2.13 && <2.15
+    , persistent-sqlite ==2.13.*
+    , resource-pool >=0.2 && <0.5
     , rio ==0.1.*
-    , tonaparser ==0.1.*
+    , tonaparser ==0.2.*
     , tonatona
   default-language: Haskell2010

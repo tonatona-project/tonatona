@@ -1,5 +1,5 @@
 name: tonaparser
-version: "0.1.0.1"
+version: "0.2.0.0"
 category: "Library, System, Tonatona"
 synopsis: Scalable way to pass runtime configurations for tonatona
 description:
@@ -10,10 +10,17 @@ author: "Kadzuya Okamoto, Dennis Gosnell"
 copyright: "2018 Kadzuya Okamoto"
 maintainer: "arow.okamoto+github@gmail.com"
 
-tested-with: GHC==8.8.3, GHC==8.8.2, GHC==8.6.5, GHC==8.6.3, GHC==8.4.3, GHC==8.2.2
+tested-with: GHC==9.4.6, GHC==9.2.8, GHC==9.0.2, GHC==8.10.7
 
 extra-source-files:
   - README.md
+
+custom-setup:
+  dependencies:
+    - base >= 4.14 && < 4.18
+    - Cabal
+    - cabal-doctest >= 1 && <1.1
+    - rio >= 0.1 && < 0.2
 
 flags:
   buildexample:
@@ -62,8 +69,8 @@ default-extensions:
   - ViewPatterns
 
 dependencies:
-  - base >= 4.7 && < 4.15
-  - envy >= 1.5 && < 2.2
+  - base >= 4.14 && < 4.18
+  - envy >= 2.1 && < 2.2
   - rio >= 0.1 && < 0.2
   - say >= 0.1 && < 0.2
 
@@ -96,13 +103,12 @@ tests:
       - test
     dependencies:
       - tonaparser
-  doctest:
-    main: "DocTest.hs"
+  doctests:
+    main: "doctests.hs"
     other-modules: []
     source-dirs:
       - test
     dependencies:
       - doctest
-      - Glob
 
 github: tonatona-project/tonatona

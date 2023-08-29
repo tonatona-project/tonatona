@@ -1,0 +1,42 @@
+name: Stack CI
+on:
+  - push
+  - pull_request
+jobs:
+  stack:
+    name: Stack - ${{ matrix.os }} - ${{ matrix.plan.resolver }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.plan.allow-failure == true }}
+    strategy:
+      matrix:
+        plan:
+          - ghc: 8.10.7
+            resolver: lts-18.28
+          - ghc: 9.0.2
+            resolver: lts-19.33
+          - ghc: 9.2.8
+            resolver: lts-20.26
+          - ghc: 9.4.6
+            resolver: lts-21.8
+        os: [ubuntu-latest, macOS-latest]
+
+    steps:
+      - name: Cache Stack build artifacts
+        uses: actions/cache@v2
+        if: ${{ matrix.os != 'macOS-latest' }}
+        with:
+          path: |
+            ~/.stack
+            .stack-work
+          key: ${{ runner.os }}-stack-${{ matrix.plan.resolver }}-${{ hashFiles('stack.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-${{ matrix.plan.resolver }}
+      - uses: actions/checkout@v3
+      - name: Setup Haskell
+        uses: haskell/actions/setup@v2
+        with:
+          ghc-version: ${{ matrix.plan.ghc }}
+          enable-stack: true
+          stack-version: 'latest'
+      - name: test
+        run: stack --no-terminal --system-ghc --resolver ${{ matrix.plan.resolver }} test --bench --no-run-benchmarks --haddock --no-haddock-deps --flag tonaparser:buildexample

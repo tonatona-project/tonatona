@@ -69,11 +69,7 @@ runServant env handlers servantServer =
     transformation action = do
       let
         ioAction = Right <$> runRIO env action
-#if MIN_VERSION_servant(0, 16, 0)
       eitherRes <- liftIO $ ioAction `catch` \(e :: ServerError) -> pure $ Left e
-#else
-      eitherRes <- liftIO $ ioAction `catch` \(e :: ServantErr) -> pure $ Left e
-#endif
       case eitherRes of
         Right res -> pure res
         Left servantErr -> throwError servantErr

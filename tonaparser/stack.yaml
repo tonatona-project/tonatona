@@ -1,7 +1,6 @@
 resolver: lts-21.8
 packages:
   - .
-extra-deps:
-  - tonaparser-0.2.0.0
+extra-deps: []
 flags: {}
 extra-package-dbs: []

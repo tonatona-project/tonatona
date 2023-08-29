@@ -1,5 +1,5 @@
 name: tonalude
-version: "0.1.1.1"
+version: "0.2.0.0"
 category: "Control, Library, Tonatona"
 synopsis: A standard library for Tonatona framework.
 description:
@@ -11,10 +11,17 @@ author: "Kadzuya Okamoto"
 copyright: "2018 Kadzuya Okamoto"
 maintainer: "arow.okamoto+github@gmail.com"
 
-tested-with: GHC==8.8.3, GHC==8.8.2, GHC==8.6.5, GHC==8.6.3, GHC==8.4.3, GHC==8.2.2
+tested-with: GHC==9.4.6, GHC==9.2.8, GHC==9.0.2, GHC==8.10.7
 
 extra-source-files:
   - README.md
+
+custom-setup:
+  dependencies:
+    - base >= 4.14 && < 4.18
+    - Cabal
+    - cabal-doctest >= 1 && <1.1
+    - rio >= 0.1 && < 0.2
 
 ghc-options: -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints
 default-extensions:
@@ -57,8 +64,8 @@ default-extensions:
   - ViewPatterns
 
 dependencies:
-  - base >= 4.7 && < 4.15
-  - bytestring >= 0.10 && < 0.11
+  - base >= 4.14 && < 4.18
+  - bytestring >= 0.10 && < 0.12
   - rio >= 0.1.5 && < 0.2
   - unliftio >= 0.2.4 && < 0.3
 
@@ -80,13 +87,12 @@ tests:
     other-modules: []
     source-dirs:
       - test
-  doctest:
-    main: "DocTest.hs"
+  doctests:
+    main: "doctests.hs"
     other-modules: []
     source-dirs:
       - test
     dependencies:
       - doctest
-      - Glob
 
 github: tonatona-project/tonatona
