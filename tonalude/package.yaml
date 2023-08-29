@@ -19,7 +19,7 @@ extra-source-files:
 custom-setup:
   dependencies:
     - base >= 4.14 && < 4.18
-    - Cabal
+    - Cabal < 3.12
     - cabal-doctest >= 1 && <1.1
     - rio >= 0.1 && < 0.2
 
